@@ -136,8 +136,11 @@
         "Serie A": ["Internazionale", "Napoli", "Milan", "Juventus", "Como", "Roma", "Atalanta", "Bologna", "Lazio", "Cagliari", "Fiorentina"]
     };
 
-    // Gera a lista da Champions automaticamente somando todas as outras
-    CLUBS["Champions League"] = Object.values(CLUBS).flat().sort();
+    // Clubes exclusivos que só aparecem na Champions
+    const EXCLUSIVE_CHAMPIONS = ["Ajax", "PSV", "Galatasaray", "Fenerbahce", "Porto", "Benfica"];
+
+    // Consolidação: Todas as ligas + os exclusivos
+    CLUBS["Champions League"] = [...Object.values(CLUBS).flat(), ...EXCLUSIVE_CHAMPIONS].sort();
 
     let db = JSON.parse(localStorage.getItem('fb_ultra_db')) || {};
     let currentTab = 'hist';
@@ -161,7 +164,7 @@
         const ns = document.querySelectorAll('.s-name'), gs = document.querySelectorAll('.s-goals');
         let scs = []; ns.forEach((n, i) => { if(n.value) scs.push({n: n.value, g: parseInt(gs[i].value) || 0}); });
 
-        if(!y) return alert("Por favor, preencha o ano!");
+        if(!y) return alert("Por favor, informe o ano.");
         if(!db[l]) db[l] = [];
         db[l].push({ y, c, scs });
         db[l].sort((a,b) => b.y - a.y);
