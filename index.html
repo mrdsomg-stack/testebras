@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Awards Hub - Ultra</title>
+    <title>Football Awards Hub - Champions Edition</title>
     <style>
         :root {
             --bg-body: #0a0a0a;
@@ -97,6 +97,8 @@
                     <option value="Premier League">Premier League</option>
                     <option value="Bundesliga">Bundesliga</option>
                     <option value="Ligue 1">Ligue 1</option>
+                    <option value="Serie A">Serie A</option>
+                    <option value="Champions League">Champions League</option>
                 </select>
             </div>
         </div>
@@ -130,15 +132,20 @@
         "La Liga": ["Barcelona", "Real Madrid", "Atletico de Madrid", "Girona", "Getafe", "Espanhol", "Valencia", "Celta Vigo", "Atletico Bilbao", "Villarreal", "Raio Vallecano", "Osasuna", "Real Betis", "Real Sociedad"],
         "Premier League": ["Manchester City", "Manchester United", "Liverpool", "Aston Villa", "Bournemouth", "Chelsea", "Everton", "Tottenham", "Newcastle", "Wolverhampton", "Nottigham Forest", "Fulham", "Sunderland"],
         "Bundesliga": ["Bayern Munich", "Borussia Dortmund", "RB Leipzig", "Bayer Leverkusen", "Stuttgart", "Freiburb", "Augsburg", "Mainz 05", "Hamburgo", "Werder Bremen", "Wolfsburg", "Eitracht Frankfurk", "Koln", "Heidenheim"],
-        "Ligue 1": ["Lens", "Lyon", "Lile", "Rennes", "Monaco", "Marseille", "Lorient", "Toulouse", "Le Havre", "Nice", "Auxerre", "Nantes", "Strasbourg"]
+        "Ligue 1": ["Lens", "Lyon", "Lile", "Rennes", "Monaco", "Marseille", "Lorient", "Toulouse", "Le Havre", "Nice", "Auxerre", "Nantes", "Strasbourg"],
+        "Serie A": ["Internazionale", "Napoli", "Milan", "Juventus", "Como", "Roma", "Atalanta", "Bologna", "Lazio", "Cagliari", "Fiorentina"]
     };
+
+    // Gera a lista da Champions automaticamente somando todas as outras
+    CLUBS["Champions League"] = Object.values(CLUBS).flat().sort();
 
     let db = JSON.parse(localStorage.getItem('fb_ultra_db')) || {};
     let currentTab = 'hist';
 
     function updateClubs() {
         const l = document.getElementById('leagueSelect').value;
-        document.getElementById('clubSelect').innerHTML = CLUBS[l].map(c => `<option value="${c}">${c}</option>`).join('');
+        const list = CLUBS[l];
+        document.getElementById('clubSelect').innerHTML = list.map(c => `<option value="${c}">${c}</option>`).join('');
     }
 
     function addField() {
@@ -154,12 +161,15 @@
         const ns = document.querySelectorAll('.s-name'), gs = document.querySelectorAll('.s-goals');
         let scs = []; ns.forEach((n, i) => { if(n.value) scs.push({n: n.value, g: parseInt(gs[i].value) || 0}); });
 
-        if(!y) return alert("Ano?");
+        if(!y) return alert("Por favor, preencha o ano!");
         if(!db[l]) db[l] = [];
         db[l].push({ y, c, scs });
         db[l].sort((a,b) => b.y - a.y);
         localStorage.setItem('fb_ultra_db', JSON.stringify(db));
-        location.reload(); 
+        
+        document.getElementById('yearInput').value = '';
+        document.getElementById('scorersInputs').innerHTML = `<div class="row"><input type="text" class="flex-2 s-name" placeholder="Jogador"><input type="number" class="flex-1 s-goals" placeholder="Gols"></div>`;
+        loadContent(); 
     }
 
     function loadContent() {
@@ -193,7 +203,13 @@
         loadContent();
     }
 
-    function del(l, i) { db[l].splice(i, 1); localStorage.setItem('fb_ultra_db', JSON.stringify(db)); loadContent(); }
+    function del(l, i) { 
+        if(confirm("Deseja excluir este registro?")) {
+            db[l].splice(i, 1); 
+            localStorage.setItem('fb_ultra_db', JSON.stringify(db)); 
+            loadContent(); 
+        }
+    }
 
     updateClubs(); loadContent();
 </script>
