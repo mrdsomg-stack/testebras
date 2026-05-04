@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Awards Hub - Champions Edition</title>
+    <title>Football Awards Hub - Global Edition</title>
     <style>
         :root {
             --bg-body: #0a0a0a;
@@ -74,6 +74,7 @@
 
         .list-item { display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 8px; }
         .badge { background: var(--accent); color: black; padding: 2px 10px; border-radius: 20px; font-weight: bold; }
+        .badge-gold { background: gold; }
         
         .del-btn { position: absolute; top: 15px; right: 15px; background: #ff4d4d; color: white; border: none; border-radius: 6px; padding: 5px 12px; cursor: pointer; }
     </style>
@@ -121,7 +122,8 @@
         <div class="nav-tabs">
             <button class="tab-btn active" onclick="showTab('hist', this)">Histórico</button>
             <button class="tab-btn" onclick="showTab('rankClub', this)">Ranking de Títulos</button>
-            <button class="tab-btn" onclick="showTab('rankGoal', this)">Ranking de Gols</button>
+            <button class="tab-btn" onclick="showTab('rankGoal', this)">Gols por Liga</button>
+            <button class="tab-btn" onclick="showTab('rankGlobal', this)">Ranking Geral de Gols</button>
         </div>
         <div id="contentArea"></div>
     </div>
@@ -136,19 +138,15 @@
         "Serie A": ["Internazionale", "Napoli", "Milan", "Juventus", "Como", "Roma", "Atalanta", "Bologna", "Lazio", "Cagliari", "Fiorentina"]
     };
 
-    // Clubes exclusivos que só aparecem na Champions
     const EXCLUSIVE_CHAMPIONS = ["Ajax", "PSV", "Galatasaray", "Fenerbahce", "Porto", "Benfica"];
-
-    // Consolidação: Todas as ligas + os exclusivos
-    CLUBS["Champions League"] = [...Object.values(CLUBS).flat(), ...EXCLUSIVE_CHAMPIONS].sort();
+    CLUBS["Champions League"] = [...new Set([...Object.values(CLUBS).flat(), ...EXCLUSIVE_CHAMPIONS])].sort();
 
     let db = JSON.parse(localStorage.getItem('fb_ultra_db')) || {};
     let currentTab = 'hist';
 
     function updateClubs() {
         const l = document.getElementById('leagueSelect').value;
-        const list = CLUBS[l];
-        document.getElementById('clubSelect').innerHTML = list.map(c => `<option value="${c}">${c}</option>`).join('');
+        document.getElementById('clubSelect').innerHTML = CLUBS[l].map(c => `<option value="${c}">${c}</option>`).join('');
     }
 
     function addField() {
@@ -158,21 +156,16 @@
     }
 
     function save() {
-        const y = document.getElementById('yearInput').value;
-        const l = document.getElementById('leagueSelect').value;
-        const c = document.getElementById('clubSelect').value;
+        const y = document.getElementById('yearInput').value, l = document.getElementById('leagueSelect').value, c = document.getElementById('clubSelect').value;
         const ns = document.querySelectorAll('.s-name'), gs = document.querySelectorAll('.s-goals');
         let scs = []; ns.forEach((n, i) => { if(n.value) scs.push({n: n.value, g: parseInt(gs[i].value) || 0}); });
 
-        if(!y) return alert("Por favor, informe o ano.");
+        if(!y) return alert("Ano?");
         if(!db[l]) db[l] = [];
         db[l].push({ y, c, scs });
         db[l].sort((a,b) => b.y - a.y);
         localStorage.setItem('fb_ultra_db', JSON.stringify(db));
-        
-        document.getElementById('yearInput').value = '';
-        document.getElementById('scorersInputs').innerHTML = `<div class="row"><input type="text" class="flex-2 s-name" placeholder="Jogador"><input type="number" class="flex-1 s-goals" placeholder="Gols"></div>`;
-        loadContent(); 
+        location.reload();
     }
 
     function loadContent() {
@@ -191,10 +184,20 @@
             Object.entries(r).sort((a,b)=>b[1]-a[1]).forEach(([cl, v]) => {
                 cont.innerHTML += `<div class="list-item"><span>${cl}</span><span class="badge">${v} Títulos</span></div>`;
             });
-        } else {
+        } else if(currentTab === 'rankGoal') {
             let r = {}; data.forEach(i => i.scs.forEach(s => r[s.n] = (r[s.n] || 0) + s.g));
             Object.entries(r).sort((a,b)=>b[1]-a[1]).forEach(([n, g]) => {
-                cont.innerHTML += `<div class="list-item"><span>${n}</span><span class="badge">${g} Gols Totais</span></div>`;
+                cont.innerHTML += `<div class="list-item"><span>${n}</span><span class="badge">${g} Gols</span></div>`;
+            });
+        } else if(currentTab === 'rankGlobal') {
+            let globalRank = {};
+            Object.values(db).flat().forEach(season => {
+                season.scs.forEach(s => {
+                    globalRank[s.n] = (globalRank[s.n] || 0) + s.g;
+                });
+            });
+            Object.entries(globalRank).sort((a,b)=>b[1]-a[1]).forEach(([n, g]) => {
+                cont.innerHTML += `<div class="list-item"><span>${n}</span><span class="badge badge-gold">${g} Gols Globais</span></div>`;
             });
         }
     }
@@ -206,13 +209,7 @@
         loadContent();
     }
 
-    function del(l, i) { 
-        if(confirm("Deseja excluir este registro?")) {
-            db[l].splice(i, 1); 
-            localStorage.setItem('fb_ultra_db', JSON.stringify(db)); 
-            loadContent(); 
-        }
-    }
+    function del(l, i) { if(confirm("Excluir?")) { db[l].splice(i, 1); localStorage.setItem('fb_ultra_db', JSON.stringify(db)); loadContent(); } }
 
     updateClubs(); loadContent();
 </script>
