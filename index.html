@@ -1,270 +1,285 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Football Analytics Hub</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Analytics Hub</title>
+    <style>
+        :root {
+            --bg-body: #0a0a0a;
+            --bg-card: #151515;
+            --accent: #00ff88;
+            --text: #ffffff;
+            --header-bg: #000000;
+        }
 
-<style>
-:root {
-    --bg-body: #0a0a0a;
-    --bg-card: #151515;
-    --accent: #00ff88;
-    --text: #ffffff;
-}
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-body {
-    font-family: Arial;
-    background: var(--bg-body);
-    color: var(--text);
-    margin: 0;
-}
+        header {
+            width: 100%;
+            background-color: var(--header-bg);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--accent);
+            text-transform: uppercase;
+            font-weight: bold;
+        }
 
-.container {
-    width: 95%;
-    max-width: 900px;
-    margin: auto;
-}
+        .container { width: 95%; max-width: 900px; margin-top: 20px; }
 
-.card {
-    background: var(--bg-card);
-    padding: 20px;
-    border-radius: 10px;
-    margin-top: 20px;
-}
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
 
-input, button {
-    padding: 10px;
-    margin: 5px 0;
-    width: 100%;
-}
+        /* Formulário de Cadastro */
+        .form-group { margin-bottom: 15px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        
+        label { display: block; margin-bottom: 5px; color: var(--accent); font-size: 0.75rem; text-transform: uppercase; font-weight: bold; }
 
-button {
-    background: var(--accent);
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-}
+        input, select {
+            background: #202020; color: white; border: 1px solid #333;
+            padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box;
+        }
 
-.player {
-    background: #1c1c1c;
-    padding: 15px;
-    margin-top: 10px;
-    cursor: pointer;
-}
+        .btn {
+            background: var(--accent); color: black; border: none; padding: 12px;
+            border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%;
+        }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
+        /* Lista de Jogadores */
+        .player-summary-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent);
+            cursor: pointer;
+        }
 
-th, td {
-    border-bottom: 1px solid #333;
-    padding: 8px;
-    text-align: left;
-}
+        .player-info h2 { margin: 0; font-size: 1.2rem; }
+        .player-info span { color: var(--accent); font-weight: bold; font-size: 1.1rem; }
 
-.modal {
-    display: none;
-    position: fixed;
-    background: rgba(0,0,0,0.9);
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-}
+        /* Modal */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 1000; overflow-y: auto;
+        }
 
-.modal-content {
-    background: #151515;
-    padding: 20px;
-    margin: 5% auto;
-    width: 90%;
-    max-width: 900px;
-}
-</style>
+        .modal-content {
+            background: var(--bg-card); margin: 2% auto; padding: 25px;
+            width: 90%; max-width: 950px; border-radius: 15px; border: 1px solid var(--accent);
+        }
+
+        .summary-section { margin-top: 25px; }
+        .summary-section h4 { color: var(--accent); text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 10px; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        th { text-align: left; color: #888; border-bottom: 1px solid #444; padding: 10px; font-size: 0.8rem; }
+        td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+        .total-row { background: rgba(0, 255, 136, 0.05); font-weight: bold; }
+    </style>
 </head>
-
 <body>
 
+<header>Gestão de Atletas Profissionais</header>
+
 <div class="container">
+    <!-- Cadastro -->
+    <div class="card">
+        <h3>👤 Novo Atleta</h3>
+        <div class="form-group">
+            <label>Nome do Atleta</label>
+            <input type="text" id="newPlayerName" placeholder="Ex: Cristiano Ronaldo">
+        </div>
+        <div class="form-row">
+            <div>
+                <label>Ano Início</label>
+                <input type="number" id="startYear" placeholder="2002">
+            </div>
+            <div>
+                <label>Idade Início</label>
+                <input type="number" id="startAge" placeholder="17">
+            </div>
+            <div style="display:flex; align-items:flex-end;">
+                <button class="btn" onclick="addPlayer()">Cadastrar</button>
+            </div>
+        </div>
+    </div>
 
-<div class="card">
-    <h3>Novo Jogador</h3>
-    <input id="name" placeholder="Nome">
-    <input id="year" placeholder="Ano início">
-    <input id="age" placeholder="Idade início">
-    <button onclick="addPlayer()">Cadastrar</button>
+    <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:15px; padding:0 10px;">
+        <h3 style="margin:0;">Dashboard</h3>
+        <select id="rankFilter" onchange="renderPlayers()" style="width: auto;">
+            <option value="alpha">A-Z</option>
+            <option value="goals">Rank Gols</option>
+        </select>
+    </div>
+
+    <div id="playersContainer"></div>
 </div>
 
-<div id="players"></div>
+<!-- MODAL DE VISUALIZAÇÃO -->
+<div id="viewModal" class="modal">
+    <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 id="viewPlayerName" style="color: var(--accent); margin:0;"></h2>
+            <button class="btn" style="width:auto; padding:8px 20px;" onclick="closeModal('viewModal')">Sair</button>
+        </div>
+        <p id="viewPlayerCareer" style="color:#888; margin: 10px 0;"></p>
 
+        <!-- Resumo Geral -->
+        <div class="summary-section">
+            <h4>Resumo Total</h4>
+            <table id="tableTotal"></table>
+        </div>
+
+        <!-- Resumo Por Ano -->
+        <div class="summary-section">
+            <h4>Estatísticas Por Ano</h4>
+            <table id="tableYear"></table>
+        </div>
+
+        <!-- Resumo Por Liga -->
+        <div class="summary-section">
+            <h4>Estatísticas Por Liga</h4>
+            <table id="tableLeague"></table>
+        </div>
+
+        <!-- Resumo Por Clube -->
+        <div class="summary-section">
+            <h4>Estatísticas Por Clube</h4>
+            <table id="tableClub"></table>
+        </div>
+        
+        <button class="btn" style="margin-top:20px;" onclick="switchToEdit()">Gerenciar Temporadas</button>
+    </div>
 </div>
 
-<div id="modal" class="modal">
-<div class="modal-content">
-    <h2 id="playerName"></h2>
-
-    <button onclick="addLine()">+ Temporada</button>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Ano</th><th>Clube</th><th>Liga</th>
-                <th>J</th><th>G</th><th>A</th><th></th>
-            </tr>
-        </thead>
-        <tbody id="editTable"></tbody>
-    </table>
-
-    <h3>Resumo</h3>
-
-    <div id="summary"></div>
-
-    <button onclick="closeModal()">Fechar</button>
-</div>
+<!-- MODAL DE EDIÇÃO -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h2 id="editPlayerName" style="color: var(--accent); margin-bottom:15px;"></h2>
+        <button class="btn" style="width:auto; margin-bottom:15px;" onclick="addNewStatLine()">+ Nova Linha</button>
+        
+        <div style="overflow-x:auto;">
+            <table style="min-width: 600px;">
+                <thead>
+                    <tr><th>Ano</th><th>Clube</th><th>Comp.</th><th>J</th><th>G</th><th>A</th><th></th></tr>
+                </thead>
+                <tbody id="modalTableBody"></tbody>
+            </table>
+        </div>
+        <button class="btn" style="margin-top:20px;" onclick="saveAndCloseEdit()">Salvar e Voltar</button>
+    </div>
 </div>
 
 <script>
+    let db = JSON.parse(localStorage.getItem('fb_players_v6')) || [];
+    let currentPlayerIndex = null;
 
-let db = JSON.parse(localStorage.getItem('db')) || [];
-let current = null;
+    function addPlayer() {
+        const name = document.getElementById('newPlayerName').value;
+        const sYear = document.getElementById('startYear').value;
+        const sAge = document.getElementById('startAge').value;
+        if(!name) return;
+        db.push({ name, sYear, sAge, stats: [] });
+        save();
+        renderPlayers();
+        document.getElementById('newPlayerName').value = '';
+    }
 
-function save(){
-    localStorage.setItem('db', JSON.stringify(db));
-}
+    function renderPlayers() {
+        const container = document.getElementById('playersContainer');
+        const filter = document.getElementById('rankFilter').value;
+        container.innerHTML = '';
+        
+        let displayList = [...db];
+        displayList.sort((a,b) => {
+            if(filter === 'goals') {
+                let sumA = a.stats.reduce((acc, s) => acc + (parseInt(s.g) || 0), 0);
+                let sumB = b.stats.reduce((acc, s) => acc + (parseInt(s.g) || 0), 0);
+                return sumB - sumA;
+            }
+            return a.name.localeCompare(b.name);
+        });
 
-function addPlayer(){
-    db.push({
-        name: name.value,
-        year: year.value,
-        age: age.value,
-        stats: []
-    });
-    save();
-    render();
-}
+        displayList.forEach((player) => {
+            const index = db.indexOf(player);
+            let tg = player.stats.reduce((acc, s) => acc + (parseInt(s.g) || 0), 0);
+            container.innerHTML += `
+                <div class="player-summary-card" onclick="openView(${index})">
+                    <div class="player-info"><h2>${player.name}</h2><small>Início: ${player.sYear}</small></div>
+                    <div><span>${tg} Gols</span></div>
+                </div>`;
+        });
+    }
 
-function render(){
-    players.innerHTML = '';
-    db.forEach((p,i)=>{
-        let gols = p.stats.reduce((t,s)=>t+(+s.g||0),0);
-        players.innerHTML += `
-            <div class="player" onclick="openPlayer(${i})">
-                ${p.name} - ${gols} gols
-            </div>
-        `;
-    });
-}
+    function openView(index) {
+        currentPlayerIndex = index;
+        const p = db[index];
+        document.getElementById('viewPlayerName').innerText = p.name;
+        document.getElementById('viewPlayerCareer').innerText = `Início em ${p.sYear} com ${p.sAge} anos.`;
+        
+        let total = {j:0, g:0, a:0}, years = {}, leagues = {}, clubs = {};
+        
+        p.stats.forEach(s => {
+            let j = parseInt(s.j)||0, g = parseInt(s.g)||0, a = parseInt(s.a)||0;
+            total.j += j; total.g += g; total.a += a;
+            
+            const group = (obj, key) => {
+                if(!obj[key]) obj[key] = {j:0, g:0, a:0};
+                obj[key].j += j; obj[key].g += g; obj[key].a += a;
+            };
+            
+            group(years, s.year); group(leagues, s.comp); group(clubs, s.club);
+        });
 
-function openPlayer(i){
-    current = i;
-    playerName.innerText = db[i].name;
-    modal.style.display = 'block';
-    renderEdit();
-    renderSummary();
-}
+        const mkTable = (data, label) => `<thead><tr><th>${label}</th><th>J</th><th>G</th><th>A</th></tr></thead><tbody>` + 
+            Object.entries(data).map(([k,v])=>`<tr><td>${k}</td><td>${v.j}</td><td>${v.g}</td><td>${v.a}</td></tr>`).join('') + `</tbody>`;
 
-function addLine(){
-    db[current].stats.push({year:'',club:'',comp:'',j:0,g:0,a:0});
-    save();
-    renderEdit();
-}
+        document.getElementById('tableTotal').innerHTML = `<tr class="total-row"><td>Geral</td><td>${total.j}</td><td>${total.g}</td><td>${total.a}</td></tr>`;
+        document.getElementById('tableYear').innerHTML = mkTable(years, "Ano");
+        document.getElementById('tableLeague').innerHTML = mkTable(leagues, "Competição");
+        document.getElementById('tableClub').innerHTML = mkTable(clubs, "Clube");
+        
+        document.getElementById('viewModal').style.display = 'block';
+    }
 
-function renderEdit(){
-    editTable.innerHTML = db[current].stats.map((s,i)=>`
-        <tr>
-            <td><input value="${s.year}" onchange="upd(${i},'year',this.value)"></td>
-            <td><input value="${s.club}" onchange="upd(${i},'club',this.value)"></td>
-            <td><input value="${s.comp}" onchange="upd(${i},'comp',this.value)"></td>
-            <td><input value="${s.j}" onchange="upd(${i},'j',this.value)"></td>
-            <td><input value="${s.g}" onchange="upd(${i},'g',this.value)"></td>
-            <td><input value="${s.a}" onchange="upd(${i},'a',this.value)"></td>
-            <td><button onclick="del(${i})">X</button></td>
-        </tr>
-    `).join('');
-}
-
-function upd(i,f,v){
-    db[current].stats[i][f]=v;
-    save();
-    renderSummary();
-}
-
-function del(i){
-    db[current].stats.splice(i,1);
-    save();
-    renderEdit();
-    renderSummary();
-}
-
-function renderSummary(){
-
-    let total = {j:0,g:0,a:0};
-    let byYear={}, byLeague={}, byClub={};
-
-    db[current].stats.forEach(s=>{
-        let j=+s.j||0, g=+s.g||0, a=+s.a||0;
-
-        total.j+=j; total.g+=g; total.a+=a;
-
-        if(!byYear[s.year]) byYear[s.year]={j:0,g:0,a:0};
-        byYear[s.year].j+=j;
-        byYear[s.year].g+=g;
-        byYear[s.year].a+=a;
-
-        if(!byLeague[s.comp]) byLeague[s.comp]={j:0,g:0,a:0};
-        byLeague[s.comp].j+=j;
-        byLeague[s.comp].g+=g;
-        byLeague[s.comp].a+=a;
-
-        if(!byClub[s.club]) byClub[s.club]={j:0,g:0,a:0};
-        byClub[s.club].j+=j;
-        byClub[s.club].g+=g;
-        byClub[s.club].a+=a;
-    });
-
-    summary.innerHTML = `
-        <h4>Geral</h4>
-        <table>
-            <tr><th>J</th><th>G</th><th>A</th></tr>
-            <tr><td>${total.j}</td><td>${total.g}</td><td>${total.a}</td></tr>
-        </table>
-
-        <h4>Por Ano</h4>
-        <table>
-            <tr><th>Ano</th><th>J</th><th>G</th><th>A</th></tr>
-            ${Object.entries(byYear).map(([k,v])=>`
-                <tr><td>${k}</td><td>${v.j}</td><td>${v.g}</td><td>${v.a}</td></tr>
-            `).join('')}
-        </table>
-
-        <h4>Por Liga</h4>
-        <table>
-            <tr><th>Liga</th><th>J</th><th>G</th><th>A</th></tr>
-            ${Object.entries(byLeague).map(([k,v])=>`
-                <tr><td>${k}</td><td>${v.j}</td><td>${v.g}</td><td>${v.a}</td></tr>
-            `).join('')}
-        </table>
-
-        <h4>Por Clube</h4>
-        <table>
-            <tr><th>Clube</th><th>J</th><th>G</th><th>A</th></tr>
-            ${Object.entries(byClub).map(([k,v])=>`
-                <tr><td>${k}</td><td>${v.j}</td><td>${v.g}</td><td>${v.a}</td></tr>
-            `).join('')}
-        </table>
-    `;
-}
-
-function closeModal(){
-    modal.style.display='none';
-    render();
-}
-
-render();
-
+    function switchToEdit() { closeModal('viewModal'); document.getElementById('editPlayerName').innerText = db[currentPlayerIndex].name; document.getElementById('editModal').style.display = 'block'; renderModalTable(); }
+    function renderModalTable() {
+        document.getElementById('modalTableBody').innerHTML = db[currentPlayerIndex].stats.map((s, idx) => `
+            <tr>
+                <td><input type="text" value="${s.year}" onchange="updateStat(${idx},'year',this.value)"></td>
+                <td><input type="text" value="${s.club}" onchange="updateStat(${idx},'club',this.value)"></td>
+                <td><input type="text" value="${s.comp}" onchange="updateStat(${idx},'comp',this.value)"></td>
+                <td><input type="number" value="${s.j}" onchange="updateStat(${idx},'j',this.value)"></td>
+                <td><input type="number" value="${s.g}" onchange="updateStat(${idx},'g',this.value)"></td>
+                <td><input type="number" value="${s.a}" onchange="updateStat(${idx},'a',this.value)"></td>
+                <td><button onclick="removeStat(${idx})" style="color:red; background:none; border:none; cursor:pointer;">X</button></td>
+            </tr>`).join('');
+    }
+    function addNewStatLine() { db[currentPlayerIndex].stats.push({ year: '', club: '', comp: '', j: 0, g: 0, a: 0 }); renderModalTable(); }
+    function updateStat(idx, field, val) { db[currentPlayerIndex].stats[idx][field] = val; save(); }
+    function removeStat(idx) { db[currentPlayerIndex].stats.splice(idx, 1); save(); renderModalTable(); }
+    function saveAndCloseEdit() { closeModal('editModal'); renderPlayers(); }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function save() { localStorage.setItem('fb_players_v6', JSON.stringify(db)); }
+    renderPlayers();
 </script>
-
 </body>
 </html>
