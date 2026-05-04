@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Awards Hub - Pro</title>
+    <title>Football Awards Hub - Ultra</title>
     <style>
         :root {
             --bg-body: #0a0a0a;
@@ -31,7 +31,6 @@
             border-bottom: 2px solid var(--accent);
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 2px;
         }
 
         .container { width: 95%; max-width: 800px; margin-top: 20px; }
@@ -62,31 +61,21 @@
         .flex-2 { flex: 2; }
         .flex-1 { flex: 1; }
 
-        .btn-add { background: #333; color: var(--accent); border: 1px solid var(--accent); padding: 10px; cursor: pointer; border-radius: 8px; margin-bottom: 15px; width: auto; }
+        .btn-add { background: #333; color: var(--accent); border: 1px solid var(--accent); padding: 10px; cursor: pointer; border-radius: 8px; margin-bottom: 15px; }
         .btn-main { width: 100%; background: var(--accent); color: black; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
 
-        .tab-btn { background: none; border: none; color: var(--text); padding: 10px 20px; cursor: pointer; opacity: 0.5; font-weight: bold; }
+        .nav-tabs { display: flex; border-bottom: 1px solid #333; margin-bottom: 20px; overflow-x: auto; }
+        .tab-btn { background: none; border: none; color: var(--text); padding: 10px 15px; cursor: pointer; opacity: 0.5; font-weight: bold; white-space: nowrap; }
         .tab-btn.active { opacity: 1; border-bottom: 2px solid var(--accent); color: var(--accent); }
 
-        /* Estilo do Histórico (Conforme sua imagem) */
-        .history-item {
-            background: #141414;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 5px solid var(--accent);
-            position: relative;
-        }
+        .history-item { background: #141414; border-radius: 12px; padding: 15px; margin-bottom: 15px; border-left: 5px solid var(--accent); position: relative; }
+        .scorer-line { font-size: 0.9rem; color: #ccc; margin-top: 4px; display: flex; align-items: center; }
+        .scorer-line::before { content: '🎯'; margin-right: 8px; }
 
-        .year-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; }
-        .year-title span { color: var(--accent); }
-
-        .scorer-line { display: flex; align-items: center; font-size: 0.9rem; color: #ccc; margin-top: 4px; }
-        .scorer-line::before { content: '🎯'; margin-right: 8px; font-size: 0.8rem; }
-
-        .del-btn { position: absolute; top: 15px; right: 15px; background: #ff4d4d; color: white; border: none; border-radius: 6px; padding: 5px 12px; cursor: pointer; font-weight: bold; }
-
-        .rank-item { display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 8px; }
+        .list-item { display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 8px; }
+        .badge { background: var(--accent); color: black; padding: 2px 10px; border-radius: 20px; font-weight: bold; }
+        
+        .del-btn { position: absolute; top: 15px; right: 15px; background: #ff4d4d; color: white; border: none; border-radius: 6px; padding: 5px 12px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -96,11 +85,10 @@
 <div class="container">
     <div class="card">
         <h3>🏆 Registrar Temporada</h3>
-        
         <div class="row">
             <div class="flex-1">
                 <label>Ano</label>
-                <input type="text" id="yearInput" placeholder="1914">
+                <input type="text" id="yearInput" placeholder="Ex: 2026">
             </div>
             <div class="flex-1">
                 <label>Liga</label>
@@ -116,22 +104,22 @@
         <label>Clube Campeão</label>
         <select id="clubSelect"></select>
 
-        <label>Artilheiros da Temporada</label>
-        <div id="scorersList">
+        <label>Artilheiros</label>
+        <div id="scorersInputs">
             <div class="row">
-                <input type="text" class="flex-2 s-name" placeholder="Nome do Jogador">
+                <input type="text" class="flex-2 s-name" placeholder="Jogador">
                 <input type="number" class="flex-1 s-goals" placeholder="Gols">
             </div>
         </div>
-        <button class="btn-add" onclick="addScorerField()">+ Adicionar outro artilheiro</button>
-
-        <button class="btn-main" onclick="saveSeason()">Salvar Registro</button>
+        <button class="btn-add" onclick="addField()">+ Outro Artilheiro</button>
+        <button class="btn-main" onclick="save()">Salvar Registro</button>
     </div>
 
     <div class="card">
-        <div style="margin-bottom: 20px; border-bottom: 1px solid #333;">
-            <button class="tab-btn active" id="btnHist" onclick="showTab('hist')">Histórico</button>
-            <button class="tab-btn" id="btnRank" onclick="showTab('rank')">Rank de Títulos</button>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="showTab('hist', this)">Histórico</button>
+            <button class="tab-btn" onclick="showTab('rankClub', this)">Ranking de Títulos</button>
+            <button class="tab-btn" onclick="showTab('rankGoal', this)">Ranking de Gols</button>
         </div>
         <div id="contentArea"></div>
     </div>
@@ -145,88 +133,69 @@
         "Ligue 1": ["Lens", "Lyon", "Lile", "Rennes", "Monaco", "Marseille", "Lorient", "Toulouse", "Le Havre", "Nice", "Auxerre", "Nantes", "Strasbourg"]
     };
 
-    let db = JSON.parse(localStorage.getItem('fb_pro_db')) || {};
+    let db = JSON.parse(localStorage.getItem('fb_ultra_db')) || {};
     let currentTab = 'hist';
 
     function updateClubs() {
-        const league = document.getElementById('leagueSelect').value;
-        document.getElementById('clubSelect').innerHTML = CLUBS[league].map(c => `<option value="${c}">${c}</option>`).join('');
+        const l = document.getElementById('leagueSelect').value;
+        document.getElementById('clubSelect').innerHTML = CLUBS[l].map(c => `<option value="${c}">${c}</option>`).join('');
     }
 
-    function addScorerField() {
-        const div = document.createElement('div');
-        div.className = 'row';
-        div.innerHTML = `<input type="text" class="flex-2 s-name" placeholder="Nome do Jogador"><input type="number" class="flex-1 s-goals" placeholder="Gols">`;
-        document.getElementById('scorersList').appendChild(div);
+    function addField() {
+        const d = document.createElement('div'); d.className = 'row';
+        d.innerHTML = `<input type="text" class="flex-2 s-name" placeholder="Jogador"><input type="number" class="flex-1 s-goals" placeholder="Gols">`;
+        document.getElementById('scorersInputs').appendChild(d);
     }
 
-    function saveSeason() {
-        const year = document.getElementById('yearInput').value;
-        const league = document.getElementById('leagueSelect').value;
-        const champ = document.getElementById('clubSelect').value;
-        
-        const names = document.querySelectorAll('.s-name');
-        const goals = document.querySelectorAll('.s-goals');
-        let scorers = [];
-        
-        names.forEach((n, i) => {
-            if(n.value) scorers.push({ name: n.value, goals: goals[i].value || 0 });
-        });
+    function save() {
+        const y = document.getElementById('yearInput').value;
+        const l = document.getElementById('leagueSelect').value;
+        const c = document.getElementById('clubSelect').value;
+        const ns = document.querySelectorAll('.s-name'), gs = document.querySelectorAll('.s-goals');
+        let scs = []; ns.forEach((n, i) => { if(n.value) scs.push({n: n.value, g: parseInt(gs[i].value) || 0}); });
 
-        if(!year) return alert("Preencha o ano!");
-        if(!db[league]) db[league] = [];
-
-        db[league].push({ year, champ, scorers });
-        db[league].sort((a,b) => b.year - a.year);
-        
-        localStorage.setItem('fb_pro_db', JSON.stringify(db));
-        
-        // Reset
-        document.getElementById('yearInput').value = '';
-        document.getElementById('scorersList').innerHTML = `<div class="row"><input type="text" class="flex-2 s-name" placeholder="Nome do Jogador"><input type="number" class="flex-1 s-goals" placeholder="Gols"></div>`;
-        loadContent();
+        if(!y) return alert("Ano?");
+        if(!db[l]) db[l] = [];
+        db[l].push({ y, c, scs });
+        db[l].sort((a,b) => b.y - a.y);
+        localStorage.setItem('fb_ultra_db', JSON.stringify(db));
+        location.reload(); 
     }
 
     function loadContent() {
-        const league = document.getElementById('leagueSelect').value;
-        const container = document.getElementById('contentArea');
-        container.innerHTML = '';
-        const data = db[league] || [];
+        const l = document.getElementById('leagueSelect').value;
+        const cont = document.getElementById('contentArea');
+        cont.innerHTML = '';
+        const data = db[l] || [];
 
         if(currentTab === 'hist') {
-            data.forEach((item, idx) => {
-                let scorerHtml = item.scorers.map(s => `<div class="scorer-line">${s.name} - ${s.goals}</div>`).join('');
-                container.innerHTML += `
-                    <div class="history-item">
-                        <div class="year-title"><span>Ano ${item.year}:</span> ${item.champ} 🏆</div>
-                        ${scorerHtml}
-                        <button class="del-btn" onclick="deleteSeason('${league}', ${idx})">X</button>
-                    </div>`;
+            data.forEach((it, idx) => {
+                let sHtml = it.scs.map(s => `<div class="scorer-line">${s.n} - ${s.g}</div>`).join('');
+                cont.innerHTML += `<div class="history-item"><b>Ano ${it.y}:</b> ${it.c} 🏆<br>${sHtml}<button class="del-btn" onclick="del('${l}',${idx})">X</button></div>`;
+            });
+        } else if(currentTab === 'rankClub') {
+            let r = {}; data.forEach(i => r[i.c] = (r[i.c] || 0) + 1);
+            Object.entries(r).sort((a,b)=>b[1]-a[1]).forEach(([cl, v]) => {
+                cont.innerHTML += `<div class="list-item"><span>${cl}</span><span class="badge">${v} Títulos</span></div>`;
             });
         } else {
-            const rank = {};
-            data.forEach(i => rank[i.champ] = (rank[i.champ] || 0) + 1);
-            Object.entries(rank).sort((a,b) => b[1]-a[1]).forEach(([club, pts]) => {
-                container.innerHTML += `<div class="rank-item"><span>${club}</span><b>${pts} Títulos</b></div>`;
+            let r = {}; data.forEach(i => i.scs.forEach(s => r[s.n] = (r[s.n] || 0) + s.g));
+            Object.entries(r).sort((a,b)=>b[1]-a[1]).forEach(([n, g]) => {
+                cont.innerHTML += `<div class="list-item"><span>${n}</span><span class="badge">${g} Gols Totais</span></div>`;
             });
         }
     }
 
-    function showTab(t) {
+    function showTab(t, b) {
         currentTab = t;
-        document.getElementById('btnHist').className = t === 'hist' ? 'tab-btn active' : 'tab-btn';
-        document.getElementById('btnRank').className = t === 'rank' ? 'tab-btn active' : 'tab-btn';
+        document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
         loadContent();
     }
 
-    function deleteSeason(l, i) {
-        db[l].splice(i, 1);
-        localStorage.setItem('fb_pro_db', JSON.stringify(db));
-        loadContent();
-    }
+    function del(l, i) { db[l].splice(i, 1); localStorage.setItem('fb_ultra_db', JSON.stringify(db)); loadContent(); }
 
-    updateClubs();
-    loadContent();
+    updateClubs(); loadContent();
 </script>
 </body>
 </html>
