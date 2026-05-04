@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Awards Hub - Global Edition</title>
+    <title>Football Career Manager</title>
     <style>
         :root {
             --bg-body: #0a0a0a;
@@ -29,11 +29,11 @@
             padding: 20px;
             text-align: center;
             border-bottom: 2px solid var(--accent);
-            font-weight: bold;
             text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
-        .container { width: 95%; max-width: 800px; margin-top: 20px; }
+        .container { width: 95%; max-width: 1000px; margin-top: 20px; }
 
         .card {
             background: var(--bg-card);
@@ -44,174 +44,159 @@
             margin-bottom: 20px;
         }
 
-        label { display: block; margin-bottom: 8px; color: var(--accent); font-size: 0.75rem; text-transform: uppercase; font-weight: bold; }
+        label { display: block; margin-bottom: 5px; color: var(--accent); font-size: 0.7rem; font-weight: bold; }
 
         select, input {
             width: 100%;
             background: #1a1a1a;
             color: white;
             border: 1px solid #333;
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
             box-sizing: border-box;
             margin-bottom: 15px;
         }
 
-        .row { display: flex; gap: 10px; }
-        .flex-2 { flex: 2; }
-        .flex-1 { flex: 1; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
 
-        .btn-add { background: #333; color: var(--accent); border: 1px solid var(--accent); padding: 10px; cursor: pointer; border-radius: 8px; margin-bottom: 15px; }
-        .btn-main { width: 100%; background: var(--accent); color: black; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-
-        .nav-tabs { display: flex; border-bottom: 1px solid #333; margin-bottom: 20px; overflow-x: auto; }
-        .tab-btn { background: none; border: none; color: var(--text); padding: 10px 15px; cursor: pointer; opacity: 0.5; font-weight: bold; white-space: nowrap; }
-        .tab-btn.active { opacity: 1; border-bottom: 2px solid var(--accent); color: var(--accent); }
-
-        .history-item { background: #141414; border-radius: 12px; padding: 15px; margin-bottom: 15px; border-left: 5px solid var(--accent); position: relative; }
-        .scorer-line { font-size: 0.9rem; color: #ccc; margin-top: 4px; display: flex; align-items: center; }
-        .scorer-line::before { content: '🎯'; margin-right: 8px; }
-
-        .list-item { display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 8px; }
-        .badge { background: var(--accent); color: black; padding: 2px 10px; border-radius: 20px; font-weight: bold; }
-        .badge-gold { background: gold; }
+        .btn-main { width: 100%; background: var(--accent); color: black; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-bottom: 10px;}
         
-        .del-btn { position: absolute; top: 15px; right: 15px; background: #ff4d4d; color: white; border: none; border-radius: 6px; padding: 5px 12px; cursor: pointer; }
+        .player-card {
+            border-left: 5px solid var(--accent);
+            background: rgba(255,255,255,0.02);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
+        th { text-align: left; color: var(--accent); border-bottom: 1px solid #333; padding: 8px; }
+        td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        .summary-box { display: flex; gap: 20px; margin-top: 10px; font-weight: bold; color: var(--accent); }
     </style>
 </head>
 <body>
 
-<header>Hall da Fama do Futebol</header>
+<header>Controle de Estatísticas de Atletas</header>
 
 <div class="container">
+    <!-- Cadastro de Jogador -->
     <div class="card">
-        <h3>🏆 Registrar Temporada</h3>
-        <div class="row">
-            <div class="flex-1">
-                <label>Ano</label>
-                <input type="text" id="yearInput" placeholder="Ex: 2026">
-            </div>
-            <div class="flex-1">
-                <label>Liga</label>
-                <select id="leagueSelect" onchange="updateClubs(); loadContent();">
-                    <option value="La Liga">La Liga</option>
-                    <option value="Premier League">Premier League</option>
-                    <option value="Bundesliga">Bundesliga</option>
-                    <option value="Ligue 1">Ligue 1</option>
-                    <option value="Serie A">Serie A</option>
-                    <option value="Champions League">Champions League</option>
-                </select>
-            </div>
-        </div>
-
-        <label>Clube Campeão</label>
-        <select id="clubSelect"></select>
-
-        <label>Artilheiros</label>
-        <div id="scorersInputs">
-            <div class="row">
-                <input type="text" class="flex-2 s-name" placeholder="Jogador">
-                <input type="number" class="flex-1 s-goals" placeholder="Gols">
-            </div>
-        </div>
-        <button class="btn-add" onclick="addField()">+ Outro Artilheiro</button>
-        <button class="btn-main" onclick="save()">Salvar Registro</button>
+        <h3>👤 Novo Atleta</h3>
+        <input type="text" id="playerName" placeholder="Nome Completo do Jogador">
+        <button class="btn-main" onclick="createPlayer()">Cadastrar Jogador</button>
     </div>
 
+    <!-- Adicionar Estatística -->
     <div class="card">
-        <div class="nav-tabs">
-            <button class="tab-btn active" onclick="showTab('hist', this)">Histórico</button>
-            <button class="tab-btn" onclick="showTab('rankClub', this)">Ranking de Títulos</button>
-            <button class="tab-btn" onclick="showTab('rankGoal', this)">Gols por Liga</button>
-            <button class="tab-btn" onclick="showTab('rankGlobal', this)">Ranking Geral de Gols</button>
+        <h3>📊 Registrar Temporada</h3>
+        <label>Selecionar Jogador</label>
+        <select id="selectPlayer"></select>
+
+        <div class="grid-inputs">
+            <div><label>Ano</label><input type="text" id="statYear" placeholder="2026"></div>
+            <div><label>Clube</label><input type="text" id="statClub" placeholder="Real Madrid"></div>
+            <div><label>Competição</label><input type="text" id="statComp" placeholder="La Liga"></div>
         </div>
-        <div id="contentArea"></div>
+        <div class="grid-inputs">
+            <div><label>Jogos</label><input type="number" id="statMatches" value="0"></div>
+            <div><label>Gols</label><input type="number" id="statGoals" value="0"></div>
+            <div><label>Assists</label><input type="number" id="statAssists" value="0"></div>
+        </div>
+        <button class="btn-main" onclick="addStat()">Adicionar ao Histórico</button>
     </div>
+
+    <!-- Lista de Jogadores e Carreiras -->
+    <div id="playersList"></div>
 </div>
 
 <script>
-    const CLUBS = {
-        "La Liga": ["Barcelona", "Real Madrid", "Atletico de Madrid", "Girona", "Getafe", "Espanhol", "Valencia", "Celta Vigo", "Atletico Bilbao", "Villarreal", "Raio Vallecano", "Osasuna", "Real Betis", "Real Sociedad"],
-        "Premier League": ["Manchester City", "Manchester United", "Liverpool", "Aston Villa", "Bournemouth", "Chelsea", "Everton", "Tottenham", "Newcastle", "Wolverhampton", "Nottigham Forest", "Fulham", "Sunderland"],
-        "Bundesliga": ["Bayern Munich", "Borussia Dortmund", "RB Leipzig", "Bayer Leverkusen", "Stuttgart", "Freiburb", "Augsburg", "Mainz 05", "Hamburgo", "Werder Bremen", "Wolfsburg", "Eitracht Frankfurk", "Koln", "Heidenheim"],
-        "Ligue 1": ["Lens", "Lyon", "Lile", "Rennes", "Monaco", "Marseille", "Lorient", "Toulouse", "Le Havre", "Nice", "Auxerre", "Nantes", "Strasbourg"],
-        "Serie A": ["Internazionale", "Napoli", "Milan", "Juventus", "Como", "Roma", "Atalanta", "Bologna", "Lazio", "Cagliari", "Fiorentina"]
-    };
+    let playersDB = JSON.parse(localStorage.getItem('fb_players_stats')) || [];
 
-    const EXCLUSIVE_CHAMPIONS = ["Ajax", "PSV", "Galatasaray", "Fenerbahce", "Porto", "Benfica"];
-    CLUBS["Champions League"] = [...new Set([...Object.values(CLUBS).flat(), ...EXCLUSIVE_CHAMPIONS])].sort();
-
-    let db = JSON.parse(localStorage.getItem('fb_ultra_db')) || {};
-    let currentTab = 'hist';
-
-    function updateClubs() {
-        const l = document.getElementById('leagueSelect').value;
-        document.getElementById('clubSelect').innerHTML = CLUBS[l].map(c => `<option value="${c}">${c}</option>`).join('');
+    function createPlayer() {
+        const name = document.getElementById('playerName').value;
+        if(!name) return alert("Nome do jogador?");
+        playersDB.push({ name, history: [] });
+        saveAndRender();
+        document.getElementById('playerName').value = '';
     }
 
-    function addField() {
-        const d = document.createElement('div'); d.className = 'row';
-        d.innerHTML = `<input type="text" class="flex-2 s-name" placeholder="Jogador"><input type="number" class="flex-1 s-goals" placeholder="Gols">`;
-        document.getElementById('scorersInputs').appendChild(d);
+    function addStat() {
+        const playerIndex = document.getElementById('selectPlayer').value;
+        if(playerIndex === "") return alert("Selecione um jogador!");
+
+        const newStat = {
+            year: document.getElementById('statYear').value,
+            club: document.getElementById('statClub').value,
+            comp: document.getElementById('statComp').value,
+            m: parseInt(document.getElementById('statMatches').value) || 0,
+            g: parseInt(document.getElementById('statGoals').value) || 0,
+            a: parseInt(document.getElementById('statAssists').value) || 0
+        };
+
+        playersDB[playerIndex].history.push(newStat);
+        saveAndRender();
     }
 
-    function save() {
-        const y = document.getElementById('yearInput').value, l = document.getElementById('leagueSelect').value, c = document.getElementById('clubSelect').value;
-        const ns = document.querySelectorAll('.s-name'), gs = document.querySelectorAll('.s-goals');
-        let scs = []; ns.forEach((n, i) => { if(n.value) scs.push({n: n.value, g: parseInt(gs[i].value) || 0}); });
-
-        if(!y) return alert("Ano?");
-        if(!db[l]) db[l] = [];
-        db[l].push({ y, c, scs });
-        db[l].sort((a,b) => b.y - a.y);
-        localStorage.setItem('fb_ultra_db', JSON.stringify(db));
-        location.reload();
+    function saveAndRender() {
+        localStorage.setItem('fb_players_stats', JSON.stringify(playersDB));
+        renderPlayers();
     }
 
-    function loadContent() {
-        const l = document.getElementById('leagueSelect').value;
-        const cont = document.getElementById('contentArea');
-        cont.innerHTML = '';
-        const data = db[l] || [];
+    function renderPlayers() {
+        const list = document.getElementById('playersList');
+        const select = document.getElementById('selectPlayer');
+        list.innerHTML = '';
+        select.innerHTML = '<option value="">-- Selecione --</option>';
 
-        if(currentTab === 'hist') {
-            data.forEach((it, idx) => {
-                let sHtml = it.scs.map(s => `<div class="scorer-line">${s.n} - ${s.g}</div>`).join('');
-                cont.innerHTML += `<div class="history-item"><b>Ano ${it.y}:</b> ${it.c} 🏆<br>${sHtml}<button class="del-btn" onclick="del('${l}',${idx})">X</button></div>`;
-            });
-        } else if(currentTab === 'rankClub') {
-            let r = {}; data.forEach(i => r[i.c] = (r[i.c] || 0) + 1);
-            Object.entries(r).sort((a,b)=>b[1]-a[1]).forEach(([cl, v]) => {
-                cont.innerHTML += `<div class="list-item"><span>${cl}</span><span class="badge">${v} Títulos</span></div>`;
-            });
-        } else if(currentTab === 'rankGoal') {
-            let r = {}; data.forEach(i => i.scs.forEach(s => r[s.n] = (r[s.n] || 0) + s.g));
-            Object.entries(r).sort((a,b)=>b[1]-a[1]).forEach(([n, g]) => {
-                cont.innerHTML += `<div class="list-item"><span>${n}</span><span class="badge">${g} Gols</span></div>`;
-            });
-        } else if(currentTab === 'rankGlobal') {
-            let globalRank = {};
-            Object.values(db).flat().forEach(season => {
-                season.scs.forEach(s => {
-                    globalRank[s.n] = (globalRank[s.n] || 0) + s.g;
-                });
-            });
-            Object.entries(globalRank).sort((a,b)=>b[1]-a[1]).forEach(([n, g]) => {
-                cont.innerHTML += `<div class="list-item"><span>${n}</span><span class="badge badge-gold">${g} Gols Globais</span></div>`;
-            });
-        }
+        playersDB.forEach((player, pIdx) => {
+            // Preencher select
+            select.innerHTML += `<option value="${pIdx}">${player.name}</option>`;
+
+            // Calcular Totais
+            let tM = 0, tG = 0, tA = 0;
+            player.history.forEach(s => { tM += s.m; tG += s.g; tA += s.a; });
+
+            // Render Card do Jogador
+            let rows = player.history.map((s, sIdx) => `
+                <tr>
+                    <td>${s.year}</td>
+                    <td>${s.club}</td>
+                    <td>${s.comp}</td>
+                    <td>${s.m}</td>
+                    <td>${s.g}</td>
+                    <td>${s.a}</td>
+                    <td><button onclick="deleteStat(${pIdx}, ${sIdx})" style="color:red; background:none; border:none; cursor:pointer;">X</button></td>
+                </tr>
+            `).join('');
+
+            list.innerHTML += `
+                <div class="card player-card">
+                    <div style="display:flex; justify-content:space-between;">
+                        <h2>${player.name}</h2>
+                        <button onclick="deletePlayer(${pIdx})" style="background:#ff4d4d; border:none; padding:5px 10px; border-radius:5px; color:white; cursor:pointer;">Excluir Atleta</button>
+                    </div>
+                    <div class="summary-box">
+                        <span>Total Jogos: ${tM}</span>
+                        <span>Total Gols: ${tG}</span>
+                        <span>Total Assists: ${tA}</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr><th>Ano</th><th>Clube</th><th>Comp.</th><th>PJ</th><th>G</th><th>A</th><th></th></tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            `;
+        });
     }
 
-    function showTab(t, b) {
-        currentTab = t;
-        document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
-        b.classList.add('active');
-        loadContent();
-    }
+    function deleteStat(pIdx, sIdx) { playersDB[pIdx].history.splice(sIdx, 1); saveAndRender(); }
+    function deletePlayer(idx) { if(confirm("Apagar jogador?")) { playersDB.splice(idx, 1); saveAndRender(); } }
 
-    function del(l, i) { if(confirm("Excluir?")) { db[l].splice(i, 1); localStorage.setItem('fb_ultra_db', JSON.stringify(db)); loadContent(); } }
-
-    updateClubs(); loadContent();
+    renderPlayers();
 </script>
 </body>
 </html>
