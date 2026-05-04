@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebFoot 2026 - Manager</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #3b82f6;
+            --text-color: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border: 1px solid #334155;
+        }
+
+        .team-name { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
+        .score { font-size: 3rem; font-weight: 900; color: var(--accent); }
+
+        .log-match {
+            background: #000;
+            height: 200px;
+            overflow-y: auto;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #10b981;
+            border: 1px solid #334155;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        button:hover { background: #2563eb; }
+        button:disabled { background: #475569; cursor: not-allowed; }
+
+        .minute { color: #f59e0b; margin-right: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 style="text-align: center;">WebFoot 2026</h1>
+
+    <div class="dashboard">
+        <div class="card" id="home-card">
+            <div class="team-name" id="home-name">Time da Casa</div>
+            <div class="score" id="home-score">0</div>
+            <div>Força: <span id="home-power">75</span></div>
+        </div>
+        <div class="card" id="away-card">
+            <div class="team-name" id="away-name">Visitante</div>
+            <div class="score" id="away-score">0</div>
+            <div>Força: <span id="away-power">70</span></div>
+        </div>
+    </div>
+
+    <button id="btn-start" onclick="iniciarPartida()">Iniciar Partida</button>
+
+    <h3 style="margin-top: 30px;">Relatório do Jogo</h3>
+    <div class="log-match" id="match-log">
+        Aguardando início do jogo...
+    </div>
+</div>
+
+<script>
+    // Configurações Iniciais
+    const timeCasa = { nome: "Vasco", força: 82, gols: 0 };
+    const timeFora = { nome: "Flamengo", força: 80, gols: 0 };
+
+    document.getElementById('home-name').innerText = timeCasa.nome;
+    document.getElementById('home-power').innerText = timeCasa.força;
+    document.getElementById('away-name').innerText = timeFora.nome;
+    document.getElementById('away-power').innerText = timeFora.força;
+
+    const logElement = document.getElementById('match-log');
+    const btnStart = document.getElementById('btn-start');
+
+    function adicionarLog(minuto, mensagem) {
+        const p = document.createElement('p');
+        p.innerHTML = `<span class="minute">${minuto}'</span> ${mensagem}`;
+        logElement.prepend(p);
+    }
+
+    async function iniciarPartida() {
+        btnStart.disabled = true;
+        logElement.innerHTML = "";
+        timeCasa.gols = 0;
+        timeFora.gols = 0;
+        document.getElementById('home-score').innerText = 0;
+        document.getElementById('away-score').innerText = 0;
+
+        adicionarLog(0, "O árbitro apita! Começa o jogo.");
+
+        for (let min = 1; min <= 90; min++) {
+            await new Promise(r => setTimeout(r, 100)); // Simula tempo acelerado
+
+            // Lógica de Probabilidade de Gol
+            // Um time com força 80 tem mais chance que um de 70
+            verificarGol(min, timeCasa, timeFora, 'home-score');
+            verificarGol(min, timeFora, timeCasa, 'away-score');
+
+            if (min === 45) adicionarLog(45, "Intervalo de jogo.");
+        }
+
+        adicionarLog(90, "Fim de papo! Jogo encerrado.");
+        btnStart.disabled = false;
+    }
+
+    function verificarGol(minuto, atacante, defensor, elementId) {
+        // Cálculo matemático: chance base + bônus de força
+        const chance = Math.random() * 1000;
+        const limiarDeGol = 5 + (atacante.força - defensor.força);
+
+        if (chance < limiarDeGol) {
+            atacante.gols++;
+            document.getElementById(elementId).innerText = atacante.gols;
+            adicionarLog(minuto, `<b>GOOOOL DO ${atacante.nome.toUpperCase()}!</b>`);
+        }
+    }
+</script>
+
+</body>
+</html>
