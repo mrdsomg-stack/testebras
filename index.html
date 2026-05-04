@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Career Hub - Brenda Edition</title>
+    <title>Football Analytics Hub</title>
     <style>
         :root {
             --bg-body: #0a0a0a;
@@ -33,7 +33,7 @@
             font-weight: bold;
         }
 
-        .container { width: 95%; max-width: 900px; margin-top: 20px; }
+        .container { width: 95%; max-width: 1000px; margin-top: 20px; }
 
         .card {
             background: var(--bg-card);
@@ -43,68 +43,47 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        h3 { color: var(--accent); margin-top: 0; }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
 
-        input, select {
-            background: #202020;
-            color: white;
-            border: 1px solid #333;
-            padding: 10px;
-            border-radius: 6px;
-            width: 100%;
-            box-sizing: border-box;
-            margin-bottom: 10px;
+        .summary-box {
+            background: rgba(255,255,255,0.03);
+            padding: 15px;
+            border-radius: 8px;
+            border-top: 2px solid var(--accent);
+        }
+
+        .summary-box h4 { margin: 0 0 10px 0; color: var(--accent); font-size: 0.9rem; text-transform: uppercase; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { text-align: left; color: #888; border-bottom: 1px solid #333; padding: 5px; }
+        td { padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.02); }
+
+        .total-row { font-weight: bold; color: var(--accent); }
+
+        input {
+            background: #202020; color: white; border: 1px solid #333;
+            padding: 10px; border-radius: 6px; width: 100%; box-sizing: border-box; margin-bottom: 10px;
         }
 
         .btn {
-            background: var(--accent);
-            color: black;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            width: 100%;
+            background: var(--accent); color: black; border: none; padding: 12px;
+            border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%;
         }
 
-        .player-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        /* Modal Style */
         .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 1000;
-            overflow-y: auto;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 1000; overflow-y: auto;
         }
 
         .modal-content {
-            background: var(--bg-card);
-            margin: 5% auto;
-            padding: 25px;
-            width: 90%;
-            max-width: 800px;
-            border-radius: 15px;
-            border: 1px solid var(--accent);
+            background: var(--bg-card); margin: 2% auto; padding: 25px;
+            width: 90%; max-width: 900px; border-radius: 15px; border: 1px solid var(--accent);
         }
-
-        .table-edit { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .table-edit th { text-align: left; color: var(--accent); padding: 10px; border-bottom: 1px solid #333; }
-        .table-edit td { padding: 5px; }
-
-        .btn-edit { background: #333; color: white; border: 1px solid #555; padding: 5px 15px; border-radius: 4px; cursor: pointer; }
-        .btn-save-modal { background: var(--accent); color: black; margin-top: 20px; }
-        .btn-add-line { background: transparent; color: var(--accent); border: 1px dotted var(--accent); margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -112,58 +91,41 @@
 <header>Gestão de Atletas Profissionais</header>
 
 <div class="container">
-    <!-- CADASTRO MESTRE -->
     <div class="card">
         <h3>👤 Cadastro de Novo Jogador</h3>
-        <input type="text" id="newPlayerName" placeholder="Digite o nome do craque...">
+        <input type="text" id="newPlayerName" placeholder="Nome do Jogador">
         <button class="btn" onclick="addPlayer()">Cadastrar Jogador</button>
     </div>
 
-    <!-- LISTA DE JOGADORES -->
-    <div class="card">
-        <h3>Lista de Atletas</h3>
-        <div id="playersContainer"></div>
-    </div>
+    <div id="playersContainer"></div>
 </div>
 
-<!-- MODAL DE EDIÇÃO DE ESTATÍSTICAS -->
 <div id="editModal" class="modal">
     <div class="modal-content">
-        <h2 id="modalPlayerName" style="color: var(--accent);"></h2>
-        <p>Edite as estatísticas de cada temporada abaixo:</p>
+        <h2 id="modalPlayerName" style="color: var(--accent); margin-top:0;"></h2>
+        <button class="btn" style="background:#333; color:var(--accent); margin-bottom:15px;" onclick="addNewStatLine()">+ Adicionar Temporada</button>
         
-        <button class="btn btn-add-line" onclick="addNewStatLine()">+ Adicionar Nova Temporada</button>
-        
-        <table class="table-edit">
+        <table>
             <thead>
-                <tr>
-                    <th>Ano</th>
-                    <th>Clube</th>
-                    <th>Competição</th>
-                    <th>Jogos</th>
-                    <th>Gols</th>
-                    <th>Assists</th>
-                    <th>Ação</th>
-                </tr>
+                <tr><th>Ano</th><th>Clube</th><th>Competição</th><th>J</th><th>G</th><th>A</th><th></th></tr>
             </thead>
             <tbody id="modalTableBody"></tbody>
         </table>
 
-        <button class="btn btn-save-modal" onclick="closeModal()">Salvar e Fechar</button>
+        <button class="btn" style="margin-top:20px;" onclick="closeModal()">Salvar e Fechar</button>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('fb_players_v3')) || [];
+    let db = JSON.parse(localStorage.getItem('fb_players_v4')) || [];
     let currentPlayerIndex = null;
 
     function addPlayer() {
         const name = document.getElementById('newPlayerName').value;
         if(!name) return;
         db.push({ name: name, stats: [] });
-        save();
+        saveAndRender();
         document.getElementById('newPlayerName').value = '';
-        renderPlayers();
     }
 
     function renderPlayers() {
@@ -171,14 +133,52 @@
         container.innerHTML = '';
         
         db.forEach((player, index) => {
-            let totalG = player.stats.reduce((acc, s) => acc + (parseInt(s.g) || 0), 0);
+            // Processamento de Dados (Agrupamento)
+            let total = { j: 0, g: 0, a: 0 };
+            let byLeague = {}, byClub = {};
+
+            player.stats.forEach(s => {
+                let j = parseInt(s.j) || 0, g = parseInt(s.g) || 0, a = parseInt(s.a) || 0;
+                
+                total.j += j; total.g += g; total.a += a;
+
+                if(!byLeague[s.comp]) byLeague[s.comp] = { j:0, g:0, a:0 };
+                byLeague[s.comp].j += j; byLeague[s.comp].g += g; byLeague[s.comp].a += a;
+
+                if(!byClub[s.club]) byClub[s.club] = { j:0, g:0, a:0 };
+                byClub[s.club].j += j; byClub[s.club].g += g; byClub[s.club].a += a;
+            });
+
             container.innerHTML += `
-                <div class="player-row">
-                    <div>
-                        <strong>${player.name}</strong><br>
-                        <small style="color: #888;">Total na Carreira: ${totalG} Gols</small>
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2 style="margin:0;">${player.name}</h2>
+                        <button class="btn" style="width:auto; padding:8px 20px;" onclick="openModal(${index})">Editar Dados</button>
                     </div>
-                    <button class="btn-edit" onclick="openModal(${index})">Editar Estatísticas</button>
+
+                    <div class="summary-grid">
+                        <div class="summary-box">
+                            <h4>Total Geral</h4>
+                            <table>
+                                <tr class="total-row"><td>Jogos</td><td>Gols</td><td>Assists</td></tr>
+                                <tr><td>${total.j}</td><td>${total.g}</td><td>${total.a}</td></tr>
+                            </table>
+                        </div>
+                        <div class="summary-box">
+                            <h4>Por Liga</h4>
+                            <table>
+                                <tr><th>Liga</th><th>J</th><th>G</th><th>A</th></tr>
+                                ${Object.entries(byLeague).map(([name, val]) => `<tr><td>${name}</td><td>${val.j}</td><td>${val.g}</td><td>${val.a}</td></tr>`).join('')}
+                            </table>
+                        </div>
+                        <div class="summary-box">
+                            <h4>Por Clube</h4>
+                            <table>
+                                <tr><th>Clube</th><th>J</th><th>G</th><th>A</th></tr>
+                                ${Object.entries(byClub).map(([name, val]) => `<tr><td>${name}</td><td>${val.j}</td><td>${val.g}</td><td>${val.a}</td></tr>`).join('')}
+                            </table>
+                        </div>
+                    </div>
                 </div>
             `;
         });
@@ -186,45 +186,37 @@
 
     function openModal(index) {
         currentPlayerIndex = index;
-        const player = db[index];
-        document.getElementById('modalPlayerName').innerText = player.name;
+        document.getElementById('modalPlayerName').innerText = db[index].name;
         document.getElementById('editModal').style.display = 'block';
         renderModalTable();
     }
 
     function renderModalTable() {
         const tbody = document.getElementById('modalTableBody');
-        tbody.innerHTML = '';
-        
-        db[currentPlayerIndex].stats.forEach((s, sIdx) => {
-            tbody.innerHTML += `
-                <tr>
-                    <td><input type="text" value="${s.year}" onchange="updateStat(${sIdx}, 'year', this.value)"></td>
-                    <td><input type="text" value="${s.club}" onchange="updateStat(${sIdx}, 'club', this.value)"></td>
-                    <td><input type="text" value="${s.comp}" onchange="updateStat(${sIdx}, 'comp', this.value)"></td>
-                    <td><input type="number" value="${s.j}" onchange="updateStat(${sIdx}, 'j', this.value)"></td>
-                    <td><input type="number" value="${s.g}" onchange="updateStat(${sIdx}, 'g', this.value)"></td>
-                    <td><input type="number" value="${s.a}" onchange="updateStat(${sIdx}, 'a', this.value)"></td>
-                    <td><button onclick="removeStat(${sIdx})" style="color:red; background:none; border:none;">X</button></td>
-                </tr>
-            `;
-        });
+        tbody.innerHTML = db[currentPlayerIndex].stats.map((s, idx) => `
+            <tr>
+                <td><input type="text" value="${s.year}" onchange="updateStat(${idx},'year',this.value)"></td>
+                <td><input type="text" value="${s.club}" onchange="updateStat(${idx},'club',this.value)"></td>
+                <td><input type="text" value="${s.comp}" onchange="updateStat(${idx},'comp',this.value)"></td>
+                <td><input type="number" value="${s.j}" onchange="updateStat(${idx},'j',this.value)"></td>
+                <td><input type="number" value="${s.g}" onchange="updateStat(${idx},'g',this.value)"></td>
+                <td><input type="number" value="${s.a}" onchange="updateStat(${idx},'a',this.value)"></td>
+                <td><button onclick="removeStat(${idx})" style="background:none; border:none; color:red; cursor:pointer;">X</button></td>
+            </tr>
+        `).join('');
     }
 
     function addNewStatLine() {
-        db[currentPlayerIndex].stats.push({ year: '2026', club: '', comp: '', j: 0, g: 0, a: 0 });
+        db[currentPlayerIndex].stats.push({ year: '', club: '', comp: '', j: 0, g: 0, a: 0 });
         renderModalTable();
     }
 
-    function updateStat(sIdx, field, val) {
-        db[currentPlayerIndex].stats[sIdx][field] = val;
-        save();
-    }
-
-    function removeStat(sIdx) {
-        db[currentPlayerIndex].stats.splice(sIdx, 1);
-        save();
-        renderModalTable();
+    function updateStat(idx, field, val) { db[currentPlayerIndex].stats[idx][field] = val; save(); }
+    
+    function removeStat(idx) { 
+        db[currentPlayerIndex].stats.splice(idx, 1); 
+        save(); 
+        renderModalTable(); 
     }
 
     function closeModal() {
@@ -232,11 +224,9 @@
         renderPlayers();
     }
 
-    function save() {
-        localStorage.setItem('fb_players_v3', JSON.stringify(db));
-    }
+    function saveAndRender() { save(); renderPlayers(); }
+    function save() { localStorage.setItem('fb_players_v4', JSON.stringify(db)); }
 
-    // Inicialização
     renderPlayers();
 </script>
 </body>
