@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Analytics Hub - Premium</title>
+    <title>Football Career Hub - Hall of Fame</title>
     <style>
         :root {
             --bg-body: #0a0a0a;
-            --bg-card: #1c2126; /* Cor do fundo do card conforme imagem */
-            --bg-item: #2c3136; /* Cor dos itens internos */
-            --accent: #2fb996; /* Verde esmeralda da imagem */
+            --bg-card: #1c2126;
+            --bg-item: #2c3136;
+            --accent: #2fb996;
             --text: #ffffff;
             --text-dim: #a0a0a0;
+            --gold: #f2ba49;
         }
 
         body {
@@ -37,13 +38,7 @@
 
         .container { width: 95%; max-width: 900px; margin-top: 20px; }
 
-        /* Estilo do Cadastro */
-        .card-main {
-            background: var(--bg-card);
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
+        .card-main { background: var(--bg-card); padding: 25px; border-radius: 15px; margin-bottom: 20px; }
 
         input, select {
             background: #121212; color: white; border: 1px solid #444;
@@ -54,24 +49,17 @@
         .btn-green {
             background: var(--accent); color: white; border: none; padding: 14px;
             border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%;
-            text-transform: uppercase; transition: 0.3s;
+            text-transform: uppercase;
         }
 
-        /* Lista de Jogadores Simplificada */
         .player-row {
-            background: var(--bg-card);
-            padding: 15px 25px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            border: 1px solid transparent;
+            background: var(--bg-card); padding: 15px 25px; border-radius: 12px;
+            margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; border: 1px solid transparent;
         }
         .player-row:hover { border-color: var(--accent); }
 
-        /* MODAL DESIGN PREMIUM */
+        /* MODAL */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 1000; overflow-y: auto;
@@ -79,53 +67,36 @@
 
         .modal-content {
             background: var(--bg-card); margin: 2% auto; padding: 30px;
-            width: 90%; max-width: 850px; border-radius: 20px; position: relative;
+            width: 90%; max-width: 850px; border-radius: 20px;
         }
 
         .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
         .btn-sair { background: var(--accent); color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
 
-        /* Resumo Total Topo */
+        /* RESUMO TOPO */
         .resumo-total-box {
-            background: var(--bg-item);
-            padding: 20px;
-            border-radius: 12px;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            text-align: center;
-            margin-bottom: 20px;
+            background: var(--bg-item); padding: 20px; border-radius: 12px;
+            display: grid; grid-template-columns: repeat(4, 1fr); text-align: center; margin-bottom: 20px;
         }
-        .resumo-total-box div span { display: block; font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; }
-        .resumo-total-box div b { font-size: 1.8rem; color: #f2ba49; } /* Cor dourada pros números */
+        .resumo-total-box div span { display: block; font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; }
+        .resumo-total-box div b { font-size: 1.6rem; color: var(--gold); }
 
-        /* Tabelas Internas */
-        .section-box {
-            background: var(--bg-item);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-        }
+        .section-box { background: var(--bg-item); padding: 15px; border-radius: 12px; margin-bottom: 15px; }
         .section-title { font-size: 0.8rem; font-weight: bold; color: var(--text-dim); text-transform: uppercase; margin-bottom: 10px; display: block; }
 
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; font-size: 0.75rem; color: var(--text-dim); padding: 10px; }
-        td { padding: 12px 10px; font-size: 0.9rem; border-bottom: 1px solid #3d4247; }
-        tr:last-child td { border-bottom: none; }
+        th { text-align: left; font-size: 0.7rem; color: var(--text-dim); padding: 10px; }
+        td { padding: 12px 10px; font-size: 0.85rem; border-bottom: 1px solid #3d4247; }
         tr:nth-child(even) { background: rgba(255,255,255,0.02); }
 
-        .btn-gerenciar {
-            background: var(--accent); color: white; border: none; padding: 15px;
-            border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%;
-            margin-top: 10px; font-size: 1rem;
-        }
+        .trophy-item { display: inline-block; background: rgba(242, 186, 73, 0.1); color: var(--gold); padding: 5px 12px; border-radius: 15px; margin: 3px; font-size: 0.8rem; border: 1px solid var(--gold); }
 
-        /* Modal Edição (Tabelas Inputs) */
-        .input-table input { margin-bottom: 0; padding: 5px; background: #111; font-size: 0.8rem; }
+        .btn-gerenciar { background: var(--accent); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<header>Gestão de Atletas Profissionais</header>
+<header>Hall da Fama do Futebol</header>
 
 <div class="container">
     <div class="card-main">
@@ -137,25 +108,27 @@
         </div>
         <button class="btn-green" onclick="addPlayer()">Cadastrar Jogador</button>
     </div>
-
     <div id="listContainer"></div>
 </div>
 
-<!-- MODAL DE VISUALIZAÇÃO (DESIGN DA IMAGEM) -->
+<!-- MODAL VISUALIZAÇÃO -->
 <div id="viewModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <div>
-                <h1 id="vName" style="margin:0;"></h1>
-                <p id="vCareer" style="color:var(--text-dim); font-size:0.9rem; margin:5px 0 0 0;"></p>
-            </div>
+            <div><h1 id="vName" style="margin:0;"></h1><p id="vCareer" style="color:var(--text-dim); font-size:0.85rem;"></p></div>
             <button class="btn-sair" onclick="closeModal('viewModal')">SAIR</button>
         </div>
 
         <div class="resumo-total-box">
             <div><span>Jogos</span><b id="tJ">0</b></div>
             <div><span>Gols</span><b id="tG">0</b></div>
-            <div><span>Assistências</span><b id="tA">0</b></div>
+            <div><span>Assists</span><b id="tA">0</b></div>
+            <div><span>Títulos</span><b id="tT">0</b></div>
+        </div>
+
+        <div class="section-box">
+            <span class="section-title">Galeria de Títulos</span>
+            <div id="trophyShelf"></div>
         </div>
 
         <div class="section-box">
@@ -168,32 +141,41 @@
             <table id="tableLeague"></table>
         </div>
 
-        <div class="section-box">
-            <span class="section-title">Estatísticas por Clube</span>
-            <table id="tableClub"></table>
-        </div>
-
-        <button class="btn-gerenciar" onclick="openEdit()">GERENCIAR TEMPORADAS</button>
+        <button class="btn-gerenciar" onclick="openEdit()">GERENCIAR CARREIRA</button>
     </div>
 </div>
 
-<!-- MODAL DE EDIÇÃO -->
+<!-- MODAL EDIÇÃO -->
 <div id="editModal" class="modal">
-    <div class="modal-content" style="max-width: 900px;">
-        <h2 style="color:var(--accent)">Editar Temporadas</h2>
-        <button class="btn-sair" style="margin-bottom:15px;" onclick="addStatRow()">+ Nova Temporada</button>
-        <div style="overflow-x:auto;">
-            <table class="input-table">
-                <thead><tr><th>Ano</th><th>Clube</th><th>Liga</th><th>J</th><th>G</th><th>A</th><th></th></tr></thead>
-                <tbody id="editBody"></tbody>
-            </table>
+    <div class="modal-content">
+        <h2 style="color:var(--accent)">Gerenciar Carreira</h2>
+        
+        <div class="section-box">
+            <span class="section-title">Adicionar Título</span>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="tYear" placeholder="Ano" style="width:80px;">
+                <input type="text" id="tName" placeholder="Nome do Título (Ex: La Liga)">
+                <button class="btn-sair" onclick="addTrophy()">Adicionar</button>
+            </div>
+            <div id="editTrophies" style="margin-top:10px;"></div>
         </div>
-        <button class="btn-green" style="margin-top:20px;" onclick="closeModal('editModal'); render();">SALVAR E VOLTAR</button>
+
+        <div class="section-box">
+            <span class="section-title">Temporadas (Estatísticas)</span>
+            <button class="btn-sair" style="margin-bottom:10px;" onclick="addStatRow()">+ Nova Temporada</button>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead><tr><th>Ano</th><th>Clube</th><th>Liga</th><th>J</th><th>G</th><th>A</th><th></th></tr></thead>
+                    <tbody id="editBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <button class="btn-green" onclick="closeModal('editModal'); render();">SALVAR E VOLTAR</button>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('fb_premium_v1')) || [];
+    let db = JSON.parse(localStorage.getItem('fb_hall_v1')) || [];
     let curIdx = null;
 
     function addPlayer() {
@@ -201,7 +183,7 @@
         const year = document.getElementById('pYear').value;
         const age = document.getElementById('pAge').value;
         if(!name) return;
-        db.push({ name, year, age, stats: [] });
+        db.push({ name, year, age, stats: [], trophies: [] });
         save(); render();
         document.getElementById('pName').value = '';
     }
@@ -213,7 +195,7 @@
             let tg = p.stats.reduce((a, s) => a + (parseInt(s.g)||0), 0);
             cont.innerHTML += `<div class="player-row" onclick="view(${i})">
                 <span><b>${p.name}</b></span>
-                <span style="color:var(--accent)">${tg} GOLS</span>
+                <span style="color:var(--accent)">${tg} GOLS | ${p.trophies.length} 🏆</span>
             </div>`;
         });
     }
@@ -223,32 +205,53 @@
         document.getElementById('vName').innerText = p.name;
         document.getElementById('vCareer').innerText = `Início em ${p.year} com ${p.age} anos.`;
         
-        let totals = {j:0, g:0, a:0}, yMap = {}, lMap = {}, cMap = {};
+        let totals = {j:0, g:0, a:0}, yMap = {}, lMap = {};
         p.stats.forEach(s => {
             let j = parseInt(s.j)||0, g = parseInt(s.g)||0, a = parseInt(s.a)||0;
             totals.j += j; totals.g += g; totals.a += a;
             const up = (m, k) => { if(!m[k]) m[k] = {j:0, g:0, a:0}; m[k].j += j; m[k].g += g; m[k].a += a; };
-            up(yMap, s.year); up(lMap, s.league); up(cMap, s.club);
+            up(yMap, s.year); up(lMap, s.league);
         });
 
         document.getElementById('tJ').innerText = totals.j;
         document.getElementById('tG').innerText = totals.g;
         document.getElementById('tA').innerText = totals.a;
+        document.getElementById('tT').innerText = p.trophies.length;
+
+        document.getElementById('trophyShelf').innerHTML = p.trophies.map(t => `<span class="trophy-item">🏆 ${t.year} - ${t.name}</span>`).join('');
 
         const mkT = (m, h) => `<thead><tr><th>${h}</th><th>J</th><th>G</th><th>A</th></tr></thead><tbody>` + 
             Object.entries(m).map(([k,v])=>`<tr><td>${k}</td><td>${v.j}</td><td>${v.g}</td><td>${v.a}</td></tr>`).join('') + `</tbody>`;
 
         document.getElementById('tableYear').innerHTML = mkT(yMap, "Ano");
-        document.getElementById('tableLeague').innerHTML = mkT(lMap, "Competição");
-        document.getElementById('tableClub').innerHTML = mkT(cMap, "Clube");
+        document.getElementById('tableLeague').innerHTML = mkT(lMap, "Liga");
         document.getElementById('viewModal').style.display = 'block';
     }
 
     function openEdit() {
         document.getElementById('viewModal').style.display = 'none';
         document.getElementById('editModal').style.display = 'block';
-        const eb = document.getElementById('editBody');
-        eb.innerHTML = db[curIdx].stats.map((s, i) => `<tr>
+        renderEditTrophies();
+        renderEditStats();
+    }
+
+    function renderEditTrophies() {
+        document.getElementById('editTrophies').innerHTML = db[curIdx].trophies.map((t, i) => 
+            `<span class="trophy-item">${t.year} - ${t.name} <b onclick="remT(${i})" style="cursor:pointer; color:red;">X</b></span>`).join('');
+    }
+
+    function addTrophy() {
+        const year = document.getElementById('tYear').value;
+        const name = document.getElementById('tName').value;
+        if(year && name) {
+            db[curIdx].trophies.push({year, name});
+            save(); renderEditTrophies();
+            document.getElementById('tYear').value = ''; document.getElementById('tName').value = '';
+        }
+    }
+
+    function renderEditStats() {
+        document.getElementById('editBody').innerHTML = db[curIdx].stats.map((s, i) => `<tr>
             <td><input type="text" value="${s.year}" onchange="upS(${i},'year',this.value)"></td>
             <td><input type="text" value="${s.club}" onchange="upS(${i},'club',this.value)"></td>
             <td><input type="text" value="${s.league}" onchange="upS(${i},'league',this.value)"></td>
@@ -259,11 +262,12 @@
         </tr>`).join('');
     }
 
-    function addStatRow() { db[curIdx].stats.push({year:'', club:'', league:'', j:0, g:0, a:0}); openEdit(); }
+    function addStatRow() { db[curIdx].stats.push({year:'', club:'', league:'', j:0, g:0, a:0}); renderEditStats(); }
     function upS(i, f, v) { db[curIdx].stats[i][f] = v; save(); }
-    function remS(i) { db[curIdx].stats.splice(i, 1); save(); openEdit(); }
+    function remS(i) { db[curIdx].stats.splice(i, 1); save(); renderEditStats(); }
+    function remT(i) { db[curIdx].trophies.splice(i, 1); save(); renderEditTrophies(); }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function save() { localStorage.setItem('fb_premium_v1', JSON.stringify(db)); }
+    function save() { localStorage.setItem('fb_hall_v1', JSON.stringify(db)); }
     render();
 </script>
 </body>
