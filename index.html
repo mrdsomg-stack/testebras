@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Manager Hub - Pro</title>
+    <title>Football History Manager</title>
     <style>
         :root {
             --bg-body: #0a0a0a;
@@ -31,14 +31,9 @@
             border-bottom: 2px solid var(--accent);
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 2px;
         }
 
-        .container {
-            width: 95%;
-            max-width: 1300px;
-            margin-top: 20px;
-        }
+        .container { width: 95%; max-width: 1200px; margin-top: 20px; }
 
         .card {
             background: var(--bg-card);
@@ -49,12 +44,7 @@
             margin-bottom: 20px;
         }
 
-        .controls {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
+        .controls { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
 
         select, input, button {
             background: #1a1a1a;
@@ -62,64 +52,39 @@
             border: 1px solid var(--accent);
             padding: 10px;
             border-radius: 5px;
-            cursor: pointer;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; border-bottom: 2px solid var(--accent); padding: 12px; color: var(--accent); }
+        td { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
 
-        th {
-            text-align: left;
-            border-bottom: 2px solid var(--accent);
-            padding: 12px;
-            font-size: 0.9rem;
-            color: var(--accent);
+        .pos-input { width: 60px; text-align: center; background: transparent; border: 1px solid #333; color: white; }
+        
+        .tab-btn { background: none; border: none; color: var(--text); padding: 10px; cursor: pointer; opacity: 0.5; }
+        .tab-btn.active { opacity: 1; border-bottom: 2px solid var(--accent); }
+        
+        .trophy-card {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid gold;
         }
-
-        td {
-            padding: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .input-mini {
-            width: 45px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .tab-btn {
-            background: none;
-            border: none;
-            color: var(--text);
-            padding: 10px 20px;
-            cursor: pointer;
-            opacity: 0.6;
-        }
-
-        .tab-btn.active {
-            opacity: 1;
-            border-bottom: 2px solid var(--accent);
-            color: var(--accent);
-        }
-
-        .points-cell { font-weight: bold; color: var(--accent); }
     </style>
 </head>
 <body>
 
-<header>Football Manager Hub</header>
+<header>Football History Hub</header>
 
 <div class="container">
     <div class="controls">
-        <div id="yearArea">
-            <select id="yearSelect" onchange="changeContext()">
-                <option value="2026">2026</option>
-                <option value="2027">2027</option>
-            </select>
-            <button onclick="addYear()">+ Ano</button>
-        </div>
+        <select id="yearSelect" onchange="changeContext()">
+            <option value="2026">2026</option>
+            <option value="1900">1900</option>
+        </select>
+        <button onclick="addNewYear()">+ Novo Ano</button>
         
         <select id="leagueSelect" onchange="changeContext()">
             <option value="la-liga">La Liga</option>
@@ -130,147 +95,125 @@
     </div>
 
     <div class="card">
-        <div class="nav-tabs">
-            <button class="tab-btn active" onclick="showTab('tabela')">Tabela</button>
-            <button class="tab-btn" onclick="showTab('artilharia')">Artilheiros</button>
+        <div class="nav">
+            <button class="tab-btn active" onclick="showTab('classificacao')">Classificação Final</button>
+            <button class="tab-btn" onclick="showTab('titulos')">Galeria de Títulos</button>
         </div>
 
-        <div id="tab-tabela" class="tab-content">
-            <table id="mainTable">
+        <hr style="opacity:0.1; margin: 20px 0;">
+
+        <!-- Aba Classificação -->
+        <div id="tab-classificacao" class="tab-content">
+            <table>
                 <thead>
                     <tr>
-                        <th>Posição</th>
+                        <th>Posição Final</th>
                         <th>Clube</th>
-                        <th>Jogos</th>
-                        <th>Vitoria</th>
-                        <th>Empate</th>
-                        <th>Derrota</th>
-                        <th>Pontos</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody"></tbody>
+                <tbody id="rankingBody"></tbody>
             </table>
         </div>
 
-        <div id="tab-artilharia" class="tab-content" style="display:none;">
-            <h3>Top Artilheiros</h3>
-            <div class="controls">
-                <input type="text" id="pName" placeholder="Nome do Jogador">
-                <input type="number" id="pGoals" placeholder="Gols">
-                <button onclick="saveScorer()" style="background: var(--accent); color: black; font-weight: bold;">Salvar</button>
-            </div>
-            <table>
-                <thead><tr><th>Jogador</th><th>Gols</th><th>Ação</th></tr></thead>
-                <tbody id="scorersBody"></tbody>
-            </table>
+        <!-- Aba Títulos -->
+        <div id="tab-titulos" class="tab-content" style="display:none;">
+            <h3>Campeões Históricos</h3>
+            <div id="titulosList"></div>
         </div>
     </div>
 </div>
 
 <script>
-    const CLUBS_MASTER = {
+    const CLUBS = {
         "la-liga": ["Barcelona", "Real Madrid", "Atletico de Madrid", "Girona", "Getafe", "Espanhol", "Valencia", "Celta Vigo", "Atletico Bilbao", "Villarreal", "Raio Vallecano", "Osasuna", "Real Betis", "Real Sociedad"],
         "premier-league": ["Manchester City", "Manchester United", "Liverpool", "Aston Villa", "Bournemouth", "Chelsea", "Everton", "Tottenham", "Newcastle", "Wolverhampton", "Nottigham Forest", "Fulham", "Sunderland"],
         "bundesliga": ["Bayern Munich", "Borussia Dortmund", "RB Leipzig", "Bayer Leverkusen", "Stuttgart", "Freiburb", "Augsburg", "Mainz 05", "Hamburgo", "Werder Bremen", "Wolfsburg", "Eitracht Frankfurk", "Koln", "Heidenheim"],
         "ligue-1": ["Lens", "Lyon", "Lile", "Rennes", "Monaco", "Marseille", "Lorient", "Toulouse", "Le Havre", "Nice", "Auxerre", "Nantes", "Strasbourg"]
     };
 
-    let db = JSON.parse(localStorage.getItem('fb_manager_db')) || { seasons: {} };
+    // Banco de dados inicializado do LocalStorage
+    let historyDB = JSON.parse(localStorage.getItem('fb_history_db')) || { years: {} };
 
     function changeContext() {
         const year = document.getElementById('yearSelect').value;
         const league = document.getElementById('leagueSelect').value;
-        
-        if (!db.seasons[year]) db.seasons[year] = {};
-        if (!db.seasons[year][league]) {
-            db.seasons[year][league] = {
-                stats: CLUBS_MASTER[league].map(name => ({ name, v: 0, e: 0, d: 0 })),
-                scorers: []
+
+        if (!historyDB.years[year]) historyDB.years[year] = {};
+        if (!historyDB.years[year][league]) {
+            historyDB.years[year][league] = {
+                ranking: CLUBS[league].map(name => ({ name, pos: "" })),
+                champion: ""
             };
         }
-        renderAll();
+        renderData();
     }
 
-    function renderAll() {
+    function renderData() {
         const year = document.getElementById('yearSelect').value;
         const league = document.getElementById('leagueSelect').value;
-        const data = db.seasons[year][league];
+        const data = historyDB.years[year][league];
 
-        // Render Tabela
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
-        
-        // Ordenar por pontos
-        const sorted = [...data.stats].sort((a, b) => ((b.v*3)+b.e) - ((a.v*3)+a.e));
-
-        sorted.forEach((club, i) => {
-            const pontos = (club.v * 3) + (club.e * 1);
-            const jogos = club.v + club.e + club.d;
+        // Renderizar Classificação
+        const rBody = document.getElementById('rankingBody');
+        rBody.innerHTML = '';
+        data.ranking.forEach((item, index) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${i+1}º</td>
-                <td>${club.name}</td>
-                <td>${jogos}</td>
-                <td><input type="number" class="input-mini" value="${club.v}" onchange="updateVal('${club.name}','v',this.value)"></td>
-                <td><input type="number" class="input-mini" value="${club.e}" onchange="updateVal('${club.name}','e',this.value)"></td>
-                <td><input type="number" class="input-mini" value="${club.d}" onchange="updateVal('${club.name}','d',this.value)"></td>
-                <td class="points-cell">${pontos}</td>
+                <td><input type="number" class="pos-input" value="${item.pos}" placeholder="--" onchange="updatePos('${item.name}', this.value)">º</td>
+                <td>${item.name}</td>
             `;
-            tbody.appendChild(tr);
+            rBody.appendChild(tr);
         });
 
-        // Render Artilheiros
-        const sBody = document.getElementById('scorersBody');
-        sBody.innerHTML = '';
-        data.scorers.sort((a,b) => b.goals - a.goals).forEach((s, i) => {
-            sBody.innerHTML += `<tr><td>${s.name}</td><td>${s.goals}</td><td><button onclick="delScorer(${i})">X</button></td></tr>`;
+        // Renderizar Títulos (Histórico Global da Liga Selecionada)
+        const tList = document.getElementById('titulosList');
+        tList.innerHTML = '';
+        Object.keys(historyDB.years).forEach(y => {
+            const champ = historyDB.years[y][league]?.champion;
+            if(champ) {
+                tList.innerHTML += `
+                    <div class="trophy-card">
+                        <span><strong>${y}</strong> - ${league.replace('-',' ').toUpperCase()}</span>
+                        <span>🏆 ${champ}</span>
+                    </div>
+                `;
+            }
         });
-        
-        localStorage.setItem('fb_manager_db', JSON.stringify(db));
+
+        localStorage.setItem('fb_history_db', JSON.stringify(historyDB));
     }
 
-    function updateVal(clubName, field, val) {
+    function updatePos(clubName, val) {
         const year = document.getElementById('yearSelect').value;
         const league = document.getElementById('leagueSelect').value;
-        const club = db.seasons[year][league].stats.find(c => c.name === clubName);
-        club[field] = parseInt(val) || 0;
-        renderAll();
+        const club = historyDB.years[year][league].ranking.find(c => c.name === clubName);
+        club.pos = val;
+
+        // Se a posição for 1, define como campeão automaticamente
+        if(val == "1") {
+            historyDB.years[year][league].champion = clubName;
+        } else if (historyDB.years[year][league].champion === clubName) {
+            historyDB.years[year][league].champion = "";
+        }
+        renderData();
     }
 
-    function addYear() {
-        const newYear = prompt("Digite o ano da nova temporada:");
-        if (newYear) {
+    function addNewYear() {
+        const y = prompt("Digite o ano:");
+        if(y) {
             const sel = document.getElementById('yearSelect');
             const opt = document.createElement('option');
-            opt.value = newYear; opt.text = newYear;
+            opt.value = y; opt.text = y;
             sel.add(opt);
-            sel.value = newYear;
+            sel.value = y;
             changeContext();
         }
     }
 
-    function saveScorer() {
-        const year = document.getElementById('yearSelect').value;
-        const league = document.getElementById('leagueSelect').value;
-        const name = document.getElementById('pName').value;
-        const goals = parseInt(document.getElementById('pGoals').value);
-        if(name && goals) {
-            db.seasons[year][league].scorers.push({name, goals});
-            renderAll();
-        }
-    }
-
-    function delScorer(i) {
-        const year = document.getElementById('yearSelect').value;
-        const league = document.getElementById('leagueSelect').value;
-        db.seasons[year][league].scorers.splice(i, 1);
-        renderAll();
-    }
-
-    function showTab(id) {
+    function showTab(tab) {
         document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-'+id).style.display = 'block';
+        document.getElementById('tab-'+tab).style.display = 'block';
         event.currentTarget.classList.add('active');
     }
 
