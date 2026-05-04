@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Awards Manager</title>
+    <title>Football Awards Hub - Ranking</title>
     <style>
         :root {
             --bg-body: #0a0a0a;
@@ -64,8 +64,6 @@
             box-sizing: border-box;
         }
 
-        input:focus { border-color: var(--accent); outline: none; }
-
         button {
             width: 100%;
             background: var(--accent);
@@ -76,26 +74,32 @@
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
-            transition: 0.3s;
         }
 
-        button:hover { opacity: 0.8; transform: translateY(-2px); }
+        .tab-btn { background: none; border: none; color: var(--text); padding: 10px 20px; cursor: pointer; opacity: 0.5; }
+        .tab-btn.active { opacity: 1; border-bottom: 2px solid var(--accent); color: var(--accent); }
 
-        .history-item {
+        .history-item, .rank-item {
             background: rgba(255,255,255,0.03);
             border-radius: 10px;
             padding: 15px;
-            margin-top: 15px;
+            margin-top: 10px;
             border-left: 4px solid var(--accent);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .history-info b { color: var(--accent); }
-        .scorers-text { font-size: 0.9rem; color: #aaa; margin-top: 5px; }
-        
-        .empty-msg { text-align: center; opacity: 0.5; margin-top: 20px; }
+        .rank-number {
+            background: var(--accent);
+            color: black;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .delete-btn { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -103,17 +107,17 @@
 <header>Hall da Fama do Futebol</header>
 
 <div class="container">
-    <!-- Formulário de Registro -->
+    <!-- Formulário -->
     <div class="card">
         <h3>🏆 Registrar Temporada</h3>
         <div class="form-group">
             <div>
-                <label>Ano / Temporada</label>
-                <input type="text" id="yearInput" placeholder="Ex: 2026 ou 1900">
+                <label>Ano</label>
+                <input type="text" id="yearInput" placeholder="Ex: 2026">
             </div>
             <div>
                 <label>Liga</label>
-                <select id="leagueSelect" onchange="loadHistory()">
+                <select id="leagueSelect" onchange="updateClubs(); loadContent();">
                     <option value="La Liga">La Liga</option>
                     <option value="Premier League">Premier League</option>
                     <option value="Bundesliga">Bundesliga</option>
@@ -124,103 +128,105 @@
 
         <div style="margin-bottom: 20px;">
             <label>Clube Campeão</label>
-            <input type="text" id="championInput" placeholder="Nome do time vencedor">
+            <select id="clubSelect"></select>
         </div>
 
         <div style="margin-bottom: 20px;">
-            <label>Artilheiros (Nome - Gols)</label>
-            <textarea id="scorersInput" rows="3" placeholder="Ex: Benzema - 25 gols&#10;Vinicius Jr - 20 gols"></textarea>
+            <label>Artilheiros</label>
+            <textarea id="scorersInput" rows="2" placeholder="Nome - Gols"></textarea>
         </div>
 
         <button onclick="saveSeason()">Salvar Registro</button>
     </div>
 
-    <!-- Histórico -->
+    <!-- Abas de Exibição -->
     <div class="card">
-        <h3>📜 Histórico de Conquistas</h3>
-        <div id="historyContainer">
-            <!-- Os registros aparecerão aqui -->
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="tab-btn active" id="btnHist" onclick="showTab('hist')">Histórico</button>
+            <button class="tab-btn" id="btnRank" onclick="showTab('rank')">Ranking de Títulos</button>
         </div>
+
+        <div id="contentArea"></div>
     </div>
 </div>
 
 <script>
-    // Banco de dados: { "La Liga": [{year: 2026, champion: "Real", scorers: "..."}, ...] }
-    let awardsDB = JSON.parse(localStorage.getItem('fb_awards_db')) || {};
+    const CLUBS_DATA = {
+        "La Liga": ["Barcelona", "Real Madrid", "Atletico de Madrid", "Girona", "Getafe", "Espanhol", "Valencia", "Celta Vigo", "Atletico Bilbao", "Villarreal", "Raio Vallecano", "Osasuna", "Real Betis", "Real Sociedad"],
+        "Premier League": ["Manchester City", "Manchester United", "Liverpool", "Aston Villa", "Bournemouth", "Chelsea", "Everton", "Tottenham", "Newcastle", "Wolverhampton", "Nottigham Forest", "Fulham", "Sunderland"],
+        "Bundesliga": ["Bayern Munich", "Borussia Dortmund", "RB Leipzig", "Bayer Leverkusen", "Stuttgart", "Freiburb", "Augsburg", "Mainz 05", "Hamburgo", "Werder Bremen", "Wolfsburg", "Eitracht Frankfurk", "Koln", "Heidenheim"],
+        "Ligue 1": ["Lens", "Lyon", "Lile", "Rennes", "Monaco", "Marseille", "Lorient", "Toulouse", "Le Havre", "Nice", "Auxerre", "Nantes", "Strasbourg"]
+    };
+
+    let awardsDB = JSON.parse(localStorage.getItem('fb_awards_db_v2')) || {};
+    let currentTab = 'hist';
+
+    function updateClubs() {
+        const league = document.getElementById('leagueSelect').value;
+        const clubSel = document.getElementById('clubSelect');
+        clubSel.innerHTML = CLUBS_DATA[league].map(c => `<option value="${c}">${c}</option>`).join('');
+    }
 
     function saveSeason() {
         const year = document.getElementById('yearInput').value;
         const league = document.getElementById('leagueSelect').value;
-        const champion = document.getElementById('championInput').value;
+        const champion = document.getElementById('clubSelect').value;
         const scorers = document.getElementById('scorersInput').value;
 
-        if(!year || !champion) {
-            alert("Por favor, preencha o ano e o campeão!");
-            return;
-        }
-
+        if(!year) return alert("Digite o ano!");
         if(!awardsDB[league]) awardsDB[league] = [];
-
-        // Atualiza se já existir o ano, senão adiciona novo
-        const existingIdx = awardsDB[league].findIndex(item => item.year === year);
-        const entry = { year, champion, scorers };
-
-        if(existingIdx > -1) {
-            awardsDB[league][existingIdx] = entry;
-        } else {
-            awardsDB[league].push(entry);
-        }
-
-        // Ordenar por ano (do mais recente para o mais antigo)
-        awardsDB[league].sort((a, b) => b.year - a.year);
-
-        localStorage.setItem('fb_awards_db', JSON.stringify(awardsDB));
         
-        // Limpar campos
-        document.getElementById('yearInput').value = '';
-        document.getElementById('championInput').value = '';
-        document.getElementById('scorersInput').value = '';
+        awardsDB[league].push({ year, champion, scorers });
+        awardsDB[league].sort((a,b) => b.year - a.year);
         
-        loadHistory();
+        localStorage.setItem('fb_awards_db_v2', JSON.stringify(awardsDB));
+        loadContent();
     }
 
-    function loadHistory() {
+    function loadContent() {
         const league = document.getElementById('leagueSelect').value;
-        const container = document.getElementById('historyContainer');
+        const container = document.getElementById('contentArea');
         container.innerHTML = '';
+        const data = awardsDB[league] || [];
 
-        const history = awardsDB[league] || [];
-
-        if(history.length === 0) {
-            container.innerHTML = '<p class="empty-msg">Nenhum título registrado para esta liga ainda.</p>';
-            return;
+        if(currentTab === 'hist') {
+            data.forEach((item, index) => {
+                container.innerHTML += `
+                    <div class="history-item">
+                        <div><b>Ano ${item.year}:</b> ${item.champion} 🏆<br><small>🎯 ${item.scorers}</small></div>
+                        <button class="delete-btn" onclick="deleteEntry('${league}', ${index})">X</button>
+                    </div>`;
+            });
+        } else {
+            const counts = {};
+            data.forEach(item => counts[item.champion] = (counts[item.champion] || 0) + 1);
+            const sortedRank = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+            
+            sortedRank.forEach(([club, count]) => {
+                container.innerHTML += `
+                    <div class="rank-item">
+                        <span>${club}</span>
+                        <span><span class="rank-number">${count}</span> Títulos</span>
+                    </div>`;
+            });
         }
+    }
 
-        history.forEach((data, index) => {
-            const item = document.createElement('div');
-            item.className = 'history-item';
-            item.innerHTML = `
-                <div class="history-info">
-                    <b>Ano ${data.year}:</b> ${data.champion} 🏆
-                    <div class="scorers-text">🎯 ${data.scorers.replace(/\n/g, ' | ')}</div>
-                </div>
-                <button onclick="deleteEntry('${league}', ${index})" style="width: 40px; padding: 5px; background: #ff4444; color: white;">X</button>
-            `;
-            container.appendChild(item);
-        });
+    function showTab(tab) {
+        currentTab = tab;
+        document.getElementById('btnHist').classList.toggle('active', tab === 'hist');
+        document.getElementById('btnRank').classList.toggle('active', tab === 'rank');
+        loadContent();
     }
 
     function deleteEntry(league, index) {
-        if(confirm("Deseja excluir este registro?")) {
-            awardsDB[league].splice(index, 1);
-            localStorage.setItem('fb_awards_db', JSON.stringify(awardsDB));
-            loadHistory();
-        }
+        awardsDB[league].splice(index, 1);
+        localStorage.setItem('fb_awards_db_v2', JSON.stringify(awardsDB));
+        loadContent();
     }
 
-    // Inicializar
-    loadHistory();
+    updateClubs();
+    loadContent();
 </script>
-
 </body>
 </html>
