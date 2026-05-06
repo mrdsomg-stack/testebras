@@ -1,285 +1,774 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Career Hub - Pro Analytics</title>
-    <style>
-        :root {
-            --bg-body: #0a0a0a;
-            --bg-card: #1c2126;
-            --bg-item: #2c3136;
-            --accent: #2fb996;
-            --text: #ffffff;
-            --text-dim: #a0a0a0;
-            --gold: #f2ba49;
-            --danger: #ff4d4d;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marechal Lott</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;padding:16px}
+:root{--green:#3fb950;--gold:#f0883e;--red:#f85149;--blue:#58a6ff;--purple:#a371f7;--surface:#161b22;--surface2:#21262d;--border:#30363d;--dim:#8b949e}
+.app{max-width:1050px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+h1{font-size:1.2rem;font-weight:600;color:#fff}
+h1 span{color:var(--green);font-size:.75rem;display:block;font-weight:400;margin-top:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.btn{background:var(--green);color:#000;border:none;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn.ghost{background:transparent;color:var(--dim);border:1px solid var(--border)}
+.btn.ghost:hover{color:#fff;border-color:var(--dim)}
+.btn.danger{background:transparent;color:var(--red);border:1px solid transparent;padding:4px 8px}
+.btn.danger:hover{background:rgba(248,81,73,.12);border-color:var(--red)}
+.btn.edit-btn{background:transparent;color:var(--gold);border:1px solid transparent;padding:4px 8px}
+.btn.tab-btn{background:transparent;color:var(--dim);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:400}
+.btn.tab-btn.active{background:rgba(240,136,62,.18);border-color:var(--gold);color:var(--gold);font-weight:700}
 
-        body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;margin-bottom:16px;scrollbar-width:thin;flex-wrap:wrap}
+.chip-wrap{display:flex;align-items:center;gap:4px}
+.chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:8px 16px;cursor:pointer;white-space:nowrap;transition:all .15s;font-size:.85rem}
+.chip:hover{border-color:var(--dim)}
+.chip.active{border-color:var(--green);background:rgba(63,185,80,.12);color:var(--green);font-weight:600}
+.chip .birth{font-size:.7rem;color:var(--dim);margin-left:4px}
+.chip-del{background:transparent;border:none;color:var(--dim);cursor:pointer;padding:4px 6px;border-radius:6px;font-size:.8rem;transition:color .15s;line-height:1}
+.chip-del:hover{color:var(--red)}
 
-        header {
-            width: 100%;
-            padding: 20px;
-            text-align: center;
-            background: #000;
-            border-bottom: 1px solid #333;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.hero-top{font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.hero-stats{display:flex;gap:24px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat .val{font-size:1.8rem;font-weight:700;line-height:1}
+.stat .lbl{font-size:.65rem;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+.stat.green .val{color:var(--green)}
+.stat.gold .val{color:var(--gold)}
+.stat.blue .val{color:var(--blue)}
 
-        /* Navegação */
-        .nav-main { display: flex; gap: 15px; margin: 20px 0; }
-        .btn-nav {
-            background: var(--bg-card); color: var(--text); border: 2px solid transparent;
-            padding: 10px 25px; border-radius: 10px; cursor: pointer; font-weight: bold;
-        }
-        .btn-nav.active { border-color: var(--accent); color: var(--accent); }
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px}
+.comp-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+.comp-name{font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
 
-        .container { width: 95%; max-width: 900px; }
+.form-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:10px}
+.form-grid input{background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:9px 12px;border-radius:8px;font-size:.85rem;width:100%;outline:none;transition:border .15s}
+.form-grid input:focus{border-color:var(--green)}
+.form-grid input::placeholder{color:var(--dim)}
+.form-actions{display:flex;gap:8px}
 
-        /* Cards */
-        .card-main { background: var(--bg-card); padding: 25px; border-radius: 15px; margin-bottom: 20px; }
-        input, select {
-            background: #121212; color: white; border: 1px solid #444;
-            padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px;
-        }
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:400px}
+th{color:var(--dim);font-size:.7rem;padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+td{padding:10px 12px;border-bottom:1px solid rgba(48,54,61,.5)}
+tr:hover td{background:rgba(255,255,255,.02)}
+.tag{background:rgba(240,136,62,.15);color:var(--gold);padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600}
+.actions{display:flex;gap:4px}
+.g-num{font-weight:700;color:var(--green)}
+.a-num{font-weight:700;color:var(--blue)}
+.rank-num{font-weight:700;color:var(--dim);width:24px;text-align:center}
+.rank-1{color:var(--gold)}
+.rank-2{color:#c0c0c0}
+.rank-3{color:#cd7f32}
 
-        .btn-green {
-            background: var(--accent); color: white; border: none; padding: 14px;
-            border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; text-transform: uppercase;
-        }
+.empty{text-align:center;padding:40px 20px;color:var(--dim)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:380px}
+.modal h2{font-size:1rem;margin-bottom:20px;font-weight:600}
+.modal input{background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;width:100%;margin-bottom:12px;outline:none}
+.modal input:focus{border-color:var(--green)}
+.modal-actions{display:flex;gap:8px;margin-top:8px}
+.modal-actions .btn{flex:1;padding:10px}
+.toast{position:fixed;bottom:24px;right:24px;background:#238636;color:#fff;padding:10px 20px;border-radius:10px;font-size:.85rem;z-index:200;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.sec-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sec-title{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;font-weight:500}
 
-        .player-row {
-            background: var(--bg-card); padding: 15px 25px; border-radius: 12px; margin-bottom: 10px;
-            display: flex; justify-content: space-between; align-items: center; cursor: pointer;
-        }
+/* CAREER */
+.career-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.career-hero{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.avatar{width:56px;height:56px;border-radius:50%;background:rgba(163,113,247,.2);border:2px solid var(--purple);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:var(--purple);flex-shrink:0}
+.career-name{font-size:1.2rem;font-weight:700}
+.career-meta{font-size:.8rem;color:var(--dim);margin-top:3px}
+.career-stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:20px}
+.career-stat{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.career-stat .val{font-size:1.5rem;font-weight:700;line-height:1;margin-bottom:4px}
+.career-stat .lbl{font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+.season-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(48,54,61,.5)}
+.season-row:last-child{border-bottom:none}
+.season-yr{font-weight:700;min-width:48px;color:#fff}
+.season-club{font-size:.8rem;color:var(--dim);min-width:130px}
+.season-bar-wrap{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.season-bar{height:100%;background:var(--green);border-radius:3px;transition:width .4s}
+.season-nums{display:flex;gap:12px;min-width:100px;justify-content:flex-end;font-size:.8rem}
+.comp-career-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.comp-career-table th{color:var(--dim);font-size:.7rem;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;font-weight:500;text-transform:uppercase}
+.comp-career-table td{padding:8px 10px;border-bottom:1px solid rgba(48,54,61,.4)}
+.comp-career-table tr:hover td{background:rgba(255,255,255,.02)}
+.divider{height:1px;background:var(--border);margin:16px 0}
+.section-label{font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:500}
 
-        /* MODAIS */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; overflow-y: auto; }
-        .modal-content { background: var(--bg-card); margin: 2% auto; padding: 30px; width: 90%; max-width: 850px; border-radius: 20px; }
-        
-        .resumo-total-box {
-            background: var(--bg-item); padding: 20px; border-radius: 12px;
-            display: grid; grid-template-columns: repeat(4, 1fr); text-align: center; margin-bottom: 20px;
-        }
-        .resumo-total-box div span { display: block; font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; }
-        .resumo-total-box div b { font-size: 1.6rem; color: var(--gold); }
+/* RANK */
+.rank-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.rank-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.rank-tab{background:transparent;border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:.78rem;color:var(--dim);cursor:pointer;transition:all .15s}
+.rank-tab.active{background:rgba(63,185,80,.15);border-color:var(--green);color:var(--green);font-weight:600}
+.rank-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(48,54,61,.4)}
+.rank-row:last-child{border-bottom:none}
+.rank-pos{font-size:.85rem;font-weight:700;min-width:24px;text-align:center}
+.rank-name{flex:1;font-size:.88rem}
+.rank-club{font-size:.72rem;color:var(--dim)}
+.rank-val{font-size:1rem;font-weight:700;min-width:40px;text-align:right}
 
-        .section-box { background: var(--bg-item); padding: 15px; border-radius: 12px; margin-bottom: 15px; }
-        .section-title { font-size: 0.8rem; font-weight: bold; color: var(--text-dim); text-transform: uppercase; margin-bottom: 10px; display: block; }
-
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; font-size: 0.75rem; color: var(--text-dim); padding: 10px; }
-        td { padding: 12px 10px; font-size: 0.9rem; border-bottom: 1px solid #3d4247; }
-        tr:nth-child(even) { background: rgba(255,255,255,0.02); }
-
-        .trophy-item { display: inline-block; background: rgba(242, 186, 73, 0.1); color: var(--gold); padding: 5px 12px; border-radius: 15px; margin: 3px; font-size: 0.8rem; border: 1px solid var(--gold); }
-        .hidden { display: none; }
-    </style>
+/* season del btn */
+.season-del-btn{background:transparent;border:none;color:var(--dim);cursor:pointer;font-size:.75rem;padding:2px 6px;border-radius:4px;transition:color .15s;margin-left:2px}
+.season-del-btn:hover{color:var(--red)}
+</style>
 </head>
 <body>
-
-<header>Analytics de Atletas Profissionais</header>
-
-<div class="nav-main">
-    <button class="btn-nav active" onclick="switchTab('jogadores')">Jogadores</button>
-    <button class="btn-nav" onclick="switchTab('rankings')">Rankings</button>
-</div>
-
-<!-- TAB JOGADORES -->
-<div class="container" id="tab-jogadores">
-    <div class="card-main">
-        <label>Nome do Atleta</label>
-        <input type="text" id="pName" placeholder="Ex: Caio">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div><label>Ano Início</label><input type="number" id="pYear" value="1906"></div>
-            <div><label>Idade Início</label><input type="number" id="pAge" value="19"></div>
-        </div>
-        <button class="btn-green" onclick="addPlayer()">Cadastrar Jogador</button>
+<div class="app">
+  <header>
+    <div>
+      <h1>Marechal Lott <span>Gestão por Temporada</span></h1>
     </div>
-    <div id="listContainer"></div>
-</div>
-
-<!-- TAB RANKINGS -->
-<div class="container hidden" id="tab-rankings">
-    <div class="card-main">
-        <label>Selecionar Competição</label>
-        <select id="rankLeagueSelect" onchange="renderLeagueRanking()"></select>
-        <div class="section-box" style="margin-top:20px;">
-            <span class="section-title">Maiores Artilheiros</span>
-            <table id="leagueRankTable">
-                <thead><tr><th>Pos</th><th>Jogador</th><th>Gols</th></tr></thead>
-                <tbody id="leagueRankBody"></tbody>
-            </table>
-        </div>
+    <div class="row">
+      <button class="btn ghost" onclick="openModal('modalPlayer')">+ Jogador</button>
+      <button class="btn ghost" id="btnRanking" style="display:none" onclick="showRanking()">🏆 Ranking</button>
+      <button class="btn" id="btnSeason" style="display:none" onclick="openModal('modalSeason')">+ Temporada</button>
     </div>
+  </header>
+
+  <div id="playerList" class="chips"></div>
+
+  <div id="mainDash" style="display:none">
+    <div class="tabs" id="seasonTabs"></div>
+    <div id="seasonContent" style="display:none"></div>
+    <div id="careerContent" style="display:none"></div>
+    <div id="rankingContent" style="display:none"></div>
+  </div>
+
+  <div id="emptyPlayers" class="empty" style="padding:60px 20px">
+    <div style="font-size:1rem;color:#fff;margin-bottom:6px">Nenhum atleta cadastrado</div>
+    <div>Clique em <b style="color:var(--green)">+ Jogador</b> para começar</div>
+  </div>
 </div>
 
-<!-- MODAL VISUALIZAÇÃO (DESIGN PREMIUM) -->
-<div id="viewModal" class="modal">
-    <div class="modal-content">
-        <div style="display:flex; justify-content:space-between; align-items:start;">
-            <div><h1 id="vName" style="margin:0;"></h1><p id="vCareer" style="color:var(--text-dim); font-size:0.85rem;"></p></div>
-            <button class="btn-nav" style="background:var(--accent); color:white;" onclick="closeModal('viewModal')">SAIR</button>
-        </div>
-
-        <div class="resumo-total-box" style="margin-top:20px;">
-            <div><span>Jogos</span><b id="tJ">0</b></div>
-            <div><span>Gols</span><b id="tG">0</b></div>
-            <div><span>Assistências</span><b id="tA">0</b></div>
-            <div><span>Títulos</span><b id="tT">0</b></div>
-        </div>
-
-        <div class="section-box"><span class="section-title">Galeria de Títulos</span><div id="trophyShelf"></div></div>
-        <div class="section-box"><span class="section-title">Estatísticas por Ano</span><table id="tableYear"></table></div>
-        <div class="section-box"><span class="section-title">Estatísticas por Liga</span><table id="tableLeague"></table></div>
-        <div class="section-box"><span class="section-title">Estatísticas por Clube</span><table id="tableClub"></table></div>
-
-        <button class="btn-green" onclick="openEdit()">GERENCIAR TEMPORADAS</button>
+<!-- Modal Jogador -->
+<div id="modalPlayer" class="overlay" onclick="closeModalOnBg(event,'modalPlayer')">
+  <div class="modal">
+    <h2>Cadastrar Atleta</h2>
+    <input type="text" id="pNameInput" placeholder="Nome completo">
+    <input type="date" id="pBirthInput">
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('modalPlayer')">Cancelar</button>
+      <button class="btn" onclick="savePlayer()">Salvar</button>
     </div>
+  </div>
 </div>
 
-<!-- MODAL EDIÇÃO -->
-<div id="editModal" class="modal">
-    <div class="modal-content">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 style="color:var(--accent); margin:0;">Editar Carreira</h2>
-            <button onclick="deletePlayer()" style="background:var(--danger); border:none; color:white; padding:10px; border-radius:10px; cursor:pointer;">EXCLUIR</button>
-        </div>
-        <div class="section-box" style="margin-top:20px;">
-            <span class="section-title">Temporadas</span>
-            <button class="btn-nav" style="padding:5px 15px; margin-bottom:10px;" onclick="addStatRow()">+ Nova</button>
-            <div style="overflow-x:auto;">
-                <table><thead><tr><th>Ano</th><th>Clube</th><th>Liga</th><th>J</th><th>G</th><th>A</th><th></th></tr></thead>
-                <tbody id="editBody"></tbody></table>
-            </div>
-        </div>
-        <div class="section-box">
-            <span class="section-title">Adicionar Título</span>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="tYear" placeholder="Ano" style="width:80px;">
-                <input type="text" id="tName" placeholder="Nome do Título">
-                <button onclick="addTrophy()" class="btn-nav">OK</button>
-            </div>
-            <div id="editTrophies" style="margin-top:10px;"></div>
-        </div>
-        <button class="btn-green" onclick="closeModal('editModal'); render();">SALVAR TUDO</button>
+<!-- Modal Temporada -->
+<div id="modalSeason" class="overlay" onclick="closeModalOnBg(event,'modalSeason')">
+  <div class="modal">
+    <h2>Nova Temporada</h2>
+    <input type="text" id="sNameInput" placeholder="Ano (ex: 2026)">
+    <input type="text" id="sClubInput" placeholder="Clube (ex: Flamengo)">
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('modalSeason')">Cancelar</button>
+      <button class="btn" onclick="saveSeason()">Criar</button>
     </div>
+  </div>
 </div>
+
+<!-- Modal Confirmar Exclusão -->
+<div id="modalConfirm" class="overlay" onclick="closeModalOnBg(event,'modalConfirm')">
+  <div class="modal">
+    <h2 id="confirmTitle">Confirmar exclusão</h2>
+    <p id="confirmMsg" style="color:var(--dim);font-size:.88rem;margin-bottom:20px;line-height:1.5"></p>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('modalConfirm')">Cancelar</button>
+      <button class="btn" style="background:var(--red);color:#fff" onclick="confirmAction()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('fb_hall_v2')) || [];
-    let curIdx = null;
+let state={players:[],activePlayerIdx:null,activeSeason:null,activeView:'season'};
+let editingEntryId=null;
+let pendingConfirm=null;
+let rankView='goals'; // 'goals' | 'assists' | 'comp_goals' | 'comp_assists'
+let rankComp=null;
 
-    function switchTab(tab) {
-        document.getElementById('tab-jogadores').classList.toggle('hidden', tab !== 'jogadores');
-        document.getElementById('tab-rankings').classList.toggle('hidden', tab !== 'rankings');
-        document.querySelectorAll('.btn-nav').forEach(b => b.classList.toggle('active', b.innerText.toLowerCase().includes(tab.substring(0,3))));
-        if(tab === 'rankings') updateRankSelect();
-    }
-
-    function addPlayer() {
-        const name = document.getElementById('pName').value;
-        if(!name) return;
-        db.push({ name, year: document.getElementById('pYear').value, age: document.getElementById('pAge').value, stats: [], trophies: [] });
-        save(); render(); document.getElementById('pName').value = '';
-    }
-
-    function render() {
-        const cont = document.getElementById('listContainer');
-        cont.innerHTML = '';
-        db.forEach((p, i) => {
-            let tg = p.stats.reduce((a, s) => a + (parseInt(s.g)||0), 0);
-            cont.innerHTML += `<div class="player-row" onclick="view(${i})">
-                <span><b>${p.name}</b></span>
-                <span style="color:var(--accent)">${tg} GOLS | ${p.trophies.length} 🏆</span>
-            </div>`;
+window.onload=()=>{
+  const saved=localStorage.getItem('marechal_lott_v5');
+  if(saved){state=JSON.parse(saved);}
+  else {
+    const old=localStorage.getItem('marechal_lott_v4');
+    if(old){
+      const d=JSON.parse(old);
+      // migrate: convert game-based entries to comp entries grouped
+      state.players=(d.players||[]).map(p=>{
+        const seasons={};
+        Object.entries(p.seasons||{}).forEach(([k,s])=>{
+          const compMap={};
+          (s.games||[]).forEach(g=>{
+            const c=g.comp||'SEM COMPETIÇÃO';
+            if(!compMap[c])compMap[c]={id:Date.now()+Math.random(),comp:c,j:0,g:0,a:0};
+            compMap[c].j++;compMap[c].g+=g.g;compMap[c].a+=g.a;
+          });
+          seasons[k]={club:s.club,entries:Object.values(compMap)};
         });
+        return{name:p.name,birth:p.birth,seasons};
+      });
+      state.activePlayerIdx=d.activePlayerIdx!==undefined?d.activePlayerIdx:null;
+      state.activeSeason=d.activeSeason||null;
     }
+  }
+  state.activeView='season';
+  render();
+};
 
-    function view(i) {
-        curIdx = i; const p = db[i];
-        document.getElementById('vName').innerText = p.name;
-        document.getElementById('vCareer').innerText = `Início em ${p.year} com ${p.age} anos.`;
-        
-        let totals = {j:0, g:0, a:0}, yMap = {}, lMap = {}, cMap = {};
-        p.stats.forEach(s => {
-            let j = parseInt(s.j)||0, g = parseInt(s.g)||0, a = parseInt(s.a)||0;
-            totals.j += j; totals.g += g; totals.a += a;
-            const up = (m, k) => { if(!m[k]) m[k] = {j:0, g:0, a:0}; m[k].j += j; m[k].g += g; m[k].a += a; };
-            up(yMap, s.year); up(lMap, s.league); up(cMap, s.club);
-        });
+function save(){localStorage.setItem('marechal_lott_v5',JSON.stringify(state));}
 
-        document.getElementById('tJ').innerText = totals.j;
-        document.getElementById('tG').innerText = totals.g;
-        document.getElementById('tA').innerText = totals.a;
-        document.getElementById('tT').innerText = p.trophies.length;
-        document.getElementById('trophyShelf').innerHTML = p.trophies.map(t => `<span class="trophy-item">🏆 ${t.year} - ${t.name}</span>`).join('');
+function toast(msg,isErr){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background=isErr?'#b91c1c':'#238636';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
 
-        const mkT = (m, h) => `<thead><tr><th>${h}</th><th>J</th><th>G</th><th>A</th></tr></thead><tbody>` + 
-            Object.entries(m).map(([k,v]) => `<tr><td>${k}</td><td>${v.j}</td><td>${v.g}</td><td>${v.a}</td></tr>`).join('') + `</tbody>`;
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeModalOnBg(e,id){if(e.target.id===id)closeModal(id);}
 
-        document.getElementById('tableYear').innerHTML = mkT(yMap, "Ano");
-        document.getElementById('tableLeague').innerHTML = mkT(lMap, "Competição");
-        document.getElementById('tableClub').innerHTML = mkT(cMap, "Clube");
-        document.getElementById('viewModal').style.display = 'block';
-    }
+function confirmDialog(title,msg,fn){
+  pendingConfirm=fn;
+  document.getElementById('confirmTitle').textContent=title;
+  document.getElementById('confirmMsg').textContent=msg;
+  openModal('modalConfirm');
+}
+function confirmAction(){
+  closeModal('modalConfirm');
+  if(pendingConfirm)pendingConfirm();
+  pendingConfirm=null;
+}
 
-    function updateRankSelect() {
-        const leagues = new Set();
-        db.forEach(p => p.stats.forEach(s => { if(s.league) leagues.add(s.league); }));
-        const sel = document.getElementById('rankLeagueSelect');
-        sel.innerHTML = Array.from(leagues).sort().map(l => `<option value="${l}">${l}</option>`).join('');
-        renderLeagueRanking();
-    }
+/* ---- PLAYERS ---- */
+function savePlayer(){
+  const name=document.getElementById('pNameInput').value.trim();
+  const birth=document.getElementById('pBirthInput').value;
+  if(!name||!birth){toast('Preencha nome e data de nascimento','err');return;}
+  state.players.push({name,birth,seasons:{}});
+  save();render();
+  closeModal('modalPlayer');
+  document.getElementById('pNameInput').value='';
+  document.getElementById('pBirthInput').value='';
+  toast('Jogador cadastrado!');
+}
 
-    function renderLeagueRanking() {
-        const league = document.getElementById('rankLeagueSelect').value;
-        const r = [];
-        db.forEach(p => {
-            let gols = p.stats.filter(s => s.league === league).reduce((a, b) => a + (parseInt(b.g)||0), 0);
-            if(gols > 0) r.push({ name: p.name, gols });
-        });
-        r.sort((a,b) => b.gols - a.gols);
-        document.getElementById('leagueRankBody').innerHTML = r.map((it, idx) => `<tr><td>${idx+1}</td><td>${it.name}</td><td>${it.gols}</td></tr>`).join('');
-    }
+function deletePlayer(idx,e){
+  e.stopPropagation();
+  const p=state.players[idx];
+  confirmDialog('Excluir jogador',`Tem certeza que deseja excluir "${p.name}"? Todos os dados serão perdidos.`,()=>{
+    state.players.splice(idx,1);
+    if(state.activePlayerIdx===idx){state.activePlayerIdx=state.players.length>0?0:null;state.activeSeason=null;}
+    else if(state.activePlayerIdx>idx)state.activePlayerIdx--;
+    save();render();
+    toast('Jogador removido');
+  });
+}
 
-    function openEdit() { document.getElementById('viewModal').style.display = 'none'; document.getElementById('editModal').style.display = 'block'; renderEditStats(); renderEditTrophies(); }
-    
-    function renderEditStats() {
-        document.getElementById('editBody').innerHTML = db[curIdx].stats.map((s, i) => `<tr>
-            <td><input type="text" value="${s.year}" onchange="upS(${i},'year',this.value)"></td>
-            <td><input type="text" value="${s.club}" onchange="upS(${i},'club',this.value)"></td>
-            <td><input type="text" value="${s.league}" onchange="upS(${i},'league',this.value)"></td>
-            <td><input type="number" value="${s.j}" onchange="upS(${i},'j',this.value)"></td>
-            <td><input type="number" value="${s.g}" onchange="upS(${i},'g',this.value)"></td>
-            <td><input type="number" value="${s.a}" onchange="upS(${i},'a',this.value)"></td>
-            <td><button onclick="remS(${i})" style="color:red; background:none; border:none;">X</button></td></tr>`).join('');
-    }
+function render(){
+  const list=document.getElementById('playerList');
+  const ep=document.getElementById('emptyPlayers');
+  list.innerHTML='';
+  if(!state.players||state.players.length===0){
+    ep.style.display='block';
+    document.getElementById('mainDash').style.display='none';
+    document.getElementById('btnSeason').style.display='none';
+    document.getElementById('btnRanking').style.display='none';
+    return;
+  }
+  ep.style.display='none';
+  state.players.forEach((p,idx)=>{
+    const wrap=document.createElement('div');
+    wrap.className='chip-wrap';
+    const c=document.createElement('div');
+    c.className='chip'+(idx===state.activePlayerIdx?' active':'');
+    const yr=p.birth?p.birth.split('-')[0]:'';
+    c.innerHTML=`${p.name}<span class="birth">${yr}</span>`;
+    c.onclick=()=>selectPlayer(idx);
+    const del=document.createElement('button');
+    del.className='chip-del';
+    del.title='Excluir jogador';
+    del.innerHTML='✕';
+    del.onclick=(e)=>deletePlayer(idx,e);
+    wrap.appendChild(c);
+    wrap.appendChild(del);
+    list.appendChild(wrap);
+  });
+  document.getElementById('btnRanking').style.display='inline-block';
+  if(state.activePlayerIdx!==null)renderDash();
+}
 
-    function renderEditTrophies() {
-        document.getElementById('editTrophies').innerHTML = db[curIdx].trophies.map((t, i) => 
-            `<span class="trophy-item">${t.year} - ${t.name} <b onclick="remT(${i})" style="cursor:pointer; color:red;">X</b></span>`).join('');
-    }
+function selectPlayer(idx){
+  state.activePlayerIdx=idx;
+  const player=state.players[idx];
+  const keys=Object.keys(player.seasons||{});
+  if(!state.activeSeason||!player.seasons[state.activeSeason]){
+    state.activeSeason=keys.length>0?keys[0]:null;
+  }
+  state.activeView='season';
+  document.getElementById('mainDash').style.display='block';
+  document.getElementById('btnSeason').style.display='inline-block';
+  save();render();
+}
 
-    function addStatRow() { db[curIdx].stats.push({year:'', club:'', league:'', j:0, g:0, a:0}); renderEditStats(); }
-    function addTrophy() { const y = document.getElementById('tYear').value, n = document.getElementById('tName').value; if(y && n) { db[curIdx].trophies.push({year:y, name:n}); save(); renderEditTrophies(); } }
-    function upS(i, f, v) { db[curIdx].stats[i][f] = v; save(); }
-    function remS(i) { db[curIdx].stats.splice(i, 1); save(); renderEditStats(); }
-    function remT(i) { db[curIdx].trophies.splice(i, 1); save(); renderEditTrophies(); }
-    function deletePlayer() { if(confirm("Excluir?")) { db.splice(curIdx, 1); save(); closeModal('editModal'); render(); } }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function save() { localStorage.setItem('fb_hall_v2', JSON.stringify(db)); }
-    render();
+function showRanking(){
+  state.activePlayerIdx=null;
+  state.activeView='ranking';
+  document.getElementById('mainDash').style.display='block';
+  document.getElementById('btnSeason').style.display='none';
+  document.getElementById('seasonTabs').innerHTML='';
+  document.getElementById('seasonContent').style.display='none';
+  document.getElementById('careerContent').style.display='none';
+  document.getElementById('rankingContent').style.display='block';
+  renderRanking();
+}
+
+/* ---- SEASONS ---- */
+function saveSeason(){
+  const name=document.getElementById('sNameInput').value.trim();
+  const club=document.getElementById('sClubInput').value.trim();
+  if(!name||!club){toast('Preencha ano e clube','err');return;}
+  const player=state.players[state.activePlayerIdx];
+  if(player.seasons[name]){toast('Temporada já existe','err');return;}
+  player.seasons[name]={club,entries:[]};
+  state.activeSeason=name;
+  state.activeView='season';
+  save();render();
+  closeModal('modalSeason');
+  document.getElementById('sNameInput').value='';
+  document.getElementById('sClubInput').value='';
+  toast('Temporada criada!');
+}
+
+function deleteSeason(sKey){
+  const player=state.players[state.activePlayerIdx];
+  confirmDialog('Excluir temporada',`Excluir a temporada "${sKey}" (${player.seasons[sKey].club})? Todos os dados serão perdidos.`,()=>{
+    delete player.seasons[sKey];
+    const keys=Object.keys(player.seasons);
+    state.activeSeason=keys.length>0?keys[0]:null;
+    state.activeView='season';
+    save();render();
+    toast('Temporada removida');
+  });
+}
+
+/* ---- RENDER DASH ---- */
+function renderDash(){
+  renderTabs();
+  document.getElementById('rankingContent').style.display='none';
+  if(state.activeView==='career'){
+    document.getElementById('careerContent').style.display='block';
+    document.getElementById('seasonContent').style.display='none';
+    renderCareer();
+  } else {
+    document.getElementById('careerContent').style.display='none';
+    document.getElementById('seasonContent').style.display='block';
+    renderSeasonContent();
+  }
+}
+
+function renderTabs(){
+  const container=document.getElementById('seasonTabs');
+  container.innerHTML='';
+  if(state.activePlayerIdx===null)return;
+  const player=state.players[state.activePlayerIdx];
+  const keys=Object.keys(player.seasons||{}).sort((a,b)=>b-a);
+
+  const careerBtn=document.createElement('button');
+  careerBtn.className='btn tab-btn'+(state.activeView==='career'?' active':'');
+  careerBtn.style.borderColor=state.activeView==='career'?'var(--purple)':'var(--border)';
+  careerBtn.style.color=state.activeView==='career'?'var(--purple)':'var(--dim)';
+  careerBtn.style.background=state.activeView==='career'?'rgba(163,113,247,.18)':'transparent';
+  careerBtn.textContent='Carreira';
+  careerBtn.onclick=()=>{state.activeView='career';save();renderDash();};
+  container.appendChild(careerBtn);
+
+  const sep=document.createElement('span');
+  sep.textContent='|';
+  sep.style.cssText='color:var(--border);margin:0 4px;font-size:.8rem';
+  container.appendChild(sep);
+
+  keys.forEach(s=>{
+    const wrap=document.createElement('span');
+    wrap.style.cssText='display:inline-flex;align-items:center;gap:2px';
+    const t=document.createElement('button');
+    t.className='btn tab-btn'+(s===state.activeSeason&&state.activeView==='season'?' active':'');
+    const sd=player.seasons[s];
+    t.innerHTML=`${s} <span style="font-size:.7rem;opacity:.7">${sd.club}</span>`;
+    t.onclick=()=>{state.activeSeason=s;state.activeView='season';save();renderDash();};
+    const del=document.createElement('button');
+    del.className='season-del-btn';
+    del.title='Excluir temporada';
+    del.innerHTML='✕';
+    del.onclick=()=>deleteSeason(s);
+    wrap.appendChild(t);
+    wrap.appendChild(del);
+    container.appendChild(wrap);
+  });
+}
+
+/* ---- SEASON CONTENT ---- */
+function renderSeasonContent(){
+  const content=document.getElementById('seasonContent');
+  if(state.activePlayerIdx===null||!state.activeSeason){content.innerHTML='';return;}
+  const seasonData=state.players[state.activePlayerIdx].seasons[state.activeSeason];
+  if(!seasonData){content.innerHTML='';return;}
+
+  const entries=seasonData.entries||[];
+  let ovJ=0,ovG=0,ovA=0;
+  entries.forEach(e=>{ovJ+=e.j;ovG+=e.g;ovA+=e.a;});
+  const avgGoals=ovJ>0?(ovG/ovJ).toFixed(2):'0.00';
+
+  let rowsHtml='';
+  [...entries].sort((a,b)=>b.g-a.g).forEach(e=>{
+    rowsHtml+=`<tr>
+      <td><span class="tag">${e.comp||'—'}</span></td>
+      <td>${e.j}</td>
+      <td class="g-num">${e.g}</td>
+      <td class="a-num">${e.a}</td>
+      <td style="color:var(--gold);font-weight:700">${e.g+e.a}</td>
+      <td style="color:var(--dim)">${e.j>0?(e.g/e.j).toFixed(2):'0.00'}</td>
+      <td><div class="actions">
+        <button class="btn edit-btn" onclick="editEntry(${e.id})">✎</button>
+        <button class="btn danger" onclick="deleteEntry(${e.id})">✖</button>
+      </div></td>
+    </tr>`;
+  });
+
+  content.innerHTML=`
+    <div class="hero">
+      <div class="hero-top">
+        <span>Clube: <b style="color:#fff">${seasonData.club}</b> &nbsp;·&nbsp; Temporada: <b style="color:#fff">${state.activeSeason}</b></span>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="val">${ovJ}</div><div class="lbl">Jogos</div></div>
+        <div class="stat green"><div class="val">${ovG}</div><div class="lbl">Gols</div></div>
+        <div class="stat blue"><div class="val">${ovA}</div><div class="lbl">Assists</div></div>
+        <div class="stat gold"><div class="val">${ovG+ovA}</div><div class="lbl">Participações</div></div>
+        <div class="stat"><div class="val">${avgGoals}</div><div class="lbl">Gols/Jogo</div></div>
+      </div>
+    </div>
+    <div class="form-wrap">
+      <div class="sec-header">
+        <span class="sec-title" id="formTitle">Adicionar competição</span>
+        <button class="btn ghost" id="btnCancelEdit" style="display:none;font-size:.75rem" onclick="cancelEdit()">Cancelar edição</button>
+      </div>
+      <div class="form-grid">
+        <input type="text" id="mComp" placeholder="Competição (ex: Brasileirão)">
+        <input type="number" id="mJ" placeholder="Jogos" min="0">
+        <input type="number" id="mG" placeholder="Gols" min="0">
+        <input type="number" id="mA" placeholder="Assists" min="0">
+      </div>
+      <div class="form-actions">
+        <button class="btn" id="btnSaveEntry" onclick="saveEntry()">Salvar</button>
+      </div>
+    </div>
+    <div class="sec-header">
+      <span class="sec-title">Competições registradas</span>
+      <span style="font-size:.75rem;color:var(--dim)">${entries.length} competiç${entries.length!==1?'ões':'ão'}</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Competição</th><th>Jogos</th><th>Gols</th><th>Assists</th><th>Participações</th><th>Média G/J</th><th></th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>
+    ${entries.length===0?'<div class="empty">Nenhuma competição registrada ainda</div>':''}
+  `;
+
+  if(editingEntryId){
+    const ft=document.getElementById('formTitle');
+    const cb=document.getElementById('btnCancelEdit');
+    const sb=document.getElementById('btnSaveEntry');
+    if(ft)ft.textContent='Editando entrada';
+    if(cb)cb.style.display='inline-block';
+    if(sb)sb.textContent='Atualizar';
+  }
+}
+
+function saveEntry(){
+  if(!state.activeSeason)return;
+  const comp=(document.getElementById('mComp').value||'').trim().toUpperCase();
+  const j=parseInt(document.getElementById('mJ').value)||0;
+  const g=parseInt(document.getElementById('mG').value)||0;
+  const a=parseInt(document.getElementById('mA').value)||0;
+  if(!comp){toast('Preencha o nome da competição','err');return;}
+  const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
+
+  if(editingEntryId){
+    const idx=season.entries.findIndex(e=>e.id===editingEntryId);
+    if(idx!==-1)season.entries[idx]={id:editingEntryId,comp,j,g,a};
+    editingEntryId=null;
+  } else {
+    // Check duplicate comp
+    if(season.entries.find(e=>e.comp===comp)){toast('Competição já existe nesta temporada','err');return;}
+    season.entries.push({id:Date.now(),comp,j,g,a});
+  }
+  save();renderSeasonContent();
+  toast('Salvo!');
+}
+
+function editEntry(id){
+  const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
+  const e=season.entries.find(x=>x.id===id);
+  if(!e)return;
+  editingEntryId=id;
+  document.getElementById('mComp').value=e.comp;
+  document.getElementById('mJ').value=e.j;
+  document.getElementById('mG').value=e.g;
+  document.getElementById('mA').value=e.a;
+  const ft=document.getElementById('formTitle');
+  const cb=document.getElementById('btnCancelEdit');
+  const sb=document.getElementById('btnSaveEntry');
+  if(ft){ft.textContent='Editando entrada';ft.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  if(cb)cb.style.display='inline-block';
+  if(sb)sb.textContent='Atualizar';
+}
+
+function cancelEdit(){editingEntryId=null;renderSeasonContent();}
+
+function deleteEntry(id){
+  const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
+  confirmDialog('Excluir entrada','Remover esta competição da temporada?',()=>{
+    season.entries=season.entries.filter(e=>e.id!==id);
+    if(editingEntryId===id)editingEntryId=null;
+    save();renderSeasonContent();
+    toast('Removido');
+  });
+}
+
+/* ---- CAREER ---- */
+function getCareerData(playerIdx){
+  const player=state.players[playerIdx];
+  let totalJ=0,totalG=0,totalA=0;
+  const compMap={};
+  const clubMap={};
+  const seasonStats=[];
+
+  const keys=Object.keys(player.seasons||{}).sort((a,b)=>b-a);
+  keys.forEach(sKey=>{
+    const s=player.seasons[sKey];
+    let sJ=0,sG=0,sA=0;
+    (s.entries||[]).forEach(e=>{
+      sJ+=e.j;sG+=e.g;sA+=e.a;
+      totalJ+=e.j;totalG+=e.g;totalA+=e.a;
+      const c=e.comp||'SEM COMPETIÇÃO';
+      if(!compMap[c])compMap[c]={j:0,g:0,a:0};
+      compMap[c].j+=e.j;compMap[c].g+=e.g;compMap[c].a+=e.a;
+    });
+    const club=s.club;
+    if(!clubMap[club])clubMap[club]={j:0,g:0,a:0,seasons:0};
+    clubMap[club].j+=sJ;clubMap[club].g+=sG;clubMap[club].a+=sA;clubMap[club].seasons++;
+    seasonStats.push({year:sKey,club,j:sJ,g:sG,a:sA});
+  });
+
+  return{totalJ,totalG,totalA,compMap,clubMap,seasonStats,
+    clubs:[...new Set(Object.values(player.seasons||{}).map(s=>s.club))],
+    seasons:keys.length};
+}
+
+function renderCareer(){
+  const player=state.players[state.activePlayerIdx];
+  const d=getCareerData(state.activePlayerIdx);
+  const age=player.birth?Math.floor((Date.now()-new Date(player.birth))/(365.25*24*3600*1000)):null;
+  const initials=player.name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+  const avgGoals=d.totalJ>0?(d.totalG/d.totalJ).toFixed(2):'0.00';
+  const maxGoals=d.seasonStats.length>0?Math.max(...d.seasonStats.map(s=>s.g),1):1;
+  const compsorted=Object.entries(d.compMap).sort((a,b)=>b[1].g-a[1].g);
+  const clubsorted=Object.entries(d.clubMap).sort((a,b)=>b[1].g-a[1].g);
+
+  let html=`<div class="career-section">
+    <div class="career-hero">
+      <div class="avatar">${initials}</div>
+      <div>
+        <div class="career-name">${player.name}</div>
+        <div class="career-meta">${age?age+' anos · ':''} ${d.seasons} temporada${d.seasons!==1?'s':''} · ${d.clubs.join(', ')||'—'}</div>
+      </div>
+    </div>
+
+    <div class="section-label">Totais da carreira</div>
+    <div class="career-stats-grid">
+      <div class="career-stat"><div class="val" style="color:#fff">${d.totalJ}</div><div class="lbl">Jogos</div></div>
+      <div class="career-stat"><div class="val" style="color:var(--green)">${d.totalG}</div><div class="lbl">Gols</div></div>
+      <div class="career-stat"><div class="val" style="color:var(--blue)">${d.totalA}</div><div class="lbl">Assists</div></div>
+      <div class="career-stat"><div class="val" style="color:var(--gold)">${d.totalG+d.totalA}</div><div class="lbl">Participações</div></div>
+      <div class="career-stat"><div class="val" style="color:var(--dim)">${avgGoals}</div><div class="lbl">Gols/Jogo</div></div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">Por clube</div>
+    <table class="comp-career-table">
+      <thead><tr>
+        <th>Clube</th><th>Temporadas</th><th>Jogos</th><th>Gols</th><th>Assists</th><th>Participações</th><th>Média G/J</th>
+      </tr></thead><tbody>`;
+
+  clubsorted.forEach(([club,cd])=>{
+    const avg=cd.j>0?(cd.g/cd.j).toFixed(2):'0.00';
+    html+=`<tr>
+      <td style="font-weight:600">${club}</td>
+      <td style="color:var(--dim)">${cd.seasons}</td>
+      <td>${cd.j}</td>
+      <td class="g-num">${cd.g}</td>
+      <td class="a-num">${cd.a}</td>
+      <td style="color:var(--gold);font-weight:700">${cd.g+cd.a}</td>
+      <td style="color:var(--dim)">${avg}</td>
+    </tr>`;
+  });
+
+  if(clubsorted.length===0)html+=`<tr><td colspan="7"><div class="empty" style="padding:12px">Nenhum dado</div></td></tr>`;
+  html+=`</tbody></table>
+
+    <div class="divider"></div>
+    <div class="section-label">Histórico por temporada</div>`;
+
+  d.seasonStats.forEach(s=>{
+    const pct=Math.round((s.g/maxGoals)*100);
+    html+=`<div class="season-row">
+      <span class="season-yr">${s.year}</span>
+      <span class="season-club">${s.club}</span>
+      <div class="season-bar-wrap"><div class="season-bar" style="width:${pct}%"></div></div>
+      <div class="season-nums">
+        <span style="color:var(--dim)">J <b style="color:#fff">${s.j}</b></span>
+        <span style="color:var(--dim)">G <b style="color:var(--green)">${s.g}</b></span>
+        <span style="color:var(--dim)">A <b style="color:var(--blue)">${s.a}</b></span>
+      </div>
+    </div>`;
+  });
+
+  if(d.seasonStats.length===0)html+=`<div class="empty" style="padding:20px">Nenhuma temporada registrada</div>`;
+
+  html+=`<div class="divider"></div>
+    <div class="section-label">Por competição (toda a carreira)</div>`;
+
+  if(compsorted.length>0){
+    html+=`<table class="comp-career-table">
+      <thead><tr>
+        <th>Competição</th><th>Jogos</th><th>Gols</th><th>Assists</th><th>Participações</th><th>Média G/J</th>
+      </tr></thead><tbody>`;
+    compsorted.forEach(([comp,cd])=>{
+      const avg=cd.j>0?(cd.g/cd.j).toFixed(2):'0.00';
+      html+=`<tr>
+        <td><span class="tag">${comp}</span></td>
+        <td>${cd.j}</td>
+        <td class="g-num">${cd.g}</td>
+        <td class="a-num">${cd.a}</td>
+        <td style="color:var(--gold);font-weight:700">${cd.g+cd.a}</td>
+        <td style="color:var(--dim)">${avg}</td>
+      </tr>`;
+    });
+    html+=`</tbody></table>`;
+  } else {
+    html+=`<div class="empty" style="padding:20px">Nenhum dado de competição</div>`;
+  }
+
+  html+=`</div>`;
+  document.getElementById('careerContent').innerHTML=html;
+}
+
+/* ---- RANKING ---- */
+function renderRanking(){
+  const allComps=new Set();
+  state.players.forEach(p=>{
+    Object.values(p.seasons||{}).forEach(s=>{
+      (s.entries||[]).forEach(e=>allComps.add(e.comp));
+    });
+  });
+  const compList=[...allComps].sort();
+
+  if(!rankComp&&compList.length>0)rankComp=compList[0];
+
+  // Build rank data
+  const generalRank=state.players.map(p=>{
+    let j=0,g=0,a=0;
+    Object.values(p.seasons||{}).forEach(s=>{
+      (s.entries||[]).forEach(e=>{j+=e.j;g+=e.g;a+=e.a;});
+    });
+    return{name:p.name,j,g,a};
+  });
+
+  const compRankData={};
+  compList.forEach(comp=>{
+    compRankData[comp]=state.players.map(p=>{
+      let j=0,g=0,a=0;
+      Object.values(p.seasons||{}).forEach(s=>{
+        (s.entries||[]).filter(e=>e.comp===comp).forEach(e=>{j+=e.j;g+=e.g;a+=e.a;});
+      });
+      return{name:p.name,j,g,a};
+    });
+  });
+
+  const posIcon=(i)=>{
+    if(i===0)return`<span class="rank-pos rank-1">🥇</span>`;
+    if(i===1)return`<span class="rank-pos rank-2">🥈</span>`;
+    if(i===2)return`<span class="rank-pos rank-3">🥉</span>`;
+    return`<span class="rank-pos" style="color:var(--dim)">${i+1}</span>`;
+  };
+
+  const buildList=(arr,field,color)=>{
+    const sorted=[...arr].sort((a,b)=>b[field]-a[field]);
+    if(sorted.every(x=>x[field]===0))return`<div class="empty" style="padding:16px">Sem dados</div>`;
+    return sorted.map((x,i)=>`<div class="rank-row">
+      ${posIcon(i)}
+      <div class="rank-name">${x.name}</div>
+      <div class="rank-val" style="color:${color}">${x[field]}</div>
+    </div>`).join('');
+  };
+
+  // Comp tab buttons
+  let compTabsHtml='';
+  compList.forEach(c=>{
+    compTabsHtml+=`<button class="rank-tab${rankComp===c?' active':''}" onclick="setRankComp('${c.replace(/'/g,"\\'")}');renderRanking()">${c}</button>`;
+  });
+
+  const rc=rankComp&&compRankData[rankComp]?compRankData[rankComp]:[];
+
+  document.getElementById('rankingContent').innerHTML=`
+    <div class="rank-section">
+      <div class="section-label">Ranking Geral — Todos os jogadores</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div style="font-size:.72rem;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">⚽ Artilheiros</div>
+          ${buildList(generalRank,'g','var(--green)')}
+        </div>
+        <div>
+          <div style="font-size:.72rem;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">🎯 Garçons</div>
+          ${buildList(generalRank,'a','var(--blue)')}
+        </div>
+      </div>
+    </div>
+
+    ${compList.length>0?`<div class="rank-section">
+      <div class="section-label">Ranking por Competição</div>
+      <div class="rank-tabs">${compTabsHtml}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div style="font-size:.72rem;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">⚽ Artilheiros</div>
+          ${buildList(rc,'g','var(--green)')}
+        </div>
+        <div>
+          <div style="font-size:.72rem;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">🎯 Garçons</div>
+          ${buildList(rc,'a','var(--blue)')}
+        </div>
+      </div>
+    </div>`:`<div class="rank-section"><div class="empty">Nenhuma competição cadastrada ainda</div></div>`}
+  `;
+}
+
+function setRankComp(c){rankComp=c;}
+
 </script>
 </body>
 </html>
