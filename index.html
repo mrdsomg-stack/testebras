@@ -1122,19 +1122,17 @@ function renderCareer(){
     <div class="section-label" style="color:var(--yellow)">🏆 Títulos conquistados na carreira</div>
     ${d.allTitles.length>0?`<div class="titles-grid">${titlesCareerHtml}</div>`:'<div class="empty" style="padding:16px">Nenhum título registrado ainda</div>'}`;
   if(yearsorted.length>0){
-    const maxYG=Math.max(...yearsorted.map(([,v])=>v.g),1);
     html+=`<div class="divider"></div><div class="section-label" style="color:var(--blue)">📅 Estatísticas por ano</div>`;
     yearsorted.forEach(([yr,v])=>{
-      const pct=Math.round((v.g/maxYG)*100);
-      html+=`<div class="season-row">
-        <span class="season-yr">${yr}</span>
-        <span class="season-club" style="color:var(--dim);font-size:.75rem">${v.j} jogos</span>
-        <div class="season-bar-wrap"><div class="season-bar" style="width:${pct}%;background:var(--blue)"></div></div>
-        <div class="season-nums">
-          <span style="color:var(--dim)">J <b style="color:#fff">${v.j}</b></span>
-          <span style="color:var(--dim)">G <b style="color:var(--green)">${v.g}</b></span>
-          <span style="color:var(--dim)">A <b style="color:var(--blue)">${v.a}</b></span>
-          <span style="color:var(--dim)">P <b style="color:var(--gold)">${v.g+v.a}</b></span>
+      const avg=v.j>0?(v.g/v.j).toFixed(2):'0.00';
+      html+=`<div style="margin-bottom:10px">
+        <div style="font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:500">${yr}</div>
+        <div class="career-stats-grid">
+          <div class="career-stat"><div class="val" style="color:#fff">${v.j}</div><div class="lbl">Jogos</div></div>
+          <div class="career-stat"><div class="val" style="color:var(--green)">${v.g}</div><div class="lbl">Gols</div></div>
+          <div class="career-stat"><div class="val" style="color:var(--blue)">${v.a}</div><div class="lbl">Assists</div></div>
+          <div class="career-stat"><div class="val" style="color:var(--gold)">${v.g+v.a}</div><div class="lbl">Participações</div></div>
+          <div class="career-stat"><div class="val" style="color:var(--dim)">${avg}</div><div class="lbl">Gols/Jogo</div></div>
         </div>
       </div>`;
     });
@@ -1156,22 +1154,27 @@ function renderCareer(){
     html+=`</tbody></table>`;
   }
   html+=`<div class="divider"></div><div class="section-label">Histórico por temporada</div>`;
-  d.seasonStats.forEach(s=>{
-    const pct=Math.round((s.g/maxGoals)*100);
-    const barColor=s.isNT?'var(--yellow)':'var(--green)';
-    const badge=s.isNT?`<span class="nt-season-badge">🏴 Seleção</span>`:'';
-    html+=`<div class="season-row">
-      <span class="season-yr">${s.year}${badge}</span>
-      <span class="season-club">${s.club}</span>
-      <div class="season-bar-wrap"><div class="season-bar" style="width:${pct}%;background:${barColor}"></div></div>
-      <div class="season-nums">
-        <span style="color:var(--dim)">J <b style="color:#fff">${s.j}</b></span>
-        <span style="color:var(--dim)">G <b style="color:var(--green)">${s.g}</b></span>
-        <span style="color:var(--dim)">A <b style="color:var(--blue)">${s.a}</b></span>
-      </div>
-    </div>`;
-  });
-  if(d.seasonStats.length===0)html+=`<div class="empty" style="padding:20px">Nenhuma temporada registrada</div>`;
+  if(d.seasonStats.length===0){
+    html+=`<div class="empty" style="padding:20px">Nenhuma temporada registrada</div>`;
+  } else {
+    d.seasonStats.forEach(s=>{
+      const avg=s.j>0?(s.g/s.j).toFixed(2):'0.00';
+      const badge=s.isNT?`<span class="nt-season-badge">🏴 Seleção</span>`:'';
+      const accentColor=s.isNT?'rgba(227,179,65,.3)':'rgba(63,185,80,.2)';
+      html+=`<div style="margin-bottom:10px">
+        <div style="font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:500;display:flex;align-items:center;gap:6px">
+          ${s.year}${badge} <span style="color:var(--dim);font-weight:400">${s.isNT?'':'· '+s.club}</span>
+        </div>
+        <div class="career-stats-grid" style="border-left:3px solid ${accentColor};padding-left:10px">
+          <div class="career-stat"><div class="val" style="color:#fff">${s.j}</div><div class="lbl">Jogos</div></div>
+          <div class="career-stat"><div class="val" style="color:var(--green)">${s.g}</div><div class="lbl">Gols</div></div>
+          <div class="career-stat"><div class="val" style="color:var(--blue)">${s.a}</div><div class="lbl">Assists</div></div>
+          <div class="career-stat"><div class="val" style="color:var(--gold)">${s.g+s.a}</div><div class="lbl">Participações</div></div>
+          <div class="career-stat"><div class="val" style="color:var(--dim)">${avg}</div><div class="lbl">Gols/Jogo</div></div>
+        </div>
+      </div>`;
+    });
+  }
   html+=`<div class="divider"></div><div class="section-label">Por competição (toda a carreira)</div>`;
   if(compsorted.length>0){
     html+=`<table class="comp-career-table"><thead><tr><th>Competição</th><th>Jogos</th><th>Gols</th><th>Assists</th><th>Participações</th><th>Média G/J</th></tr></thead><tbody>`;
