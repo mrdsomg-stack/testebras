@@ -853,124 +853,45 @@ function deleteEntry(id){
   });
 }
 
-/* PESSOAL / CONTRATOS + BÔNUS */
-// contract shape: {id, time, forma, valor, temporada, obs}
-// bonus shape:    {id, temporada, descricao, valor}
+/*
+  CONTRATOS — nova estrutura:
+  contract = {
+    id, time, forma, obs,
+    temporadas: [{id, temporada, valor}],
+    bonuses:    [{id, temporada, descricao, valor}]
+  }
+*/
 
 let editingBonusId=null;
+let activeContractId=null; // contrato aberto para adicionar temporada/bônus
+let editingTempId=null;    // id da temporada sendo editada dentro do contrato
+
+function getContracts(){
+  const p=state.players[state.activePlayerIdx];
+  if(!p.contracts)p.contracts=[];
+  return p.contracts;
+}
+
+function calcContractTotal(c){
+  const tVal=(c.temporadas||[]).reduce((s,t)=>s+(t.valor||0),0);
+  const bVal=(c.bonuses||[]).reduce((s,b)=>s+(b.valor||0),0);
+  return tVal+bVal;
+}
 
 function renderPersonal(){
-  const player=state.players[state.activePlayerIdx];
-  if(!player.contracts)player.contracts=[];
-  if(!player.bonuses)player.bonuses=[];
-  const contracts=player.contracts;
-  const bonuses=player.bonuses;
+  const contracts=getContracts();
+  const grandTotal=contracts.reduce((s,c)=>s+calcContractTotal(c),0);
+  const totalSalarios=contracts.reduce((s,c)=>s+(c.temporadas||[]).reduce((ss,t)=>ss+(t.valor||0),0),0);
+  const totalBonus=contracts.reduce((s,c)=>s+(c.bonuses||[]).reduce((ss,b)=>ss+(b.valor||0),0),0);
 
-  // totais gerais
-  const totalContratos=contracts.reduce((s,c)=>s+(c.valor||0),0);
-  const totalBonuses=bonuses.reduce((s,b)=>s+(b.valor||0),0);
-  const totalGeral=totalContratos+totalBonuses;
-
-  // agrupar por temporada para exibição
-  const allTemps=[...new Set([
-    ...contracts.map(c=>c.temporada||'—'),
-    ...bonuses.map(b=>b.temporada||'—')
-  ])].sort((a,b)=>b.localeCompare(a));
-
-  // --- FORM CONTRATO ---
   const isEditC=editingContractId!==null;
   const editC=isEditC?contracts.find(c=>c.id===editingContractId):null;
 
-  // --- FORM BÔNUS ---
-  const isEditB=editingBonusId!==null;
-  const editB=isEditB?bonuses.find(b=>b.id===editingBonusId):null;
-
-  // --- grupos por temporada ---
-  let gruposHtml='';
-  allTemps.forEach(temp=>{
-    const cList=contracts.filter(c=>(c.temporada||'—')===temp);
-    const bList=bonuses.filter(b=>(b.temporada||'—')===temp);
-    const totalC=cList.reduce((s,c)=>s+(c.valor||0),0);
-    const totalB=bList.reduce((s,b)=>s+(b.valor||0),0);
-    const totalTemp=totalC+totalB;
-
-    let cRows='';
-    cList.forEach(c=>{
-      cRows+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(48,54,61,.4)">
-        <div>
-          <div style="font-weight:600;font-size:.88rem">${c.time||'—'}</div>
-          <div style="font-size:.72rem;color:var(--dim);margin-top:2px">${c.forma||''}</div>
-          ${c.obs?`<div style="font-size:.72rem;color:var(--dim);margin-top:2px">📝 ${c.obs}</div>`:''}
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-weight:700;color:var(--gold);font-size:.95rem">${fmtEuro(c.valor)}</span>
-          <button class="btn edit-btn" style="padding:3px 8px;font-size:.75rem;border:1px solid rgba(240,136,62,.3)" onclick="editContract('${c.id}')">✎</button>
-          <button class="btn danger" style="padding:3px 8px;font-size:.75rem" onclick="deleteContract('${c.id}')">✖</button>
-        </div>
-      </div>`;
-    });
-
-    let bRows='';
-    bList.forEach(b=>{
-      bRows+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(48,54,61,.4)">
-        <div>
-          <div style="font-weight:600;font-size:.88rem;color:var(--blue)">${b.descricao||'Bônus'}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-weight:700;color:var(--blue);font-size:.95rem">+${fmtEuro(b.valor)}</span>
-          <button class="btn edit-btn" style="padding:3px 8px;font-size:.75rem;border:1px solid rgba(88,166,255,.3);color:var(--blue)" onclick="editBonus('${b.id}')">✎</button>
-          <button class="btn danger" style="padding:3px 8px;font-size:.75rem" onclick="deleteBonus('${b.id}')">✖</button>
-        </div>
-      </div>`;
-    });
-
-    gruposHtml+=`<div class="contract-card" style="margin-bottom:12px">
-      <div class="contract-header" style="margin-bottom:10px">
-        <span style="font-size:.95rem;font-weight:700;color:var(--yellow)">📅 ${temp}</span>
-        <div style="text-align:right">
-          <div style="font-size:.62rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Total da temporada</div>
-          <div style="font-size:1.1rem;font-weight:700;color:var(--gold)">${fmtEuro(totalTemp)}</div>
-        </div>
-      </div>
-      ${cList.length>0?`
-        <div style="font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;margin-top:4px">Contratos</div>
-        ${cRows}`:''}
-      ${bList.length>0?`
-        <div style="font-size:.65rem;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;margin-top:10px">Bônus</div>
-        ${bRows}`:''}
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid rgba(48,54,61,.6)">
-        <div style="display:flex;gap:16px;font-size:.78rem">
-          <span style="color:var(--dim)">Contratos <b style="color:var(--gold)">${fmtEuro(totalC)}</b></span>
-          <span style="color:var(--dim)">Bônus <b style="color:var(--blue)">${fmtEuro(totalB)}</b></span>
-        </div>
-        <span style="font-size:.8rem;font-weight:700;color:var(--gold)">${fmtEuro(totalTemp)}</span>
-      </div>
-    </div>`;
-  });
-
-  document.getElementById('personalContent').innerHTML=`
-    <!-- RESUMO GERAL -->
-    <div class="contracts-total-bar" style="margin-bottom:16px">
-      <div>
-        <div class="sub">Total da carreira (contratos + bônus)</div>
-        <div class="big-num">${fmtEuro(totalGeral)}</div>
-      </div>
-      <div style="text-align:right;display:flex;gap:24px;align-items:center">
-        <div>
-          <div class="sub">Contratos</div>
-          <div style="font-size:1.2rem;font-weight:700;color:var(--gold)">${fmtEuro(totalContratos)}</div>
-        </div>
-        <div>
-          <div class="sub">Bônus</div>
-          <div style="font-size:1.2rem;font-weight:700;color:var(--blue)">${fmtEuro(totalBonuses)}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FORMULÁRIO CONTRATO -->
+  // form novo contrato
+  let formContrato=`
     <div class="form-wrap" style="${isEditC?'border-color:var(--gold)':''}">
       <div class="sec-header">
-        <span class="sec-title" style="${isEditC?'color:var(--gold)':''}">💼 ${isEditC?'Editando contrato':'Novo contrato'}</span>
+        <span class="sec-title">${isEditC?'✎ Editando contrato':'💼 Novo contrato'}</span>
         ${isEditC?`<button class="btn ghost" style="font-size:.75rem" onclick="cancelContractEdit()">Cancelar</button>`:''}
       </div>
       <div class="form-grid">
@@ -979,123 +900,256 @@ function renderPersonal(){
           <option value="Mensal" ${isEditC&&editC?.forma==='Mensal'?'selected':''}>Mensal</option>
           <option value="Anual" ${isEditC&&editC?.forma==='Anual'?'selected':''}>Anual</option>
         </select>
-        <input type="number" id="cValor" placeholder="Valor (€)" min="0" step="0.01" value="${isEditC?(editC?.valor||''):''}">
-        <input type="text" id="cTemporada" placeholder="Temporada (ex: 2016/17)" value="${isEditC?(editC?.temporada||''):''}">
       </div>
       <div style="margin-bottom:10px">
         <input type="text" id="cObs" placeholder="Observações (opcional)" style="background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:9px 12px;border-radius:8px;font-size:.85rem;width:100%;outline:none" value="${isEditC?(editC?.obs||''):''}">
       </div>
       <div class="form-actions">
-        <button class="btn" onclick="saveContract()">${isEditC?'Atualizar':'Salvar contrato'}</button>
+        <button class="btn" onclick="saveContract()">${isEditC?'Atualizar':'Criar contrato'}</button>
+      </div>
+    </div>`;
+
+  // cards de contratos
+  let cardsHtml='';
+  contracts.forEach(c=>{
+    const total=calcContractTotal(c);
+    const tTotal=(c.temporadas||[]).reduce((s,t)=>s+(t.valor||0),0);
+    const bTotal=(c.bonuses||[]).reduce((s,b)=>s+(b.valor||0),0);
+    const isOpen=activeContractId===c.id;
+    const isEditingThisC=editingContractId===c.id;
+
+    // linhas de temporadas
+    let tempRows='';
+    const sortedTemps=[...(c.temporadas||[])].sort((a,b)=>b.temporada.localeCompare(a.temporada));
+    sortedTemps.forEach(t=>{
+      const isEditT=editingTempId===t.id&&activeContractId===c.id;
+      tempRows+=`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(48,54,61,.35)">
+        <span style="font-size:.8rem;color:var(--yellow);min-width:68px;font-weight:600">${t.temporada}</span>
+        <span style="font-weight:700;color:var(--gold);flex:1">${fmtEuro(t.valor)}</span>
+        <button class="btn edit-btn" style="padding:2px 8px;font-size:.72rem;border:1px solid rgba(240,136,62,.3)" onclick="editTemp('${c.id}','${t.id}')">✎</button>
+        <button class="btn danger" style="padding:2px 8px;font-size:.72rem" onclick="deleteTemp('${c.id}','${t.id}')">✖</button>
+      </div>`;
+    });
+
+    // linhas de bônus
+    let bonusRows='';
+    const sortedBonus=[...(c.bonuses||[])].sort((a,b)=>b.temporada.localeCompare(a.temporada));
+    sortedBonus.forEach(b=>{
+      bonusRows+=`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(48,54,61,.35)">
+        <span style="font-size:.8rem;color:var(--blue);min-width:68px;font-weight:600">${b.temporada}</span>
+        <span style="font-size:.8rem;color:var(--dim);flex:1">${b.descricao}</span>
+        <span style="font-weight:700;color:var(--blue)">+${fmtEuro(b.valor)}</span>
+        <button class="btn edit-btn" style="padding:2px 8px;font-size:.72rem;border:1px solid rgba(88,166,255,.3);color:var(--blue)" onclick="editBonus('${c.id}','${b.id}')">✎</button>
+        <button class="btn danger" style="padding:2px 8px;font-size:.72rem" onclick="deleteBonus('${c.id}','${b.id}')">✖</button>
+      </div>`;
+    });
+
+    // form adicionar temporada (dentro do contrato)
+    const editT=editingTempId&&activeContractId===c.id?(c.temporadas||[]).find(t=>t.id===editingTempId):null;
+    let addTempForm=``;
+    if(isOpen){
+      addTempForm=`
+        <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
+          <div class="sec-header" style="margin-bottom:8px">
+            <span class="sec-title" style="color:var(--yellow)">${editT?'✎ Editando temporada':'📅 Adicionar temporada'}</span>
+            ${editT?`<button class="btn ghost" style="font-size:.72rem" onclick="cancelTempEdit()">Cancelar</button>`:''}
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+            <input type="text" id="tTemp_${c.id}" placeholder="Temporada (ex: 2016/17)" value="${editT?editT.temporada:''}" style="background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:8px 12px;border-radius:8px;font-size:.83rem;flex:1;min-width:130px;outline:none">
+            <input type="number" id="tValor_${c.id}" placeholder="Valor (€)" value="${editT?editT.valor:''}" style="background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:8px 12px;border-radius:8px;font-size:.83rem;flex:1;min-width:110px;outline:none">
+            <button class="btn" style="white-space:nowrap" onclick="saveTemp('${c.id}')">${editT?'Atualizar':'+ Temporada'}</button>
+          </div>
+
+          <div class="sec-header" style="margin-bottom:8px;margin-top:10px">
+            <span class="sec-title" style="color:var(--blue)">${editingBonusId&&activeContractId===c.id?'✎ Editando bônus':'⭐ Adicionar bônus'}</span>
+            ${editingBonusId&&activeContractId===c.id?`<button class="btn ghost" style="font-size:.72rem" onclick="cancelBonusEdit()">Cancelar</button>`:''}
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input type="text" id="bTemp_${c.id}" placeholder="Temporada (ex: 2016/17)" value="${editingBonusId&&activeContractId===c.id?((c.bonuses||[]).find(b=>b.id===editingBonusId)?.temporada||''):''}" style="background:var(--surface2);border:1px solid rgba(88,166,255,.3);color:#e6edf3;padding:8px 12px;border-radius:8px;font-size:.83rem;flex:1;min-width:130px;outline:none">
+            <input type="text" id="bDesc_${c.id}" placeholder="Descrição do bônus" value="${editingBonusId&&activeContractId===c.id?((c.bonuses||[]).find(b=>b.id===editingBonusId)?.descricao||''):''}" style="background:var(--surface2);border:1px solid rgba(88,166,255,.3);color:#e6edf3;padding:8px 12px;border-radius:8px;font-size:.83rem;flex:2;min-width:140px;outline:none">
+            <input type="number" id="bValor_${c.id}" placeholder="Valor (€)" value="${editingBonusId&&activeContractId===c.id?((c.bonuses||[]).find(b=>b.id===editingBonusId)?.valor||''):''}" style="background:var(--surface2);border:1px solid rgba(88,166,255,.3);color:#e6edf3;padding:8px 12px;border-radius:8px;font-size:.83rem;flex:1;min-width:110px;outline:none">
+            <button class="btn" style="background:rgba(88,166,255,.2);color:var(--blue);border:1px solid rgba(88,166,255,.4);white-space:nowrap" onclick="saveBonus('${c.id}')">${editingBonusId&&activeContractId===c.id?'Atualizar':'+ Bônus'}</button>
+          </div>
+        </div>`;
+    }
+
+    cardsHtml+=`<div class="contract-card" style="margin-bottom:12px${isEditingThisC?';border-color:var(--gold)':''}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div style="font-size:1rem;font-weight:700">${c.time||'—'}</div>
+          <div style="font-size:.72rem;color:var(--dim);margin-top:2px">${c.forma||''}${c.obs?' · '+c.obs:''}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Total do contrato</div>
+          <div style="font-size:1.15rem;font-weight:700;color:var(--gold)">${fmtEuro(total)}</div>
+          <div style="font-size:.7rem;color:var(--dim);margin-top:2px">Salários ${fmtEuro(tTotal)} · Bônus ${fmtEuro(bTotal)}</div>
+        </div>
+      </div>
+
+      ${sortedTemps.length>0?`
+        <div style="font-size:.62rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Temporadas</div>
+        ${tempRows}`:''}
+
+      ${sortedBonus.length>0?`
+        <div style="font-size:.62rem;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-top:10px;margin-bottom:4px">Bônus</div>
+        ${bonusRows}`:''}
+
+      ${addTempForm}
+
+      <div style="display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(48,54,61,.5)">
+        <button class="btn" style="background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3);font-size:.78rem;padding:6px 12px" onclick="toggleContractOpen('${c.id}')">${isOpen?'✕ Fechar':'＋ Adicionar temporada / bônus'}</button>
+        <button class="btn edit-btn" style="font-size:.78rem;padding:6px 12px;border:1px solid rgba(240,136,62,.3)" onclick="editContract('${c.id}')">✎ Editar contrato</button>
+        <button class="btn danger" style="font-size:.78rem;padding:6px 12px" onclick="deleteContract('${c.id}')">✖ Excluir</button>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('personalContent').innerHTML=`
+    <div class="contracts-total-bar" style="margin-bottom:16px">
+      <div>
+        <div class="sub">Total da carreira</div>
+        <div class="big-num">${fmtEuro(grandTotal)}</div>
+      </div>
+      <div style="display:flex;gap:24px;align-items:center">
+        <div style="text-align:right">
+          <div class="sub">Salários</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--gold)">${fmtEuro(totalSalarios)}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="sub">Bônus</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--blue)">${fmtEuro(totalBonus)}</div>
+        </div>
       </div>
     </div>
-
-    <!-- FORMULÁRIO BÔNUS -->
-    <div class="form-wrap" style="${isEditB?'border-color:var(--blue)':'border-color:rgba(88,166,255,.25)'}">
-      <div class="sec-header">
-        <span class="sec-title" style="color:var(--blue)">${isEditB?'✎ Editando bônus':'⭐ Novo bônus'}</span>
-        ${isEditB?`<button class="btn ghost" style="font-size:.75rem" onclick="cancelBonusEdit()">Cancelar</button>`:''}
-      </div>
-      <div class="form-grid">
-        <input type="text" id="bDesc" placeholder="Descrição (ex: Bônus de gol)" value="${isEditB?(editB?.descricao||''):''}">
-        <input type="number" id="bValor" placeholder="Valor (€)" min="0" step="0.01" value="${isEditB?(editB?.valor||''):''}">
-        <input type="text" id="bTemporada" placeholder="Temporada (ex: 2016/17)" value="${isEditB?(editB?.temporada||''):''}">
-      </div>
-      <div class="form-actions">
-        <button class="btn" style="background:rgba(88,166,255,.2);color:var(--blue);border:1px solid rgba(88,166,255,.4)" onclick="saveBonus()">${isEditB?'Atualizar':'Salvar bônus'}</button>
-      </div>
-    </div>
-
-    <!-- LISTA AGRUPADA POR TEMPORADA -->
+    ${formContrato}
     <div class="sec-header">
-      <span class="sec-title">Por temporada</span>
-      <span style="font-size:.75rem;color:var(--dim)">${allTemps.length} temporada${allTemps.length!==1?'s':''}</span>
+      <span class="sec-title">Contratos</span>
+      <span style="font-size:.75rem;color:var(--dim)">${contracts.length} contrato${contracts.length!==1?'s':''}</span>
     </div>
-    ${allTemps.length===0?'<div class="empty">Nenhum registro ainda</div>':gruposHtml}
+    ${contracts.length===0?'<div class="empty">Nenhum contrato ainda. Crie um acima.</div>':cardsHtml}
   `;
 }
 
+function toggleContractOpen(cid){
+  if(activeContractId===cid){activeContractId=null;editingTempId=null;editingBonusId=null;}
+  else{activeContractId=cid;editingTempId=null;editingBonusId=null;}
+  renderPersonal();
+  if(activeContractId){
+    setTimeout(()=>{document.getElementById('tTemp_'+cid)?.scrollIntoView({behavior:'smooth',block:'nearest'});},50);
+  }
+}
+
 function saveContract(){
-  const player=state.players[state.activePlayerIdx];
-  if(!player.contracts)player.contracts=[];
+  const contracts=getContracts();
   const time=document.getElementById('cTime').value.trim();
   const forma=document.getElementById('cForma').value;
-  const valor=parseFloat(document.getElementById('cValor').value)||0;
-  const temporada=document.getElementById('cTemporada').value.trim();
   const obs=document.getElementById('cObs').value.trim();
   if(!time){toast('Preencha o time/clube','err');return;}
-  if(!valor){toast('Preencha o valor','err');return;}
-  if(!temporada){toast('Preencha a temporada','err');return;}
   if(editingContractId){
-    const idx=player.contracts.findIndex(c=>c.id===editingContractId);
-    if(idx!==-1)player.contracts[idx]={id:editingContractId,time,forma,valor,temporada,obs};
+    const idx=contracts.findIndex(c=>c.id===editingContractId);
+    if(idx!==-1){contracts[idx].time=time;contracts[idx].forma=forma;contracts[idx].obs=obs;}
     editingContractId=null;
   } else {
-    player.contracts.push({id:'c_'+Date.now(),time,forma,valor,temporada,obs});
+    const nc={id:'c_'+Date.now(),time,forma,obs,temporadas:[],bonuses:[]};
+    contracts.push(nc);
+    activeContractId=nc.id;
   }
   save();renderPersonal();
-  toast('Contrato salvo!');
+  toast(editingContractId?'Atualizado!':'Contrato criado! Adicione as temporadas abaixo.');
 }
 
 function editContract(id){
   editingContractId=id;
+  activeContractId=null;
   renderPersonal();
   setTimeout(()=>{document.getElementById('cTime')?.scrollIntoView({behavior:'smooth',block:'nearest'});},50);
 }
 
-function cancelContractEdit(){
-  editingContractId=null;
-  renderPersonal();
-}
+function cancelContractEdit(){editingContractId=null;renderPersonal();}
 
 function deleteContract(id){
   const player=state.players[state.activePlayerIdx];
-  confirmDialog('Excluir contrato','Remover este contrato permanentemente?',()=>{
-    player.contracts=(player.contracts||[]).filter(c=>c.id!==id);
+  confirmDialog('Excluir contrato','Excluir este contrato e todos os dados dentro dele?',()=>{
+    player.contracts=player.contracts.filter(c=>c.id!==id);
     if(editingContractId===id)editingContractId=null;
-    save();renderPersonal();
-    toast('Contrato removido');
+    if(activeContractId===id)activeContractId=null;
+    save();renderPersonal();toast('Contrato removido');
   });
 }
 
-function saveBonus(){
-  const player=state.players[state.activePlayerIdx];
-  if(!player.bonuses)player.bonuses=[];
-  const descricao=document.getElementById('bDesc').value.trim();
-  const valor=parseFloat(document.getElementById('bValor').value)||0;
-  const temporada=document.getElementById('bTemporada').value.trim();
-  if(!descricao){toast('Preencha a descrição do bônus','err');return;}
+// --- TEMPORADAS DENTRO DO CONTRATO ---
+function saveTemp(cid){
+  const contracts=getContracts();
+  const c=contracts.find(x=>x.id===cid);
+  if(!c)return;
+  if(!c.temporadas)c.temporadas=[];
+  const temp=document.getElementById('tTemp_'+cid)?.value.trim();
+  const valor=parseFloat(document.getElementById('tValor_'+cid)?.value)||0;
+  if(!temp){toast('Preencha a temporada','err');return;}
   if(!valor){toast('Preencha o valor','err');return;}
-  if(!temporada){toast('Preencha a temporada','err');return;}
+  if(editingTempId){
+    const idx=c.temporadas.findIndex(t=>t.id===editingTempId);
+    if(idx!==-1)c.temporadas[idx]={id:editingTempId,temporada:temp,valor};
+    editingTempId=null;
+  } else {
+    c.temporadas.push({id:'t_'+Date.now(),temporada:temp,valor});
+  }
+  save();renderPersonal();toast('Temporada salva!');
+}
+
+function editTemp(cid,tid){
+  activeContractId=cid;editingTempId=tid;editingBonusId=null;
+  renderPersonal();
+  setTimeout(()=>{document.getElementById('tTemp_'+cid)?.scrollIntoView({behavior:'smooth',block:'nearest'});},50);
+}
+
+function cancelTempEdit(){editingTempId=null;renderPersonal();}
+
+function deleteTemp(cid,tid){
+  const c=getContracts().find(x=>x.id===cid);
+  confirmDialog('Excluir temporada','Remover esta temporada do contrato?',()=>{
+    c.temporadas=c.temporadas.filter(t=>t.id!==tid);
+    if(editingTempId===tid)editingTempId=null;
+    save();renderPersonal();toast('Removido');
+  });
+}
+
+// --- BÔNUS DENTRO DO CONTRATO ---
+function saveBonus(cid){
+  const contracts=getContracts();
+  const c=contracts.find(x=>x.id===cid);
+  if(!c)return;
+  if(!c.bonuses)c.bonuses=[];
+  const temp=document.getElementById('bTemp_'+cid)?.value.trim();
+  const desc=document.getElementById('bDesc_'+cid)?.value.trim();
+  const valor=parseFloat(document.getElementById('bValor_'+cid)?.value)||0;
+  if(!temp){toast('Preencha a temporada do bônus','err');return;}
+  if(!desc){toast('Preencha a descrição','err');return;}
+  if(!valor){toast('Preencha o valor','err');return;}
   if(editingBonusId){
-    const idx=player.bonuses.findIndex(b=>b.id===editingBonusId);
-    if(idx!==-1)player.bonuses[idx]={id:editingBonusId,descricao,valor,temporada};
+    const idx=c.bonuses.findIndex(b=>b.id===editingBonusId);
+    if(idx!==-1)c.bonuses[idx]={id:editingBonusId,temporada:temp,descricao:desc,valor};
     editingBonusId=null;
   } else {
-    player.bonuses.push({id:'b_'+Date.now(),descricao,valor,temporada});
+    c.bonuses.push({id:'b_'+Date.now(),temporada:temp,descricao:desc,valor});
   }
-  save();renderPersonal();
-  toast('Bônus salvo!');
+  save();renderPersonal();toast('Bônus salvo!');
 }
 
-function editBonus(id){
-  editingBonusId=id;
+function editBonus(cid,bid){
+  activeContractId=cid;editingBonusId=bid;editingTempId=null;
   renderPersonal();
-  setTimeout(()=>{document.getElementById('bDesc')?.scrollIntoView({behavior:'smooth',block:'nearest'});},50);
+  setTimeout(()=>{document.getElementById('bTemp_'+cid)?.scrollIntoView({behavior:'smooth',block:'nearest'});},50);
 }
 
-function cancelBonusEdit(){
-  editingBonusId=null;
-  renderPersonal();
-}
+function cancelBonusEdit(){editingBonusId=null;renderPersonal();}
 
-function deleteBonus(id){
-  const player=state.players[state.activePlayerIdx];
+function deleteBonus(cid,bid){
+  const c=getContracts().find(x=>x.id===cid);
   confirmDialog('Excluir bônus','Remover este bônus?',()=>{
-    player.bonuses=(player.bonuses||[]).filter(b=>b.id!==id);
-    if(editingBonusId===id)editingBonusId=null;
-    save();renderPersonal();
-    toast('Bônus removido');
+    c.bonuses=c.bonuses.filter(b=>b.id!==bid);
+    if(editingBonusId===bid)editingBonusId=null;
+    save();renderPersonal();toast('Bônus removido');
   });
 }
 
