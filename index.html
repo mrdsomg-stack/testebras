@@ -853,150 +853,185 @@ function deleteEntry(id){
   });
 }
 
-/* PESSOAL / CONTRATOS */
+/* PESSOAL / CONTRATOS + BÔNUS */
+// contract shape: {id, time, forma, valor, temporada, obs}
+// bonus shape:    {id, temporada, descricao, valor}
+
+let editingBonusId=null;
+
 function renderPersonal(){
   const player=state.players[state.activePlayerIdx];
   if(!player.contracts)player.contracts=[];
+  if(!player.bonuses)player.bonuses=[];
   const contracts=player.contracts;
-  let totalAtivo=0,totalCarreira=0;
-  contracts.forEach(c=>{
-    const total=calcContractTotal(c);
-    totalCarreira+=total;
-    if(c.status==='ativo')totalAtivo+=c.valor||0;
-  });
-  const isEditing=editingContractId!==null;
-  const editingContract=isEditing?contracts.find(c=>c.id===editingContractId):null;
-  let contractsHtml='';
-  if(contracts.length===0){
-    contractsHtml=`<div class="empty">Nenhum contrato registrado ainda</div>`;
-  } else {
-    [...contracts].sort((a,b)=>b.id.localeCompare(a.id)).forEach(c=>{
-      const total=calcContractTotal(c);
-      const isAtivo=c.status==='ativo';
-      contractsHtml+=`<div class="contract-card${isAtivo?' active-contract':''}">
-        <div class="contract-header">
-          <span class="contract-club">🏢 ${c.empresa||'—'}</span>
-          <div style="display:flex;gap:6px;align-items:center">
-            <span class="contract-badge ${c.forma==='Mensal'?'mensal':'anual'}">${c.forma}</span>
-            <span class="contract-badge ${isAtivo?'ativo':'encerrado'}">${isAtivo?'✓ Ativo':'Encerrado'}</span>
-          </div>
+  const bonuses=player.bonuses;
+
+  // totais gerais
+  const totalContratos=contracts.reduce((s,c)=>s+(c.valor||0),0);
+  const totalBonuses=bonuses.reduce((s,b)=>s+(b.valor||0),0);
+  const totalGeral=totalContratos+totalBonuses;
+
+  // agrupar por temporada para exibição
+  const allTemps=[...new Set([
+    ...contracts.map(c=>c.temporada||'—'),
+    ...bonuses.map(b=>b.temporada||'—')
+  ])].sort((a,b)=>b.localeCompare(a));
+
+  // --- FORM CONTRATO ---
+  const isEditC=editingContractId!==null;
+  const editC=isEditC?contracts.find(c=>c.id===editingContractId):null;
+
+  // --- FORM BÔNUS ---
+  const isEditB=editingBonusId!==null;
+  const editB=isEditB?bonuses.find(b=>b.id===editingBonusId):null;
+
+  // --- grupos por temporada ---
+  let gruposHtml='';
+  allTemps.forEach(temp=>{
+    const cList=contracts.filter(c=>(c.temporada||'—')===temp);
+    const bList=bonuses.filter(b=>(b.temporada||'—')===temp);
+    const totalC=cList.reduce((s,c)=>s+(c.valor||0),0);
+    const totalB=bList.reduce((s,b)=>s+(b.valor||0),0);
+    const totalTemp=totalC+totalB;
+
+    let cRows='';
+    cList.forEach(c=>{
+      cRows+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(48,54,61,.4)">
+        <div>
+          <div style="font-weight:600;font-size:.88rem">${c.time||'—'}</div>
+          <div style="font-size:.72rem;color:var(--dim);margin-top:2px">${c.forma||''}</div>
+          ${c.obs?`<div style="font-size:.72rem;color:var(--dim);margin-top:2px">📝 ${c.obs}</div>`:''}
         </div>
-        <div class="contract-details">
-          <div class="contract-detail-item">
-            <div class="lbl">Valor por período</div>
-            <div class="val" style="color:var(--gold)">${fmtEuro(c.valor)}</div>
-          </div>
-          <div class="contract-detail-item">
-            <div class="lbl">Início</div>
-            <div class="val">${c.dataInicio||'—'}</div>
-          </div>
-          <div class="contract-detail-item">
-            <div class="lbl">Término</div>
-            <div class="val">${c.dataFim||'—'}</div>
-          </div>
-          <div class="contract-detail-item">
-            <div class="lbl">Duração</div>
-            <div class="val">${calcDuracao(c)}</div>
-          </div>
-        </div>
-        <div class="contract-summary">
-          <div><div class="total-label">💰 Total estimado do contrato</div></div>
-          <div class="total-val">${fmtEuro(total)}</div>
-        </div>
-        ${c.obs?`<div style="margin-top:10px;font-size:.8rem;color:var(--dim);padding:8px 12px;background:rgba(255,255,255,.03);border-radius:6px">📝 ${c.obs}</div>`:''}
-        <div class="contract-actions">
-          <button class="btn edit-btn" style="font-size:.8rem;padding:5px 12px;border:1px solid rgba(240,136,62,.3)" onclick="editContract('${c.id}')">✎ Editar</button>
-          <button class="btn danger" style="font-size:.8rem" onclick="deleteContract('${c.id}')">✖ Excluir</button>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-weight:700;color:var(--gold);font-size:.95rem">${fmtEuro(c.valor)}</span>
+          <button class="btn edit-btn" style="padding:3px 8px;font-size:.75rem;border:1px solid rgba(240,136,62,.3)" onclick="editContract('${c.id}')">✎</button>
+          <button class="btn danger" style="padding:3px 8px;font-size:.75rem" onclick="deleteContract('${c.id}')">✖</button>
         </div>
       </div>`;
     });
-  }
-  document.getElementById('personalContent').innerHTML=`
-    <div class="contracts-total-bar">
-      <div>
-        <div class="sub">Valor total (todos os contratos)</div>
-        <div class="big-num">${fmtEuro(totalCarreira)}</div>
+
+    let bRows='';
+    bList.forEach(b=>{
+      bRows+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(48,54,61,.4)">
+        <div>
+          <div style="font-weight:600;font-size:.88rem;color:var(--blue)">${b.descricao||'Bônus'}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-weight:700;color:var(--blue);font-size:.95rem">+${fmtEuro(b.valor)}</span>
+          <button class="btn edit-btn" style="padding:3px 8px;font-size:.75rem;border:1px solid rgba(88,166,255,.3);color:var(--blue)" onclick="editBonus('${b.id}')">✎</button>
+          <button class="btn danger" style="padding:3px 8px;font-size:.75rem" onclick="deleteBonus('${b.id}')">✖</button>
+        </div>
+      </div>`;
+    });
+
+    gruposHtml+=`<div class="contract-card" style="margin-bottom:12px">
+      <div class="contract-header" style="margin-bottom:10px">
+        <span style="font-size:.95rem;font-weight:700;color:var(--yellow)">📅 ${temp}</span>
+        <div style="text-align:right">
+          <div style="font-size:.62rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Total da temporada</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--gold)">${fmtEuro(totalTemp)}</div>
+        </div>
       </div>
-      <div style="text-align:right">
-        <div class="sub">Contrato(s) ativo(s)</div>
-        <div style="font-size:1.4rem;font-weight:700;color:var(--green)">${fmtEuro(totalAtivo)}<span style="font-size:.72rem;color:var(--dim);margin-left:6px">/ período</span></div>
+      ${cList.length>0?`
+        <div style="font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;margin-top:4px">Contratos</div>
+        ${cRows}`:''}
+      ${bList.length>0?`
+        <div style="font-size:.65rem;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;margin-top:10px">Bônus</div>
+        ${bRows}`:''}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid rgba(48,54,61,.6)">
+        <div style="display:flex;gap:16px;font-size:.78rem">
+          <span style="color:var(--dim)">Contratos <b style="color:var(--gold)">${fmtEuro(totalC)}</b></span>
+          <span style="color:var(--dim)">Bônus <b style="color:var(--blue)">${fmtEuro(totalB)}</b></span>
+        </div>
+        <span style="font-size:.8rem;font-weight:700;color:var(--gold)">${fmtEuro(totalTemp)}</span>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('personalContent').innerHTML=`
+    <!-- RESUMO GERAL -->
+    <div class="contracts-total-bar" style="margin-bottom:16px">
+      <div>
+        <div class="sub">Total da carreira (contratos + bônus)</div>
+        <div class="big-num">${fmtEuro(totalGeral)}</div>
+      </div>
+      <div style="text-align:right;display:flex;gap:24px;align-items:center">
+        <div>
+          <div class="sub">Contratos</div>
+          <div style="font-size:1.2rem;font-weight:700;color:var(--gold)">${fmtEuro(totalContratos)}</div>
+        </div>
+        <div>
+          <div class="sub">Bônus</div>
+          <div style="font-size:1.2rem;font-weight:700;color:var(--blue)">${fmtEuro(totalBonuses)}</div>
+        </div>
       </div>
     </div>
-    <div class="form-wrap" style="${isEditing?'border-color:var(--gold)':''}">
+
+    <!-- FORMULÁRIO CONTRATO -->
+    <div class="form-wrap" style="${isEditC?'border-color:var(--gold)':''}">
       <div class="sec-header">
-        <span class="sec-title">${isEditing?'✎ Editando contrato':'+ Novo contrato'}</span>
-        ${isEditing?`<button class="btn ghost" style="font-size:.75rem" onclick="cancelContractEdit()">Cancelar</button>`:''}
+        <span class="sec-title" style="${isEditC?'color:var(--gold)':''}">💼 ${isEditC?'Editando contrato':'Novo contrato'}</span>
+        ${isEditC?`<button class="btn ghost" style="font-size:.75rem" onclick="cancelContractEdit()">Cancelar</button>`:''}
       </div>
       <div class="form-grid">
-        <input type="text" id="cEmpresa" placeholder="Empresa / Clube" value="${isEditing?(editingContract?.empresa||''):''}">
+        <input type="text" id="cTime" placeholder="Time / Clube" value="${isEditC?(editC?.time||''):''}">
         <select id="cForma">
-          <option value="Mensal" ${isEditing&&editingContract?.forma==='Mensal'?'selected':''}>Mensal</option>
-          <option value="Anual" ${isEditing&&editingContract?.forma==='Anual'?'selected':''}>Anual</option>
+          <option value="Mensal" ${isEditC&&editC?.forma==='Mensal'?'selected':''}>Mensal</option>
+          <option value="Anual" ${isEditC&&editC?.forma==='Anual'?'selected':''}>Anual</option>
         </select>
-        <input type="number" id="cValor" placeholder="Valor (€)" min="0" step="0.01" value="${isEditing?(editingContract?.valor||''):''}">
-        <input type="text" id="cInicio" placeholder="Início (ex: 2025-01)" value="${isEditing?(editingContract?.dataInicio||''):''}">
-        <input type="text" id="cFim" placeholder="Término (ex: 2027-12)" value="${isEditing?(editingContract?.dataFim||''):''}">
-        <select id="cStatus">
-          <option value="ativo" ${isEditing&&editingContract?.status==='ativo'?'selected':''}>Ativo</option>
-          <option value="encerrado" ${isEditing&&editingContract?.status==='encerrado'?'selected':''}>Encerrado</option>
-        </select>
+        <input type="number" id="cValor" placeholder="Valor (€)" min="0" step="0.01" value="${isEditC?(editC?.valor||''):''}">
+        <input type="text" id="cTemporada" placeholder="Temporada (ex: 2016/17)" value="${isEditC?(editC?.temporada||''):''}">
       </div>
       <div style="margin-bottom:10px">
-        <input type="text" id="cObs" placeholder="Observações (opcional)" style="background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:9px 12px;border-radius:8px;font-size:.85rem;width:100%;outline:none" value="${isEditing?(editingContract?.obs||''):''}">
+        <input type="text" id="cObs" placeholder="Observações (opcional)" style="background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:9px 12px;border-radius:8px;font-size:.85rem;width:100%;outline:none" value="${isEditC?(editC?.obs||''):''}">
       </div>
       <div class="form-actions">
-        <button class="btn" onclick="saveContract()">${isEditing?'Atualizar':'Salvar contrato'}</button>
+        <button class="btn" onclick="saveContract()">${isEditC?'Atualizar':'Salvar contrato'}</button>
       </div>
     </div>
-    <div class="sec-header">
-      <span class="sec-title">Contratos</span>
-      <span style="font-size:.75rem;color:var(--dim)">${contracts.length} contrato${contracts.length!==1?'s':''}</span>
+
+    <!-- FORMULÁRIO BÔNUS -->
+    <div class="form-wrap" style="${isEditB?'border-color:var(--blue)':'border-color:rgba(88,166,255,.25)'}">
+      <div class="sec-header">
+        <span class="sec-title" style="color:var(--blue)">${isEditB?'✎ Editando bônus':'⭐ Novo bônus'}</span>
+        ${isEditB?`<button class="btn ghost" style="font-size:.75rem" onclick="cancelBonusEdit()">Cancelar</button>`:''}
+      </div>
+      <div class="form-grid">
+        <input type="text" id="bDesc" placeholder="Descrição (ex: Bônus de gol)" value="${isEditB?(editB?.descricao||''):''}">
+        <input type="number" id="bValor" placeholder="Valor (€)" min="0" step="0.01" value="${isEditB?(editB?.valor||''):''}">
+        <input type="text" id="bTemporada" placeholder="Temporada (ex: 2016/17)" value="${isEditB?(editB?.temporada||''):''}">
+      </div>
+      <div class="form-actions">
+        <button class="btn" style="background:rgba(88,166,255,.2);color:var(--blue);border:1px solid rgba(88,166,255,.4)" onclick="saveBonus()">${isEditB?'Atualizar':'Salvar bônus'}</button>
+      </div>
     </div>
-    ${contractsHtml}
+
+    <!-- LISTA AGRUPADA POR TEMPORADA -->
+    <div class="sec-header">
+      <span class="sec-title">Por temporada</span>
+      <span style="font-size:.75rem;color:var(--dim)">${allTemps.length} temporada${allTemps.length!==1?'s':''}</span>
+    </div>
+    ${allTemps.length===0?'<div class="empty">Nenhum registro ainda</div>':gruposHtml}
   `;
-}
-
-function calcContractTotal(c){
-  if(!c.valor||!c.dataInicio||!c.dataFim)return c.valor||0;
-  const [iniY,iniM]=c.dataInicio.split('-').map(Number);
-  const [fimY,fimM]=c.dataFim.split('-').map(Number);
-  if(isNaN(iniY)||isNaN(fimY))return c.valor||0;
-  const meses=(fimY-iniY)*12+(fimM-iniM)+1;
-  if(c.forma==='Mensal')return(c.valor||0)*Math.max(meses,1);
-  const anos=Math.ceil(meses/12);
-  return(c.valor||0)*Math.max(anos,1);
-}
-
-function calcDuracao(c){
-  if(!c.dataInicio||!c.dataFim)return'—';
-  const [iniY,iniM]=c.dataInicio.split('-').map(Number);
-  const [fimY,fimM]=c.dataFim.split('-').map(Number);
-  if(isNaN(iniY)||isNaN(fimY))return'—';
-  const meses=(fimY-iniY)*12+(fimM-iniM)+1;
-  if(meses<12)return`${meses} mês${meses!==1?'es':''}`;
-  const anos=Math.floor(meses/12);
-  const m=meses%12;
-  return`${anos} ano${anos!==1?'s':''}${m>0?' e '+m+' mês'+(m!==1?'es':''):''}`;
 }
 
 function saveContract(){
   const player=state.players[state.activePlayerIdx];
   if(!player.contracts)player.contracts=[];
-  const empresa=document.getElementById('cEmpresa').value.trim();
+  const time=document.getElementById('cTime').value.trim();
   const forma=document.getElementById('cForma').value;
   const valor=parseFloat(document.getElementById('cValor').value)||0;
-  const dataInicio=document.getElementById('cInicio').value.trim();
-  const dataFim=document.getElementById('cFim').value.trim();
-  const status=document.getElementById('cStatus').value;
+  const temporada=document.getElementById('cTemporada').value.trim();
   const obs=document.getElementById('cObs').value.trim();
-  if(!empresa){toast('Preencha a empresa/clube','err');return;}
+  if(!time){toast('Preencha o time/clube','err');return;}
   if(!valor){toast('Preencha o valor','err');return;}
+  if(!temporada){toast('Preencha a temporada','err');return;}
   if(editingContractId){
     const idx=player.contracts.findIndex(c=>c.id===editingContractId);
-    if(idx!==-1)player.contracts[idx]={id:editingContractId,empresa,forma,valor,dataInicio,dataFim,status,obs};
+    if(idx!==-1)player.contracts[idx]={id:editingContractId,time,forma,valor,temporada,obs};
     editingContractId=null;
   } else {
-    player.contracts.push({id:'c_'+Date.now(),empresa,forma,valor,dataInicio,dataFim,status,obs});
+    player.contracts.push({id:'c_'+Date.now(),time,forma,valor,temporada,obs});
   }
   save();renderPersonal();
   toast('Contrato salvo!');
@@ -1005,7 +1040,7 @@ function saveContract(){
 function editContract(id){
   editingContractId=id;
   renderPersonal();
-  setTimeout(()=>{document.getElementById('cEmpresa')?.scrollIntoView({behavior:'smooth',block:'nearest'});},50);
+  setTimeout(()=>{document.getElementById('cTime')?.scrollIntoView({behavior:'smooth',block:'nearest'});},50);
 }
 
 function cancelContractEdit(){
@@ -1020,6 +1055,47 @@ function deleteContract(id){
     if(editingContractId===id)editingContractId=null;
     save();renderPersonal();
     toast('Contrato removido');
+  });
+}
+
+function saveBonus(){
+  const player=state.players[state.activePlayerIdx];
+  if(!player.bonuses)player.bonuses=[];
+  const descricao=document.getElementById('bDesc').value.trim();
+  const valor=parseFloat(document.getElementById('bValor').value)||0;
+  const temporada=document.getElementById('bTemporada').value.trim();
+  if(!descricao){toast('Preencha a descrição do bônus','err');return;}
+  if(!valor){toast('Preencha o valor','err');return;}
+  if(!temporada){toast('Preencha a temporada','err');return;}
+  if(editingBonusId){
+    const idx=player.bonuses.findIndex(b=>b.id===editingBonusId);
+    if(idx!==-1)player.bonuses[idx]={id:editingBonusId,descricao,valor,temporada};
+    editingBonusId=null;
+  } else {
+    player.bonuses.push({id:'b_'+Date.now(),descricao,valor,temporada});
+  }
+  save();renderPersonal();
+  toast('Bônus salvo!');
+}
+
+function editBonus(id){
+  editingBonusId=id;
+  renderPersonal();
+  setTimeout(()=>{document.getElementById('bDesc')?.scrollIntoView({behavior:'smooth',block:'nearest'});},50);
+}
+
+function cancelBonusEdit(){
+  editingBonusId=null;
+  renderPersonal();
+}
+
+function deleteBonus(id){
+  const player=state.players[state.activePlayerIdx];
+  confirmDialog('Excluir bônus','Remover este bônus?',()=>{
+    player.bonuses=(player.bonuses||[]).filter(b=>b.id!==id);
+    if(editingBonusId===id)editingBonusId=null;
+    save();renderPersonal();
+    toast('Bônus removido');
   });
 }
 
