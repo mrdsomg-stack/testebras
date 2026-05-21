@@ -305,8 +305,7 @@ window.onload=()=>{
       state.activeSeason=d.activeSeason||null;
     }
   }
-  state.activeView='season';
-  render();
+  state.activeView='season';render();
 };
 
 function migrateSeasonV8(sKey,s){
@@ -504,6 +503,7 @@ function renderSeasonContent(){
   const comps=sd.comps||[];
   const titles=sd.titles||[];
   const overall=calcStats(matches);
+  // PATCH 1: Removed W/D/L from hero
   const heroHtml=`<div class="hero" style="${sd.isNT?'border-color:rgba(227,179,65,.3)':''}">
     <div class="hero-top"><span>${sd.isNT?'🏴 <b style="color:var(--yellow)">Seleção Nacional</b>':`Clube: <b style="color:#fff">${sd.club}</b> &nbsp;·&nbsp; Temporada: <b style="color:#fff">${state.activeSeason}</b>`}</span></div>
     <div class="hero-stats">
@@ -512,9 +512,6 @@ function renderSeasonContent(){
       <div class="stat blue"><div class="val">${overall.a}</div><div class="lbl">Assists</div></div>
       <div class="stat gold"><div class="val">${overall.g+overall.a}</div><div class="lbl">Participações</div></div>
       <div class="stat"><div class="val">${overall.j>0?(overall.g/overall.j).toFixed(2):'0.00'}</div><div class="lbl">G/Jogo</div></div>
-      <div class="stat"><div class="val" style="color:var(--green)">${overall.w}</div><div class="lbl" style="color:var(--green)">V</div></div>
-      <div class="stat"><div class="val" style="color:var(--yellow)">${overall.d}</div><div class="lbl">E</div></div>
-      <div class="stat"><div class="val" style="color:var(--red)">${overall.l}</div><div class="lbl">D</div></div>
     </div>
   </div>`;
   const subTabsHtml=`<div class="sub-tabs">
@@ -584,6 +581,7 @@ function renderSubGeral(sd,matches,comps,titles,overall){
 }
 
 // --- POR COMPETIÇÃO ---
+// PATCH 2: Removed W/D/L from por competição
 function renderSubPorComp(sd,matches,comps){
   if(comps.length===0)return'<div class="empty">Nenhuma competição cadastrada nesta temporada.</div>';
   let html='';
@@ -601,9 +599,6 @@ function renderSubPorComp(sd,matches,comps){
         <div class="stat blue"><div class="val">${st.a}</div><div class="lbl">Assists</div></div>
         <div class="stat gold"><div class="val">${st.g+st.a}</div><div class="lbl">Partic.</div></div>
         <div class="stat"><div class="val">${st.j>0?(st.g/st.j).toFixed(2):'0.00'}</div><div class="lbl">G/J</div></div>
-        <div class="stat"><div class="val" style="color:var(--green)">${st.w}</div><div class="lbl" style="color:var(--green)">V</div></div>
-        <div class="stat"><div class="val" style="color:var(--yellow)">${st.d}</div><div class="lbl">E</div></div>
-        <div class="stat"><div class="val" style="color:var(--red)">${st.l}</div><div class="lbl">D</div></div>
         <div class="stat"><div class="val" style="color:var(--dim)">${st.gf}</div><div class="lbl">Pró</div></div>
         <div class="stat"><div class="val" style="color:var(--red)">${st.ga}</div><div class="lbl">Contra</div></div>
       </div>
@@ -613,6 +608,7 @@ function renderSubPorComp(sd,matches,comps){
 }
 
 // --- POR ANO ---
+// PATCH 3: Removed W/D/L from por ano
 function renderSubPorAno(sd,matches){
   const yearMap={};
   matches.forEach(m=>{const yr=getMatchYear(m,state.activeSeason);if(!yearMap[yr])yearMap[yr]=[];yearMap[yr].push(m);});
@@ -629,9 +625,6 @@ function renderSubPorAno(sd,matches){
         <div class="stat blue"><div class="val">${st.a}</div><div class="lbl">Assists</div></div>
         <div class="stat gold"><div class="val">${st.g+st.a}</div><div class="lbl">Partic.</div></div>
         <div class="stat"><div class="val">${st.j>0?(st.g/st.j).toFixed(2):'0.00'}</div><div class="lbl">G/J</div></div>
-        <div class="stat"><div class="val" style="color:var(--green)">${st.w}</div><div class="lbl" style="color:var(--green)">V</div></div>
-        <div class="stat"><div class="val" style="color:var(--yellow)">${st.d}</div><div class="lbl">E</div></div>
-        <div class="stat"><div class="val" style="color:var(--red)">${st.l}</div><div class="lbl">D</div></div>
         <div class="stat"><div class="val" style="color:var(--dim)">${st.gf}</div><div class="lbl">Pró</div></div>
         <div class="stat"><div class="val" style="color:var(--red)">${st.ga}</div><div class="lbl">Contra</div></div>
       </div>
@@ -641,6 +634,7 @@ function renderSubPorAno(sd,matches){
 }
 
 // --- LISTA DE JOGOS ---
+// PATCH 4: New match card format — Data | Casa | Placar | Fora | Gols | Assists
 function renderSubJogos(sd,matches,comps){
   const club=sd.club||'Seleção';
   let filtered=activeCompFilter?matches.filter(m=>m.compId===activeCompFilter):matches;
@@ -654,22 +648,36 @@ function renderSubJogos(sd,matches,comps){
     const res=m.gf>m.ga?'W':m.gf===m.ga?'D':'L';
     const resColor=res==='W'?'var(--green)':res==='D'?'var(--yellow)':'var(--red)';
     const resLabel=res==='W'?'V':res==='D'?'E':'D';
-    // placar: sempre mostra clube do lado correto
-    let leftTeam,rightTeam,leftScore,rightScore;
-    if(m.loc==='home'){leftTeam=`<b style="color:#fff">${club}</b>`;rightTeam=m.opponent||'—';leftScore=m.gf;rightScore=m.ga;}
-    else{leftTeam=m.opponent||'—';rightTeam=`<b style="color:#fff">${club}</b>`;leftScore=m.ga;rightScore=m.gf;}
-    const scoreDisp=`<span style="color:${resColor};font-weight:800">${leftScore}</span> <span style="color:var(--dim)">-</span> <span style="color:${resColor};font-weight:800">${rightScore}</span>`;
+    // home/away teams always positioned correctly
+    const homeTeam=m.loc==='home'?club:m.opponent||'—';
+    const awayTeam=m.loc==='home'?m.opponent||'—':club;
+    const homeScore=m.loc==='home'?m.gf:m.ga;
+    const awayScore=m.loc==='home'?m.ga:m.gf;
     const compName=getCompName(sd,m.compId);
-    const pg=m.playerGoals>0?`⚽${m.playerGoals} `:'';
-    const pa=m.playerAssists>0?`🎯${m.playerAssists}`:'';
-    const contrib=pg||pa?`<span style="font-size:.68rem;color:var(--green);margin-left:6px">${pg}${pa}</span>`:'';
-    matchesHtml+=`<div class="match-card">
-      <span class="match-loc ${m.loc}">${m.loc==='home'?'🏠 Casa':'✈️ Fora'}</span>
-      <div class="match-teams">${leftTeam} vs ${rightTeam}${contrib}</div>
-      <div class="match-score">${scoreDisp} <span style="font-size:.62rem;background:${resColor}22;border-radius:4px;padding:1px 5px;color:${resColor};margin-left:2px">${resLabel}</span></div>
-      <span class="match-comp-tag">${compName}</span>
-      <span class="match-date">${m.date||''}</span>
-      <div class="match-actions">
+    // Format date DD/MM/YYYY
+    let dateFmt='';
+    if(m.date&&m.date.length===10){const[yr,mo,dy]=m.date.split('-');dateFmt=`${dy}/${mo}/${yr}`;}
+    else dateFmt=m.date||'—';
+    const pgDisp=m.playerGoals>0
+      ?`<span style="color:var(--green);font-weight:700;font-size:.82rem">⚽ ${m.playerGoals}</span>`
+      :`<span style="color:var(--border);font-size:.82rem">⚽ 0</span>`;
+    const paDisp=m.playerAssists>0
+      ?`<span style="color:var(--blue);font-weight:700;font-size:.82rem">🎯 ${m.playerAssists}</span>`
+      :`<span style="color:var(--border);font-size:.82rem">🎯 0</span>`;
+    matchesHtml+=`<div class="match-card" style="gap:8px;padding:9px 12px">
+      <span style="min-width:82px;font-weight:600;color:var(--dim);font-size:.72rem;flex-shrink:0">${dateFmt}</span>
+      <span style="width:1px;height:20px;background:var(--border);flex-shrink:0;align-self:center"></span>
+      <div style="flex:1;min-width:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span style="font-size:.85rem;font-weight:${m.loc==='home'?'700':'400'};color:${m.loc==='home'?'#fff':'var(--dim)'};white-space:nowrap">${homeTeam}</span>
+        <div style="font-size:.95rem;font-weight:800;padding:2px 10px;background:rgba(255,255,255,.05);border-radius:6px;white-space:nowrap;flex-shrink:0"><span style="color:${resColor}">${homeScore}</span><span style="color:var(--dim);margin:0 4px">–</span><span style="color:${resColor}">${awayScore}</span></div>
+        <span style="font-size:.85rem;font-weight:${m.loc==='away'?'700':'400'};color:${m.loc==='away'?'#fff':'var(--dim)'};white-space:nowrap">${awayTeam}</span>
+        <span style="font-size:.6rem;background:${resColor}22;border-radius:4px;padding:1px 6px;color:${resColor};font-weight:700;flex-shrink:0">${resLabel}</span>
+      </div>
+      <span style="width:1px;height:20px;background:var(--border);flex-shrink:0;align-self:center"></span>
+      <div style="display:flex;gap:10px;align-items:center;flex-shrink:0">${pgDisp}${paDisp}</div>
+      <span style="width:1px;height:20px;background:var(--border);flex-shrink:0;align-self:center"></span>
+      <span class="match-comp-tag" style="font-size:.65rem;flex-shrink:0">${compName}</span>
+      <div class="match-actions" style="flex-shrink:0">
         <button class="btn edit-btn" style="padding:3px 8px;font-size:.72rem;border:1px solid rgba(240,136,62,.3)" onclick="editMatch('${m.id}')">✎</button>
         <button class="btn danger" style="padding:3px 8px;font-size:.72rem" onclick="deleteMatch('${m.id}')">✖</button>
       </div>
@@ -737,7 +745,6 @@ function openAddMatch(){
   document.getElementById('mMatchPlayerGoals').value='0';
   document.getElementById('mMatchAssists').value='0';
   document.getElementById('modalMatchTitle').textContent='Registrar Jogo';
-  // bind preview updates
   ['mMatchLoc','mMatchOpponent','mMatchGF','mMatchGA'].forEach(id=>{
     const el=document.getElementById(id);
     if(el){el.oninput=updateMatchPreview;el.onchange=updateMatchPreview;}
@@ -838,7 +845,6 @@ function getCareerData(playerIdx){
       if(!yearMap[yr])yearMap[yr]={j:0,g:0,a:0};
       yearMap[yr].j++;yearMap[yr].g+=m.playerGoals||0;yearMap[yr].a+=m.playerAssists||0;
     });
-    // compat: old ntYears
     (s.ntYears||[]).forEach(yr=>{
       (yr.entries||[]).forEach(e=>{
         sJ+=e.j;sG+=e.g;sA+=e.a;totalJ+=e.j;totalG+=e.g;totalA+=e.a;
