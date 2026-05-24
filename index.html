@@ -144,6 +144,13 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .comp-list-item .comp-name{flex:1;font-size:.88rem;font-weight:600;color:var(--gold)}
 /* season summary card */
 .summary-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
+/* opponent table */
+.opp-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.opp-table th{color:var(--dim);font-size:.7rem;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.opp-table td{padding:8px 10px;border-bottom:1px solid rgba(48,54,61,.4)}
+.opp-table tr:hover td{background:rgba(163,113,247,.05)}
+.opp-search{background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:8px 12px;border-radius:8px;font-size:.85rem;width:100%;outline:none;margin-bottom:12px}
+.opp-search:focus{border-color:var(--purple)}
 </style>
 </head>
 <body>
@@ -282,6 +289,7 @@ let pendingConfirm=null;
 let rankComp=null;
 let seasonSubView='geral';
 let activeCompFilter=null;
+let oppSearchQuery='';
 
 // contract vars
 let editingContractId=null;
@@ -503,7 +511,6 @@ function renderSeasonContent(){
   const comps=sd.comps||[];
   const titles=sd.titles||[];
   const overall=calcStats(matches);
-  // PATCH 1: Removed W/D/L from hero
   const heroHtml=`<div class="hero" style="${sd.isNT?'border-color:rgba(227,179,65,.3)':''}">
     <div class="hero-top"><span>${sd.isNT?'🏴 <b style="color:var(--yellow)">Seleção Nacional</b>':`Clube: <b style="color:#fff">${sd.club}</b> &nbsp;·&nbsp; Temporada: <b style="color:#fff">${state.activeSeason}</b>`}</span></div>
     <div class="hero-stats">
@@ -581,7 +588,6 @@ function renderSubGeral(sd,matches,comps,titles,overall){
 }
 
 // --- POR COMPETIÇÃO ---
-// PATCH 2: Removed W/D/L from por competição
 function renderSubPorComp(sd,matches,comps){
   if(comps.length===0)return'<div class="empty">Nenhuma competição cadastrada nesta temporada.</div>';
   let html='';
@@ -608,7 +614,6 @@ function renderSubPorComp(sd,matches,comps){
 }
 
 // --- POR ANO ---
-// PATCH 3: Removed W/D/L from por ano
 function renderSubPorAno(sd,matches){
   const yearMap={};
   matches.forEach(m=>{const yr=getMatchYear(m,state.activeSeason);if(!yearMap[yr])yearMap[yr]=[];yearMap[yr].push(m);});
@@ -634,7 +639,6 @@ function renderSubPorAno(sd,matches){
 }
 
 // --- LISTA DE JOGOS ---
-// PATCH 4: New match card format — Data | Casa | Placar | Fora | Gols | Assists
 function renderSubJogos(sd,matches,comps){
   const club=sd.club||'Seleção';
   let filtered=activeCompFilter?matches.filter(m=>m.compId===activeCompFilter):matches;
@@ -648,13 +652,11 @@ function renderSubJogos(sd,matches,comps){
     const res=m.gf>m.ga?'W':m.gf===m.ga?'D':'L';
     const resColor=res==='W'?'var(--green)':res==='D'?'var(--yellow)':'var(--red)';
     const resLabel=res==='W'?'V':res==='D'?'E':'D';
-    // home/away teams always positioned correctly
     const homeTeam=m.loc==='home'?club:m.opponent||'—';
     const awayTeam=m.loc==='home'?m.opponent||'—':club;
     const homeScore=m.loc==='home'?m.gf:m.ga;
     const awayScore=m.loc==='home'?m.ga:m.gf;
     const compName=getCompName(sd,m.compId);
-    // Format date DD/MM/YYYY
     let dateFmt='';
     if(m.date&&m.date.length===10){const[yr,mo,dy]=m.date.split('-');dateFmt=`${dy}/${mo}/${yr}`;}
     else dateFmt=m.date||'—';
@@ -827,7 +829,7 @@ function deleteTitle(tid){
 function getCareerData(playerIdx){
   const player=state.players[playerIdx];
   let totalJ=0,totalG=0,totalA=0;
-  const compMap={},clubMap={},yearMap={};
+  const compMap={},clubMap={},yearMap={},opponentMap={};
   const seasonStats=[],allTitles=[];
   const keys=Object.keys(player.seasons||{}).sort((a,b)=>{if(a==='SELEÇÃO')return-1;if(b==='SELEÇÃO')return 1;return b-a;});
   keys.forEach(sKey=>{
@@ -844,6 +846,16 @@ function getCareerData(playerIdx){
       const yr=getMatchYear(m,sKey);
       if(!yearMap[yr])yearMap[yr]={j:0,g:0,a:0};
       yearMap[yr].j++;yearMap[yr].g+=m.playerGoals||0;yearMap[yr].a+=m.playerAssists||0;
+      // Opponent tracking
+      const opp=m.opponent&&m.opponent.trim()&&m.opponent!=='—'?m.opponent.trim():'Desconhecido';
+      if(!opponentMap[opp])opponentMap[opp]={j:0,g:0,a:0,w:0,d:0,l:0,gf:0,ga:0};
+      opponentMap[opp].j++;
+      opponentMap[opp].g+=m.playerGoals||0;
+      opponentMap[opp].a+=m.playerAssists||0;
+      opponentMap[opp].gf+=m.gf||0;
+      opponentMap[opp].ga+=m.ga||0;
+      const mres=m.gf>m.ga?'w':m.gf===m.ga?'d':'l';
+      opponentMap[opp][mres]++;
     });
     (s.ntYears||[]).forEach(yr=>{
       (yr.entries||[]).forEach(e=>{
@@ -863,9 +875,20 @@ function getCareerData(playerIdx){
     }
   });
   seasonStats.sort((a,b)=>b.year-a.year);
-  return{totalJ,totalG,totalA,compMap,clubMap,yearMap,seasonStats,allTitles,
+  return{totalJ,totalG,totalA,compMap,clubMap,yearMap,opponentMap,seasonStats,allTitles,
     clubs:[...new Set(Object.values(player.seasons||{}).filter(s=>!s.isNT).map(s=>s.club))],
     seasons:keys.length};
+}
+
+function filterOppTable(query){
+  oppSearchQuery=query;
+  const tbody=document.getElementById('oppTableBody');
+  if(!tbody)return;
+  const rows=tbody.querySelectorAll('tr');
+  rows.forEach(r=>{
+    const name=r.getAttribute('data-opp')||'';
+    r.style.display=name.toLowerCase().includes(query.toLowerCase())?'':'none';
+  });
 }
 
 function renderCareer(){
@@ -877,6 +900,7 @@ function renderCareer(){
   const compsorted=Object.entries(d.compMap).sort((a,b)=>b[1].g-a[1].g);
   const clubsorted=Object.entries(d.clubMap).sort((a,b)=>b[1].g-a[1].g);
   const yearsorted=Object.entries(d.yearMap).sort((a,b)=>b[0].localeCompare(a[0]));
+  const oppsorted=Object.entries(d.opponentMap).sort((a,b)=>b[1].j-a[1].j);
   let titlesCareerHtml='';
   d.allTitles.forEach(t=>{
     titlesCareerHtml+=`<div class="title-card"><div class="title-card-trophy">🏆</div><div><div class="title-card-name">${t.name}</div><div class="title-card-season">${t.isNT?'🏴 ':''}${t.club} · ${t.season!=='SELEÇÃO'?t.season:'Seleção Nacional'}</div></div></div>`;
@@ -898,6 +922,7 @@ function renderCareer(){
     <div class="divider"></div>
     <div class="section-label" style="color:var(--yellow)">🏆 Títulos</div>
     ${d.allTitles.length>0?`<div class="titles-grid">${titlesCareerHtml}</div>`:'<div class="empty" style="padding:16px">Nenhum título ainda</div>'}`;
+
   if(yearsorted.length>0){
     html+=`<div class="divider"></div><div class="section-label" style="color:var(--blue)">📅 Por ano</div>`;
     yearsorted.forEach(([yr,v])=>{
@@ -942,8 +967,78 @@ function renderCareer(){
     });
     html+=`</tbody></table>`;
   } else html+=`<div class="empty" style="padding:20px">Nenhum dado</div>`;
+
+  // ===== POR ADVERSÁRIO =====
+  html+=`<div class="divider"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="section-label" style="color:var(--purple);margin-bottom:0">🆚 Por adversário</div>
+      <span style="font-size:.72rem;color:var(--dim)">${oppsorted.length} adversário${oppsorted.length!==1?'s':''}</span>
+    </div>`;
+
+  if(oppsorted.length>0){
+    // Sort options
+    html+=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+      <input class="opp-search" id="oppSearchInput" placeholder="🔍 Buscar adversário..." oninput="filterOppTable(this.value)" style="flex:1;min-width:160px;max-width:280px;margin-bottom:0">
+      <select id="oppSortSel" onchange="sortOppTable(this.value)" style="background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:7px 10px;border-radius:8px;font-size:.78rem;outline:none">
+        <option value="j">Ordenar: Jogos</option>
+        <option value="g">Ordenar: Gols</option>
+        <option value="a">Ordenar: Assists</option>
+        <option value="w">Ordenar: Vitórias</option>
+      </select>
+    </div>`;
+
+    let oppRowsHtml='';
+    oppsorted.forEach(([opp,od])=>{
+      const wPct=od.j>0?Math.round(od.w/od.j*100):0;
+      const wColor=wPct>=60?'var(--green)':wPct>=40?'var(--yellow)':'var(--red)';
+      oppRowsHtml+=`<tr data-opp="${opp.replace(/"/g,'&quot;')}" data-j="${od.j}" data-g="${od.g}" data-a="${od.a}" data-w="${od.w}">
+        <td style="font-weight:600;color:#fff">${opp}</td>
+        <td style="color:var(--dim);font-weight:600">${od.j}</td>
+        <td style="color:var(--green);font-weight:700">${od.w}</td>
+        <td style="color:var(--yellow)">${od.d}</td>
+        <td style="color:var(--red)">${od.l}</td>
+        <td style="font-size:.72rem;color:${wColor};font-weight:700">${wPct}%</td>
+        <td class="g-num">${od.g}</td>
+        <td class="a-num">${od.a}</td>
+        <td style="color:var(--gold);font-weight:700">${od.g+od.a}</td>
+        <td style="color:var(--dim)">${od.j>0?(od.g/od.j).toFixed(2):'0.00'}</td>
+      </tr>`;
+    });
+
+    html+=`<div style="overflow-x:auto">
+      <table class="opp-table">
+        <thead><tr>
+          <th>Adversário</th>
+          <th>J</th>
+          <th style="color:var(--green)">V</th>
+          <th style="color:var(--yellow)">E</th>
+          <th style="color:var(--red)">D</th>
+          <th>%V</th>
+          <th style="color:var(--green)">Gols</th>
+          <th style="color:var(--blue)">Assists</th>
+          <th style="color:var(--gold)">Partic.</th>
+          <th>G/J</th>
+        </tr></thead>
+        <tbody id="oppTableBody">${oppRowsHtml}</tbody>
+      </table>
+    </div>`;
+  } else {
+    html+=`<div class="empty" style="padding:20px">Nenhum jogo registrado com adversários identificados</div>`;
+  }
+
   html+=`</div>`;
   document.getElementById('careerContent').innerHTML=html;
+}
+
+function sortOppTable(field){
+  const tbody=document.getElementById('oppTableBody');
+  if(!tbody)return;
+  const rows=[...tbody.querySelectorAll('tr')];
+  rows.sort((a,b)=>parseInt(b.getAttribute('data-'+field)||0)-parseInt(a.getAttribute('data-'+field)||0));
+  rows.forEach(r=>tbody.appendChild(r));
+  // Re-apply filter
+  const q=document.getElementById('oppSearchInput')?.value||'';
+  if(q)filterOppTable(q);
 }
 
 // ===================== RANKING =====================
