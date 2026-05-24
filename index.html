@@ -900,7 +900,7 @@ function calcMilestones(playerIdx){
 function getCareerData(playerIdx){
   const player=state.players[playerIdx];
   let totalJ=0,totalG=0,totalA=0;
-  const compMap={},clubMap={},yearMap={},opponentMap={};
+  const compMap={},clubMap={},yearMap={},opponentMap={},ageMap={};
   const seasonStats=[],allTitles=[];
   const keys=Object.keys(player.seasons||{}).sort((a,b)=>{if(a==='SELEÇÃO')return-1;if(b==='SELEÇÃO')return 1;return b-a;});
   keys.forEach(sKey=>{
@@ -917,6 +917,17 @@ function getCareerData(playerIdx){
       const yr=getMatchYear(m,sKey);
       if(!yearMap[yr])yearMap[yr]={j:0,g:0,a:0};
       yearMap[yr].j++;yearMap[yr].g+=m.playerGoals||0;yearMap[yr].a+=m.playerAssists||0;
+      // Age tracking
+      if(player.birth&&m.date&&m.date.length===10){
+        const bd=new Date(player.birth);const md=new Date(m.date);
+        let age=md.getFullYear()-bd.getFullYear();
+        const hadBday=(md.getMonth()>bd.getMonth())||(md.getMonth()===bd.getMonth()&&md.getDate()>=bd.getDate());
+        if(!hadBday)age--;
+        if(age>=0&&age<=50){
+          if(!ageMap[age])ageMap[age]={j:0,g:0,a:0};
+          ageMap[age].j++;ageMap[age].g+=m.playerGoals||0;ageMap[age].a+=m.playerAssists||0;
+        }
+      }
       // Opponent tracking
       const opp=m.opponent&&m.opponent.trim()&&m.opponent!=='—'?m.opponent.trim():'Desconhecido';
       if(!opponentMap[opp])opponentMap[opp]={j:0,g:0,a:0,w:0,d:0,l:0,gf:0,ga:0};
@@ -946,7 +957,7 @@ function getCareerData(playerIdx){
     }
   });
   seasonStats.sort((a,b)=>b.year-a.year);
-  return{totalJ,totalG,totalA,compMap,clubMap,yearMap,opponentMap,seasonStats,allTitles,
+  return{totalJ,totalG,totalA,compMap,clubMap,yearMap,ageMap,opponentMap,seasonStats,allTitles,
     clubs:[...new Set(Object.values(player.seasons||{}).filter(s=>!s.isNT).map(s=>s.club))],
     seasons:keys.length};
 }
@@ -1085,6 +1096,73 @@ function renderCareer(){
     });
     html+=`</tbody></table>`;
   } else html+=`<div class="empty" style="padding:20px">Nenhum dado</div>`;
+
+  // ===== POR IDADE =====
+  const agesorted=Object.entries(d.ageMap).sort((a,b)=>Number(a[0])-Number(b[0]));
+  html+=`<div class="divider"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div class="section-label" style="color:var(--coral,#f0883e);margin-bottom:0">🎂 Por idade</div>
+      ${!player.birth?`<span style="font-size:.72rem;color:var(--red)">⚠️ Cadastre a data de nascimento e as datas dos jogos para ver este dado</span>`:agesorted.length===0?`<span style="font-size:.72rem;color:var(--dim)">Registre datas nos jogos para calcular</span>`:''}
+    </div>`;
+  if(agesorted.length>0){
+    // Best age by goals
+    const bestGoalAge=agesorted.reduce((best,cur)=>cur[1].g>best[1].g?cur:best,agesorted[0]);
+    const maxG=Math.max(...agesorted.map(([,v])=>v.g));
+    const maxJ=Math.max(...agesorted.map(([,v])=>v.j));
+    html+=`<div style="overflow-x:auto;margin-bottom:14px">
+      <table class="comp-career-table" style="min-width:500px">
+        <thead><tr>
+          <th>Idade</th>
+          <th>Jogos</th>
+          <th style="color:var(--green)">Gols</th>
+          <th style="color:var(--blue)">Assists</th>
+          <th style="color:var(--gold)">Partic.</th>
+          <th>G/J</th>
+          <th style="min-width:120px">Gols (barra)</th>
+        </tr></thead>
+        <tbody>`;
+    agesorted.forEach(([age,v])=>{
+      const isBest=Number(age)===Number(bestGoalAge[0])&&v.g>0;
+      const barW=maxG>0?Math.round(v.g/maxG*100):0;
+      const barColor=isBest?'var(--green)':'rgba(63,185,80,.5)';
+      html+=`<tr style="${isBest?'background:rgba(63,185,80,.05)':''}">
+        <td style="font-weight:700;color:${isBest?'var(--green)':'#fff'};white-space:nowrap">${age} anos${isBest?' 🏆':''}</td>
+        <td style="color:var(--dim)">${v.j}</td>
+        <td class="g-num">${v.g}</td>
+        <td class="a-num">${v.a}</td>
+        <td style="color:var(--gold);font-weight:700">${v.g+v.a}</td>
+        <td style="color:var(--dim)">${v.j>0?(v.g/v.j).toFixed(2):'0.00'}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;min-width:80px">
+              <div style="height:100%;background:${barColor};border-radius:3px;width:${barW}%;transition:width .3s"></div>
+            </div>
+            <span style="font-size:.68rem;color:var(--dim);min-width:20px;text-align:right">${v.g}</span>
+          </div>
+        </td>
+      </tr>`;
+    });
+    html+=`</tbody></table></div>`;
+    // Summary badges: peak age, most games age
+    const bestGamesAge=agesorted.reduce((best,cur)=>cur[1].j>best[1].j?cur:best,agesorted[0]);
+    const bestAssistAge=agesorted.reduce((best,cur)=>cur[1].a>best[1].a?cur:best,agesorted[0]);
+    html+=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:2px">
+      <div style="background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.3);border-radius:10px;padding:8px 14px">
+        <div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Melhor temporada (gols)</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--green)">${bestGoalAge[0]} anos — ${bestGoalAge[1].g} gols</div>
+      </div>
+      <div style="background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.3);border-radius:10px;padding:8px 14px">
+        <div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Mais ativo (jogos)</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--blue)">${bestGamesAge[0]} anos — ${bestGamesAge[1].j} jogos</div>
+      </div>
+      ${bestAssistAge[1].a>0?`<div style="background:rgba(240,136,62,.1);border:1px solid rgba(240,136,62,.3);border-radius:10px;padding:8px 14px">
+        <div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Melhor temporada (assists)</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--gold)">${bestAssistAge[0]} anos — ${bestAssistAge[1].a} assists</div>
+      </div>`:''}
+    </div>`;
+  } else if(player.birth){
+    html+=`<div class="empty" style="padding:16px">Registre as datas dos jogos para calcular as estatísticas por idade</div>`;
+  }
 
   // ===== POR ADVERSÁRIO =====
   html+=`<div class="divider"></div>
