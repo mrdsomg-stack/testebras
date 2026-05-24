@@ -174,7 +174,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <h1>Marechal Lott <span>Gestão por Temporada</span></h1>
     </div>
     <div class="row">
-      <button class="btn ghost" onclick="openModal('modalPlayer')">+ Jogador</button>
+      <button class="btn ghost" onclick="openAddPlayer()">+ Jogador</button>
       <button class="btn ghost" id="btnRanking" style="display:none" onclick="showRanking()">🏆 Ranking</button>
       <button class="btn" id="btnSeason" style="display:none" onclick="openModal('modalSeason')">+ Temporada</button>
     </div>
@@ -196,12 +196,14 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <!-- Modal Jogador -->
 <div id="modalPlayer" class="overlay" onclick="closeModalOnBg(event,'modalPlayer')">
   <div class="modal">
-    <h2>Cadastrar Atleta</h2>
+    <h2 id="modalPlayerTitle">Cadastrar Atleta</h2>
+    <label class="modal-label">Nome completo</label>
     <input type="text" id="pNameInput" placeholder="Nome completo">
+    <label class="modal-label">Data de nascimento</label>
     <input type="date" id="pBirthInput">
     <div class="modal-actions">
       <button class="btn ghost" onclick="closeModal('modalPlayer')">Cancelar</button>
-      <button class="btn" onclick="savePlayer()">Salvar</button>
+      <button class="btn" id="btnSavePlayer" onclick="savePlayer()">Salvar</button>
     </div>
   </div>
 </div>
@@ -369,14 +371,44 @@ function toggleNtCheckbox(){
 function fmtEuro(v){return'€'+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 
 // ===================== PLAYERS =====================
+let editingPlayerIdx=null;
+
+function openAddPlayer(){
+  editingPlayerIdx=null;
+  document.getElementById('modalPlayerTitle').textContent='Cadastrar Atleta';
+  document.getElementById('btnSavePlayer').textContent='Salvar';
+  document.getElementById('pNameInput').value='';
+  document.getElementById('pBirthInput').value='';
+  openModal('modalPlayer');
+}
+
+function editPlayer(idx,e){
+  e.stopPropagation();
+  editingPlayerIdx=idx;
+  const p=state.players[idx];
+  document.getElementById('modalPlayerTitle').textContent='Editar Atleta';
+  document.getElementById('btnSavePlayer').textContent='Atualizar';
+  document.getElementById('pNameInput').value=p.name||'';
+  document.getElementById('pBirthInput').value=p.birth||'';
+  openModal('modalPlayer');
+}
+
 function savePlayer(){
   const name=document.getElementById('pNameInput').value.trim();
   const birth=document.getElementById('pBirthInput').value;
   if(!name||!birth){toast('Preencha nome e data de nascimento','err');return;}
-  state.players.push({name,birth,seasons:{},contracts:[]});
-  save();render();closeModal('modalPlayer');
-  document.getElementById('pNameInput').value='';document.getElementById('pBirthInput').value='';
-  toast('Jogador cadastrado!');
+  if(editingPlayerIdx!==null){
+    state.players[editingPlayerIdx].name=name;
+    state.players[editingPlayerIdx].birth=birth;
+    editingPlayerIdx=null;
+    save();render();closeModal('modalPlayer');
+    toast('Jogador atualizado!');
+  } else {
+    state.players.push({name,birth,seasons:{},contracts:[]});
+    save();render();closeModal('modalPlayer');
+    document.getElementById('pNameInput').value='';document.getElementById('pBirthInput').value='';
+    toast('Jogador cadastrado!');
+  }
 }
 function deletePlayer(idx,e){
   e.stopPropagation();
@@ -404,7 +436,11 @@ function render(){
     c.onclick=()=>selectPlayer(idx);
     const del=document.createElement('button');del.className='chip-del';del.innerHTML='✕';
     del.onclick=(e)=>deletePlayer(idx,e);
-    wrap.appendChild(c);wrap.appendChild(del);list.appendChild(wrap);
+    const edit=document.createElement('button');edit.className='chip-del';edit.innerHTML='✎';
+    edit.style.cssText='color:var(--gold);font-size:.85rem';
+    edit.title='Editar jogador';
+    edit.onclick=(e)=>editPlayer(idx,e);
+    wrap.appendChild(c);wrap.appendChild(edit);wrap.appendChild(del);list.appendChild(wrap);
   });
   document.getElementById('btnRanking').style.display='inline-block';
   if(state.activePlayerIdx!==null)renderDash();
