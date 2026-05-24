@@ -144,6 +144,20 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .comp-list-item .comp-name{flex:1;font-size:.88rem;font-weight:600;color:var(--gold)}
 /* season summary card */
 .summary-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
+/* milestone cards */
+.milestone-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:4px}
+.milestone-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;transition:border-color .2s}
+.milestone-card:hover{border-color:rgba(163,113,247,.5)}
+.milestone-card.reached{border-color:rgba(163,113,247,.35);background:rgba(163,113,247,.06)}
+.milestone-card.pending{opacity:.45}
+.milestone-num{font-size:1.7rem;font-weight:700;color:var(--purple);line-height:1;margin-bottom:6px}
+.milestone-num.gold{color:var(--yellow)}
+.milestone-label{font-size:.6rem;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:8px;font-weight:500}
+.milestone-detail{font-size:.78rem;color:#e6edf3;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.milestone-sub{font-size:.68rem;color:var(--dim)}
+.milestone-badge{display:inline-flex;align-items:center;gap:3px;background:rgba(63,185,80,.15);border:1px solid rgba(63,185,80,.3);border-radius:8px;padding:2px 8px;font-size:.65rem;color:var(--green);font-weight:700;margin-top:6px}
+.milestone-badge.nt{background:rgba(227,179,65,.15);border-color:rgba(227,179,65,.3);color:var(--yellow)}
+.milestone-next{font-size:.72rem;color:var(--purple);font-weight:600;margin-top:4px}
 /* opponent table */
 .opp-table{width:100%;border-collapse:collapse;font-size:.82rem}
 .opp-table th{color:var(--dim);font-size:.7rem;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
@@ -826,6 +840,63 @@ function deleteTitle(tid){
 }
 
 // ===================== CAREER =====================
+function calcMilestones(playerIdx){
+  const player=state.players[playerIdx];
+  // Collect ALL matches across all seasons with full context, sorted by date
+  const allMatches=[];
+  const keys=Object.keys(player.seasons||{}).sort((a,b)=>{if(a==='SELEÇÃO')return 1;if(b==='SELEÇÃO')return -1;return a-b;});
+  keys.forEach(sKey=>{
+    const s=player.seasons[sKey];
+    (s.matches||[]).forEach(m=>{
+      if((m.playerGoals||0)===0)return; // skip scoreless games for perf
+      allMatches.push({
+        date:m.date||'',
+        goals:m.playerGoals||0,
+        opponent:m.opponent||'—',
+        club:s.isNT?'🏴 Seleção':(s.club||'—'),
+        season:sKey,
+        comp:getCompName(s,m.compId)||'—',
+        isNT:s.isNT||false
+      });
+    });
+  });
+  // Sort by date ascending (empty dates go last)
+  allMatches.sort((a,b)=>{
+    if(!a.date&&!b.date)return 0;
+    if(!a.date)return 1;
+    if(!b.date)return -1;
+    return a.date.localeCompare(b.date);
+  });
+  // Walk through and detect milestone crossings
+  const milestones=[];
+  const targets=[100,200,300,400,500,600,700,800,900,1000];
+  let cumulative=0;
+  let tIdx=0;
+  allMatches.forEach(m=>{
+    const prev=cumulative;
+    cumulative+=m.goals;
+    // Check if we crossed any milestone in this match
+    while(tIdx<targets.length && cumulative>=targets[tIdx]){
+      const target=targets[tIdx];
+      // Which goal number within this match was the milestone? (e.g. if prev=98, goals=3, target=100 → goal #2 in this match)
+      const goalNumInMatch=target-prev; // 1-indexed within this match
+      milestones.push({
+        target,
+        date:m.date,
+        opponent:m.opponent,
+        club:m.club,
+        season:m.season,
+        comp:m.comp,
+        isNT:m.isNT,
+        matchGoals:m.goals,
+        goalNumInMatch
+      });
+      tIdx++;
+    }
+  });
+  return{milestones,current:cumulative};
+}
+
 function getCareerData(playerIdx){
   const player=state.players[playerIdx];
   let totalJ=0,totalG=0,totalA=0;
@@ -922,6 +993,53 @@ function renderCareer(){
     <div class="divider"></div>
     <div class="section-label" style="color:var(--yellow)">🏆 Títulos</div>
     ${d.allTitles.length>0?`<div class="titles-grid">${titlesCareerHtml}</div>`:'<div class="empty" style="padding:16px">Nenhum título ainda</div>'}`;
+
+  // ===== MARCOS DE GOLS =====
+  const msData=calcMilestones(state.activePlayerIdx);
+  const targets=[100,200,300,400,500,600,700,800,900,1000];
+  const msMap=Object.fromEntries(msData.milestones.map(m=>[m.target,m]));
+  const msReached=msData.milestones.length;
+  const msNext=msReached<targets.length?targets[msReached]:null;
+  const msNextRemaining=msNext?msNext-msData.current:0;
+  html+=`<div class="divider"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div class="section-label" style="color:var(--purple);margin-bottom:0">⚽ Marcos de gols</div>
+      ${msNext?`<span style="font-size:.72rem;color:var(--purple);background:rgba(163,113,247,.12);border:1px solid rgba(163,113,247,.3);border-radius:10px;padding:3px 10px;font-weight:600">${msNextRemaining} gol${msNextRemaining!==1?'s':''} para o gol ${msNext.toLocaleString('pt-BR')}</span>`:`<span style="font-size:.72rem;color:var(--green);background:rgba(63,185,80,.12);border:1px solid rgba(63,185,80,.3);border-radius:10px;padding:3px 10px;font-weight:600">🏅 Todos os marcos alcançados!</span>`}
+    </div>
+    <div class="milestone-grid">`;
+  targets.forEach(t=>{
+    const ms=msMap[t];
+    const isMilestone=t===1000;
+    if(ms){
+      let dateFmt='';
+      if(ms.date&&ms.date.length===10){const[yr,mo,dy]=ms.date.split('-');dateFmt=`${dy}/${mo}/${yr}`;}
+      else if(ms.date)dateFmt=ms.date;
+      else dateFmt='Data não registrada';
+      const inMatchNote=ms.matchGoals>1?`<div class="milestone-sub">${ms.goalNumInMatch}º gol do jogo (${ms.matchGoals} no total)</div>`:'';
+      html+=`<div class="milestone-card reached">
+        <div class="milestone-num${isMilestone?' gold':''}">${t>=1000?'1.000':t}</div>
+        <div class="milestone-label">Gol de número ${t.toLocaleString('pt-BR')}</div>
+        <div class="milestone-detail">vs ${ms.opponent}</div>
+        <div class="milestone-sub">${ms.comp} · ${ms.season!=='SELEÇÃO'?ms.season:''}</div>
+        ${inMatchNote}
+        <div style="display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap">
+          <span class="milestone-badge${ms.isNT?' nt':''}">${ms.isNT?'🏴 ':''} ${ms.club}</span>
+          ${dateFmt?`<span style="font-size:.65rem;color:var(--dim)">${dateFmt}</span>`:''}
+        </div>
+      </div>`;
+    } else {
+      const remaining=t-msData.current;
+      const isNext=t===msNext;
+      html+=`<div class="milestone-card pending${isNext?' reached':''}">
+        <div class="milestone-num${isMilestone?' gold':''}">${t>=1000?'1.000':t}</div>
+        <div class="milestone-label">Gol de número ${t.toLocaleString('pt-BR')}</div>
+        ${isNext
+          ?`<div class="milestone-next">Faltam ${remaining} gol${remaining!==1?'s':''}</div><div style="margin-top:6px;height:4px;background:rgba(163,113,247,.15);border-radius:2px;overflow:hidden"><div style="height:100%;background:var(--purple);border-radius:2px;width:${Math.min(100,Math.round((msData.current%(t-100===0?100:100))/100*100))}%;transition:width .4s"></div></div>`
+          :`<div style="font-size:.72rem;color:var(--dim);margin-top:4px">Ainda não alcançado</div>`}
+      </div>`;
+    }
+  });
+  html+=`</div>`;
 
   if(yearsorted.length>0){
     html+=`<div class="divider"></div><div class="section-label" style="color:var(--blue)">📅 Por ano</div>`;
