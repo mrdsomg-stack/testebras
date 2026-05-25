@@ -118,17 +118,14 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .rank-val{font-size:1rem;font-weight:700;min-width:40px;text-align:right}
 .season-del-btn{background:transparent;border:none;color:var(--dim);cursor:pointer;font-size:.75rem;padding:2px 6px;border-radius:4px;transition:color .15s;margin-left:2px}
 .season-del-btn:hover{color:var(--red)}
-/* personal */
 .contracts-total-bar{background:rgba(240,136,62,.08);border:1px solid rgba(240,136,62,.25);border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .contracts-total-bar .big-num{font-size:2rem;font-weight:700;color:var(--gold)}
 .contracts-total-bar .sub{font-size:.72rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
 .contract-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;transition:border-color .2s}
 .contract-card:hover{border-color:var(--dim)}
-/* sub-tabs */
 .sub-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 .sub-tab{background:transparent;border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:.78rem;color:var(--dim);cursor:pointer;transition:all .15s;font-weight:400}
 .sub-tab.active{background:rgba(88,166,255,.15);border-color:var(--blue);color:var(--blue);font-weight:600}
-/* match card */
 .match-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;transition:border-color .15s;flex-wrap:wrap}
 .match-card:hover{border-color:var(--dim)}
 .match-loc{font-size:.68rem;font-weight:700;padding:3px 8px;border-radius:8px;min-width:54px;text-align:center;flex-shrink:0}
@@ -139,12 +136,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .match-comp-tag{font-size:.68rem;background:rgba(240,136,62,.12);color:var(--gold);padding:2px 8px;border-radius:8px;font-weight:600;flex-shrink:0}
 .match-date{font-size:.68rem;color:var(--dim);flex-shrink:0}
 .match-actions{display:flex;gap:4px;flex-shrink:0}
-/* comp item */
 .comp-list-item{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:6px}
 .comp-list-item .comp-name{flex:1;font-size:.88rem;font-weight:600;color:var(--gold)}
-/* season summary card */
 .summary-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
-/* milestone cards */
 .milestone-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:4px}
 .milestone-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;transition:border-color .2s}
 .milestone-card:hover{border-color:rgba(163,113,247,.5)}
@@ -158,7 +152,6 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .milestone-badge{display:inline-flex;align-items:center;gap:3px;background:rgba(63,185,80,.15);border:1px solid rgba(63,185,80,.3);border-radius:8px;padding:2px 8px;font-size:.65rem;color:var(--green);font-weight:700;margin-top:6px}
 .milestone-badge.nt{background:rgba(227,179,65,.15);border-color:rgba(227,179,65,.3);color:var(--yellow)}
 .milestone-next{font-size:.72rem;color:var(--purple);font-weight:600;margin-top:4px}
-/* opponent table */
 .opp-table{width:100%;border-collapse:collapse;font-size:.82rem}
 .opp-table th{color:var(--dim);font-size:.7rem;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
 .opp-table td{padding:8px 10px;border-bottom:1px solid rgba(48,54,61,.4)}
@@ -307,7 +300,6 @@ let seasonSubView='geral';
 let activeCompFilter=null;
 let oppSearchQuery='';
 
-// contract vars
 let editingContractId=null;
 let activeContractId=null;
 let editingTempId=null;
@@ -878,13 +870,12 @@ function deleteTitle(tid){
 // ===================== CAREER =====================
 function calcMilestones(playerIdx){
   const player=state.players[playerIdx];
-  // Collect ALL matches across all seasons with full context, sorted by date
   const allMatches=[];
   const keys=Object.keys(player.seasons||{}).sort((a,b)=>{if(a==='SELEÇÃO')return 1;if(b==='SELEÇÃO')return -1;return a-b;});
   keys.forEach(sKey=>{
     const s=player.seasons[sKey];
     (s.matches||[]).forEach(m=>{
-      if((m.playerGoals||0)===0)return; // skip scoreless games for perf
+      if((m.playerGoals||0)===0)return;
       allMatches.push({
         date:m.date||'',
         goals:m.playerGoals||0,
@@ -896,14 +887,12 @@ function calcMilestones(playerIdx){
       });
     });
   });
-  // Sort by date ascending (empty dates go last)
   allMatches.sort((a,b)=>{
     if(!a.date&&!b.date)return 0;
     if(!a.date)return 1;
     if(!b.date)return -1;
     return a.date.localeCompare(b.date);
   });
-  // Walk through and detect milestone crossings
   const milestones=[];
   const targets=[100,200,300,400,500,600,700,800,900,1000];
   let cumulative=0;
@@ -911,11 +900,9 @@ function calcMilestones(playerIdx){
   allMatches.forEach(m=>{
     const prev=cumulative;
     cumulative+=m.goals;
-    // Check if we crossed any milestone in this match
     while(tIdx<targets.length && cumulative>=targets[tIdx]){
       const target=targets[tIdx];
-      // Which goal number within this match was the milestone? (e.g. if prev=98, goals=3, target=100 → goal #2 in this match)
-      const goalNumInMatch=target-prev; // 1-indexed within this match
+      const goalNumInMatch=target-prev;
       milestones.push({
         target,
         date:m.date,
@@ -953,7 +940,6 @@ function getCareerData(playerIdx){
       const yr=getMatchYear(m,sKey);
       if(!yearMap[yr])yearMap[yr]={j:0,g:0,a:0};
       yearMap[yr].j++;yearMap[yr].g+=m.playerGoals||0;yearMap[yr].a+=m.playerAssists||0;
-      // Age tracking
       if(player.birth&&m.date&&m.date.length===10){
         const bd=new Date(player.birth);const md=new Date(m.date);
         let age=md.getFullYear()-bd.getFullYear();
@@ -964,7 +950,6 @@ function getCareerData(playerIdx){
           ageMap[age].j++;ageMap[age].g+=m.playerGoals||0;ageMap[age].a+=m.playerAssists||0;
         }
       }
-      // Opponent tracking
       const opp=m.opponent&&m.opponent.trim()&&m.opponent!=='—'?m.opponent.trim():'Desconhecido';
       if(!opponentMap[opp])opponentMap[opp]={j:0,g:0,a:0,w:0,d:0,l:0,gf:0,ga:0};
       opponentMap[opp].j++;
@@ -1133,11 +1118,9 @@ function renderCareer(){
     html+=`</tbody></table>`;
   } else html+=`<div class="empty" style="padding:20px">Nenhum dado</div>`;
 
-  // ===== POR IDADE =====
-  // Build cumulative age stats: total accumulated at each birthday
+  // ===== POR IDADE (ACUMULADO) =====
   const ageCumRows=[];
   if(player.birth){
-    // Collect all matches with dates, sorted ascending
     const allDatedMatches=[];
     Object.keys(player.seasons||{}).forEach(sKey=>{
       const s=player.seasons[sKey];
@@ -1150,25 +1133,20 @@ function renderCareer(){
     allDatedMatches.sort((a,b)=>a.date.localeCompare(b.date));
     if(allDatedMatches.length>0){
       const bd=new Date(player.birth);
-      // Find min and max age from data
       const firstDate=new Date(allDatedMatches[0].date);
       const lastDate=new Date(allDatedMatches[allDatedMatches.length-1].date);
       let startAge=lastDate.getFullYear()-bd.getFullYear();
       const hadBdayLast=(lastDate.getMonth()>bd.getMonth())||(lastDate.getMonth()===bd.getMonth()&&lastDate.getDate()>=bd.getDate());
       if(!hadBdayLast)startAge--;
-      // For each age from first to last, compute cumulative at END of that age (on their birthday)
       let firstAge=firstDate.getFullYear()-bd.getFullYear();
       const hadBdayFirst=(firstDate.getMonth()>bd.getMonth())||(firstDate.getMonth()===bd.getMonth()&&firstDate.getDate()>=bd.getDate());
       if(!hadBdayFirst)firstAge--;
       for(let age=firstAge;age<=startAge;age++){
-        // Birthday that marks end of this age = birthday in (birth year + age + 1)
         const bdayEnd=new Date(bd.getFullYear()+age+1,bd.getMonth(),bd.getDate());
-        // All matches before this birthday
         let cumJ=0,cumG=0,cumA=0;
         allDatedMatches.forEach(m=>{
           if(new Date(m.date)<bdayEnd){cumJ+=m.j;cumG+=m.g;cumA+=m.a;}
         });
-        // Matches played during this age specifically
         const bdayStart=new Date(bd.getFullYear()+age,bd.getMonth(),bd.getDate());
         let ageJ=0,ageG=0,ageA=0;
         allDatedMatches.forEach(m=>{
@@ -1189,7 +1167,7 @@ function renderCareer(){
     html+=`<div style="overflow-x:auto;margin-bottom:14px">
       <table class="comp-career-table" style="min-width:520px">
         <thead><tr>
-          <th>Ao completar</th>
+          <th>Aos</th>
           <th>Jogos acum.</th>
           <th style="color:var(--green)">Gols acum.</th>
           <th style="color:var(--blue)">Assists acum.</th>
@@ -1202,8 +1180,9 @@ function renderCareer(){
       const prev=i>0?ageCumRows[i-1].cumG:0;
       const diff=r.cumG-prev;
       const barW=maxCumG>0?Math.round(r.cumG/maxCumG*100):0;
+      // FIX: exibe r.age (idade real do jogador), não r.age+1
       html+=`<tr>
-        <td style="font-weight:700;color:#fff;white-space:nowrap">${r.age+1} anos</td>
+        <td style="font-weight:700;color:#fff;white-space:nowrap">${r.age} anos</td>
         <td style="color:var(--dim)">${r.cumJ}</td>
         <td style="color:var(--green);font-weight:700">${r.cumG}</td>
         <td style="color:var(--blue);font-weight:700">${r.cumA}</td>
@@ -1220,9 +1199,8 @@ function renderCareer(){
       </tr>`;
     });
     html+=`</tbody></table></div>`;
-    const last=ageCumRows[ageCumRows.length-1];
     html+=`<div style="font-size:.72rem;color:var(--dim);padding:4px 2px">
-      💡 Cada linha mostra o total acumulado <b style="color:#fff">ao completar aquela idade</b> — ou seja, o que o jogador já tinha na carreira naquele aniversário.
+      💡 Cada linha mostra o total acumulado que o jogador tinha <b style="color:#fff">durante aquela idade</b>.
     </div>`;
   } else if(player.birth){
     html+=`<div class="empty" style="padding:16px">Registre as datas dos jogos para calcular o acumulado por idade</div>`;
@@ -1236,7 +1214,6 @@ function renderCareer(){
     </div>`;
 
   if(oppsorted.length>0){
-    // Sort options
     html+=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
       <input class="opp-search" id="oppSearchInput" placeholder="🔍 Buscar adversário..." oninput="filterOppTable(this.value)" style="flex:1;min-width:160px;max-width:280px;margin-bottom:0">
       <select id="oppSortSel" onchange="sortOppTable(this.value)" style="background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:7px 10px;border-radius:8px;font-size:.78rem;outline:none">
@@ -1296,7 +1273,6 @@ function sortOppTable(field){
   const rows=[...tbody.querySelectorAll('tr')];
   rows.sort((a,b)=>parseInt(b.getAttribute('data-'+field)||0)-parseInt(a.getAttribute('data-'+field)||0));
   rows.forEach(r=>tbody.appendChild(r));
-  // Re-apply filter
   const q=document.getElementById('oppSearchInput')?.value||'';
   if(q)filterOppTable(q);
 }
