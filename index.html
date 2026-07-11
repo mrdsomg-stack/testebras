@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -158,6 +160,48 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .opp-table tr:hover td{background:rgba(163,113,247,.05)}
 .opp-search{background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:8px 12px;border-radius:8px;font-size:.85rem;width:100%;outline:none;margin-bottom:12px}
 .opp-search:focus{border-color:var(--purple)}
+
+
+/* ===================== IMPORTADOR WIKIPÉDIA ===================== */
+.wiki-modal{max-width:1120px;padding:24px}
+.wiki-import-top{display:grid;grid-template-columns:minmax(260px,1fr) auto;gap:10px;align-items:end}
+.wiki-url-wrap label{display:block;margin-bottom:6px}
+.wiki-url-input{margin-bottom:0!important}
+.wiki-options{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.wiki-option{display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.78rem;color:var(--dim);cursor:pointer;user-select:none}
+.wiki-option input{width:15px!important;height:15px!important;margin:0!important;accent-color:var(--green)}
+.wiki-status{min-height:20px;font-size:.78rem;color:var(--dim);margin:8px 0}
+.wiki-status.success{color:var(--green)}
+.wiki-status.error{color:var(--red)}
+.wiki-mapping{display:none;margin-top:14px}
+.wiki-mapping.visible{display:block}
+.wiki-map-bar{display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:10px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px}
+.wiki-map-control{min-width:240px;flex:1}
+.wiki-map-control select{margin:0!important}
+.wiki-count{font-size:.75rem;color:var(--dim)}
+.wiki-preview-wrap{overflow:auto;max-height:55vh;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.wiki-table{min-width:980px;font-size:.78rem}
+.wiki-table th{position:sticky;top:0;z-index:2;background:var(--surface2)}
+.wiki-table td{padding:7px 8px;vertical-align:middle}
+.wiki-table td[contenteditable="true"]{outline:none;border-radius:5px;min-width:90px}
+.wiki-table td[contenteditable="true"]:focus{background:rgba(88,166,255,.10);box-shadow:inset 0 0 0 1px var(--blue)}
+.wiki-table .wiki-date{min-width:105px}
+.wiki-table .wiki-team{min-width:165px}
+.wiki-table .wiki-score{min-width:70px;text-align:center;font-weight:700}
+.wiki-table .wiki-comp{min-width:170px}
+.wiki-table .wiki-num-input{width:62px!important;min-width:62px;margin:0!important;padding:6px 8px!important;text-align:center}
+.wiki-table .wiki-check{width:15px!important;height:15px!important;margin:0!important;accent-color:var(--green)}
+.wiki-row-invalid{opacity:.55}
+.wiki-row-duplicate{opacity:.58}
+.wiki-row-removed{display:none}
+.wiki-row-status{font-size:.68rem;white-space:nowrap;font-weight:600}
+.wiki-row-status.ok{color:var(--green)}
+.wiki-row-status.warn{color:var(--yellow)}
+.wiki-row-status.err{color:var(--red)}
+.wiki-bulk-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.wiki-footer-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+@media(max-width:700px){.wiki-import-top{grid-template-columns:1fr}.wiki-modal{padding:18px}.wiki-preview-wrap{max-height:50vh}}
+
 </style>
 </head>
 <body>
@@ -277,6 +321,78 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
+
+<!-- Modal Importar Wikipédia -->
+<div id="modalWikiImport" class="overlay" onclick="closeModalOnBg(event,'modalWikiImport')">
+  <div class="modal wiki-modal">
+    <h2 style="margin-bottom:6px">Importar jogos da Wikipédia</h2>
+    <div style="color:var(--dim);font-size:.8rem;line-height:1.5;margin-bottom:14px">
+      Cole o link da página da temporada. Os jogos serão carregados para conferência antes de entrarem nesta temporada.
+    </div>
+
+    <div class="wiki-import-top">
+      <div class="wiki-url-wrap">
+        <label class="modal-label">Link da temporada na Wikipédia</label>
+        <input class="wiki-url-input" type="url" id="wikiImportUrl" placeholder="https://en.wikipedia.org/wiki/..."><br>
+      </div>
+      <button class="btn" id="wikiLoadBtn" onclick="loadWikipediaMatches()">Buscar jogos</button>
+    </div>
+
+    <div class="wiki-options">
+      <label class="wiki-option"><input type="checkbox" id="wikiOnlyPlayed" checked> Somente jogos realizados</label>
+      <label class="wiki-option"><input type="checkbox" id="wikiTranslateComps" checked> Traduzir competições conhecidas</label>
+      <label class="wiki-option"><input type="checkbox" id="wikiIncludeFriendlies"> Incluir amistosos</label>
+    </div>
+
+    <div id="wikiImportStatus" class="wiki-status">Nenhum link consultado.</div>
+
+    <div id="wikiMapping" class="wiki-mapping">
+      <div class="wiki-map-bar">
+        <div class="wiki-map-control">
+          <label class="modal-label">Time do jogador nesta página</label>
+          <select id="wikiMainTeam" onchange="refreshWikipediaPreviewMapping()"></select>
+        </div>
+        <div>
+          <div id="wikiImportCount" class="wiki-count"></div>
+          <div class="wiki-bulk-actions" style="margin-top:7px">
+            <button class="btn ghost" style="padding:5px 10px;font-size:.7rem" onclick="toggleAllWikipediaRows(true)">Marcar todos</button>
+            <button class="btn ghost" style="padding:5px 10px;font-size:.7rem" onclick="toggleAllWikipediaRows(false)">Desmarcar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wiki-preview-wrap">
+        <table class="wiki-table">
+          <thead>
+            <tr>
+              <th style="width:38px">✓</th>
+              <th>Data</th>
+              <th>Time 1</th>
+              <th>Placar</th>
+              <th>Time 2</th>
+              <th>Competição</th>
+              <th style="color:var(--green)">Gols</th>
+              <th style="color:var(--blue)">Assists</th>
+              <th>Situação</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="wikiImportBody"></tbody>
+        </table>
+      </div>
+
+      <div style="font-size:.7rem;color:var(--dim);margin-top:8px;line-height:1.45">
+        Você pode corrigir data, times, placar e competição diretamente na tabela. Gols e assistências começam em zero e seguem os mesmos campos usados no registro manual.
+      </div>
+    </div>
+
+    <div class="wiki-footer-actions">
+      <button class="btn ghost" onclick="closeModal('modalWikiImport')">Cancelar</button>
+      <button class="btn" id="wikiImportBtn" style="display:none" onclick="importWikipediaMatches()">Importar jogos marcados</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal Confirmar -->
 <div id="modalConfirm" class="overlay" onclick="closeModalOnBg(event,'modalConfirm')">
   <div class="modal">
@@ -299,6 +415,8 @@ let rankComp=null;
 let seasonSubView='geral';
 let activeCompFilter=null;
 let oppSearchQuery='';
+let wikipediaImportGames=[];
+let wikipediaImportPage='';
 
 let editingContractId=null;
 let activeContractId=null;
@@ -623,9 +741,12 @@ function renderSubGeral(sd,matches,comps,titles,overall){
       </div>
     </div>
     <div class="form-wrap" style="border-color:rgba(63,185,80,.25)">
-      <div class="sec-header"><span class="sec-title" style="color:var(--green)">⚽ Registrar jogo</span></div>
-      <div style="color:var(--dim);font-size:.82rem;margin-bottom:10px">${comps.length===0?'⚠️ Cadastre pelo menos uma competição acima antes de adicionar jogos.':'Clique abaixo para registrar um jogo nesta temporada.'}</div>
-      ${comps.length>0?`<button class="btn" onclick="openAddMatch()">+ Novo Jogo</button>`:''}
+      <div class="sec-header"><span class="sec-title" style="color:var(--green)">⚽ Registrar jogos</span></div>
+      <div style="color:var(--dim);font-size:.82rem;margin-bottom:10px">Adicione uma partida manualmente ou importe toda a tabela de uma temporada da Wikipédia.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${comps.length>0?`<button class="btn" onclick="openAddMatch()">+ Novo Jogo</button>`:`<span style="font-size:.75rem;color:var(--yellow);align-self:center">Para registro manual, cadastre uma competição acima.</span>`}
+        <button class="btn ghost" style="border-color:rgba(88,166,255,.45);color:var(--blue)" onclick="openWikipediaImport()">🌐 Importar da Wikipédia</button>
+      </div>
     </div>`;
 }
 
@@ -728,9 +849,12 @@ function renderSubJogos(sd,matches,comps){
     </div>`;
   });
   return filterHtml+`
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap">
       <span class="sec-title">${filtered.length} jogo${filtered.length!==1?'s':''}</span>
-      ${comps.length>0?`<button class="btn" style="padding:6px 14px;font-size:.78rem" onclick="openAddMatch()">+ Novo Jogo</button>`:''}
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="btn ghost" style="padding:6px 12px;font-size:.75rem;border-color:rgba(88,166,255,.45);color:var(--blue)" onclick="openWikipediaImport()">🌐 Wikipédia</button>
+        ${comps.length>0?`<button class="btn" style="padding:6px 14px;font-size:.78rem" onclick="openAddMatch()">+ Novo Jogo</button>`:''}
+      </div>
     </div>
     ${filtered.length===0?'<div class="empty">Nenhum jogo registrado ainda.</div>':matchesHtml}`;
 }
@@ -846,6 +970,346 @@ function deleteMatch(mid){
     season.matches=(season.matches||[]).filter(m=>m.id!==mid);
     save();renderSeasonContent();toast('Jogo removido');
   });
+}
+
+
+// ===================== IMPORTADOR WIKIPÉDIA =====================
+const wikiMonthMap={
+  january:1,jan:1,janeiro:1,enero:1,janvier:1,gennaio:1,januar:1,januari:1,
+  february:2,feb:2,fevereiro:2,febrero:2,fevrier:2,fevr:2,febbraio:2,februar:2,februari:2,
+  march:3,mar:3,marco:3,marzo:3,mars:3,marz:3,maart:3,
+  april:4,apr:4,abril:4,avril:4,aprile:4,
+  may:5,maio:5,mayo:5,mai:5,maggio:5,mei:5,
+  june:6,jun:6,junho:6,junio:6,juin:6,giugno:6,juni:6,
+  july:7,jul:7,julho:7,julio:7,juillet:7,luglio:7,juli:7,
+  august:8,aug:8,agosto:8,aout:8,
+  september:9,sep:9,sept:9,setembro:9,septiembre:9,septembre:9,settembre:9,
+  october:10,oct:10,outubro:10,octubre:10,octobre:10,ottobre:10,oktober:10,
+  november:11,nov:11,novembro:11,noviembre:11,novembre:11,
+  december:12,dec:12,dezembro:12,diciembre:12,decembre:12,dicembre:12,dezember:12
+};
+
+function wikiStatus(message,type=''){
+  const el=document.getElementById('wikiImportStatus');
+  if(!el)return;
+  el.textContent=message;
+  el.className=`wiki-status ${type}`.trim();
+}
+
+function wikiNormalize(value=''){
+  return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+}
+
+function wikiDecodeHtml(value=''){
+  const area=document.createElement('textarea');area.innerHTML=value;return area.value;
+}
+
+function wikiClean(value=''){
+  let text=String(value).replace(/<!--[\s\S]*?-->/g,' ').replace(/<ref\b[^>]*\/>/gi,' ').replace(/<ref\b[^>]*>[\s\S]*?<\/ref>/gi,' ');
+  for(let i=0;i<6;i++){
+    const prev=text;
+    text=text.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g,'$2').replace(/\[\[([^\]]+)\]\]/g,'$1')
+      .replace(/\{\{\s*(?:nowrap|nobr|small|smaller|larger|plainlist)\s*\|([^{}]*)\}\}/gi,'$1')
+      .replace(/\{\{\s*abbr\s*\|([^|{}]+)(?:\|[^{}]*)?\}\}/gi,'$1').replace(/\{\{[^{}]*\}\}/g,' ');
+    if(text===prev)break;
+  }
+  const div=document.createElement('div');div.innerHTML=text;text=div.textContent||div.innerText||'';
+  return wikiDecodeHtml(text).replace(/''+/g,'').replace(/\s+/g,' ').trim();
+}
+
+function wikiParseUrl(raw){
+  let parsed;
+  try{parsed=new URL(String(raw||'').trim());}catch{throw new Error('Informe um link válido da Wikipédia.');}
+  const parts=parsed.hostname.toLowerCase().split('.');
+  const idx=parts.indexOf('wikipedia');
+  if(idx<1||!parsed.pathname.startsWith('/wiki/'))throw new Error('Use um link de página da Wikipédia no formato /wiki/.');
+  const language=parts[0]==='www'?'en':parts[0];
+  const title=decodeURIComponent(parsed.pathname.slice('/wiki/'.length)).replace(/_/g,' ');
+  if(!title)throw new Error('Não foi possível identificar o título da página.');
+  return{language,title};
+}
+
+function wikiExtractFootballBoxes(source){
+  const templates=[];const lower=source.toLowerCase();let index=0;
+  while(index<source.length){
+    const start=lower.indexOf('{{football box',index);if(start===-1)break;
+    let depth=0,end=-1;
+    for(let i=start;i<source.length-1;i++){
+      const pair=source.slice(i,i+2);
+      if(pair==='{{'){depth++;i++;}
+      else if(pair==='}}'){depth--;i++;if(depth===0){end=i+1;break;}}
+    }
+    if(end===-1)break;
+    templates.push({start,text:source.slice(start,end)});index=end;
+  }
+  return templates;
+}
+
+function wikiSplitTopLevel(value){
+  const parts=[];let current='',templateDepth=0,linkDepth=0;
+  for(let i=0;i<value.length;i++){
+    const pair=value.slice(i,i+2);
+    if(pair==='{{'){templateDepth++;current+=pair;i++;continue;}
+    if(pair==='}}'&&templateDepth>0){templateDepth--;current+=pair;i++;continue;}
+    if(pair==='[['){linkDepth++;current+=pair;i++;continue;}
+    if(pair===']]'&&linkDepth>0){linkDepth--;current+=pair;i++;continue;}
+    if(value[i]==='|'&&templateDepth===0&&linkDepth===0){parts.push(current);current='';}
+    else current+=value[i];
+  }
+  parts.push(current);return parts;
+}
+
+function wikiTemplateParams(templateText){
+  const parts=wikiSplitTopLevel(templateText.slice(2,-2));const params={};
+  for(let i=1;i<parts.length;i++){
+    const eq=parts[i].indexOf('=');if(eq===-1)continue;
+    const key=wikiNormalize(parts[i].slice(0,eq)).replace(/ /g,'');
+    if(key)params[key]=parts[i].slice(eq+1).trim();
+  }
+  return params;
+}
+
+function wikiHeadings(source){
+  const headings=[];const regex=/^(={2,6})\s*(.*?)\s*\1\s*$/gm;let match;
+  while((match=regex.exec(source))!==null)headings.push({index:match.index,level:match[1].length,title:wikiClean(match[2])});
+  return headings;
+}
+
+function wikiHeadingStackAt(headings,position){
+  const stack=[];
+  for(const h of headings){if(h.index>position)break;const slot=h.level-2;stack[slot]=h.title;stack.length=slot+1;}
+  return stack.filter(Boolean);
+}
+
+function wikiInferCompetition(stack,roundValue=''){
+  const generic=['competition','competitions','matches','match','fixtures','results','league table','results summary','results by round','group stage','knockout phase','round of 16','round of 32','round of 64','quarter finals','semi finals','semifinals','first leg','second leg','final','overall record'];
+  const candidates=stack.filter(h=>!generic.includes(wikiNormalize(h)));
+  let competition=candidates[candidates.length-1]||wikiClean(roundValue)||'Não identificada';
+  const normalized=wikiNormalize(competition);
+  if((normalized.includes('pre season')||normalized.includes('friendl'))&&roundValue){
+    const round=wikiClean(roundValue),roundKey=wikiNormalize(round);
+    if(round&&!/^\d+$/.test(round)&&!roundKey.includes('friendly'))competition=round;
+  }
+  return competition;
+}
+
+function wikiTranslateCompetition(value){
+  const exact={
+    'pre season and friendlies':'Amistosos','pre season friendlies':'Amistosos','friendly':'Amistoso','friendlies':'Amistosos',
+    'coupe de france':'Copa da França','trophee des champions':'Supercopa da França',
+    'uefa champions league':'Liga dos Campeões da UEFA','uefa europa league':'Liga Europa da UEFA',
+    'uefa europa conference league':'Liga Conferência da UEFA','riyadh season cup':'Riyadh Season Cup'
+  };
+  return exact[wikiNormalize(value)]||value;
+}
+
+function wikiIsFriendly(value){return /friendl|pre season|preseason|amistos|testimonial|tour|riyadh season/.test(wikiNormalize(value));}
+
+function wikiMakeDate(year,month,day){
+  if(!year||month<1||month>12||day<1||day>31)return{display:'',iso:'',timestamp:Number.MAX_SAFE_INTEGER};
+  return{display:`${String(day).padStart(2,'0')}/${String(month).padStart(2,'0')}/${year}`,iso:`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`,timestamp:new Date(year,month-1,day,12).getTime()};
+}
+
+function wikiParseDate(rawValue){
+  const raw=String(rawValue||'');let match=raw.match(/\{\{\s*(?:start date|dts|date)\s*\|\s*(\d{4})\s*\|\s*(\d{1,2})\s*\|\s*(\d{1,2})/i);
+  if(match)return wikiMakeDate(Number(match[1]),Number(match[2]),Number(match[3]));
+  const text=wikiClean(raw).replace(/\b(1st|2nd|3rd|\d+th|1er)\b/gi,m=>m.replace(/\D/g,'')).replace(/,/g,' ').replace(/\s+/g,' ').trim();
+  match=text.match(/\b(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})\b/);if(match)return wikiMakeDate(+match[1],+match[2],+match[3]);
+  match=text.match(/\b(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{4})\b/);if(match)return wikiMakeDate(+match[3],+match[2],+match[1]);
+  match=text.match(/\b(\d{1,2})\s+([A-Za-zÀ-ÿ.]+)\s+(\d{4})\b/);
+  if(match){const name=wikiNormalize(match[2]).replace(/\s/g,'');const month=wikiMonthMap[name]||wikiMonthMap[name.slice(0,3)];if(month)return wikiMakeDate(+match[3],month,+match[1]);}
+  match=text.match(/\b([A-Za-zÀ-ÿ.]+)\s+(\d{1,2})\s+(\d{4})\b/);
+  if(match){const name=wikiNormalize(match[1]).replace(/\s/g,'');const month=wikiMonthMap[name]||wikiMonthMap[name.slice(0,3)];if(month)return wikiMakeDate(+match[3],month,+match[2]);}
+  return{display:text,iso:'',timestamp:Number.MAX_SAFE_INTEGER};
+}
+
+function wikiCleanScore(value){
+  const text=wikiClean(value).replace(/−/g,'-');const match=text.match(/\b\d+\s*[–—-]\s*\d+\b/);
+  return match?match[0].replace(/\s+/g,'').replace(/[—-]/g,'–'):text;
+}
+
+function wikiBuildGames(wikitext){
+  const headings=wikiHeadings(wikitext),templates=wikiExtractFootballBoxes(wikitext),games=[],seen=new Set();
+  const includeFriendlies=document.getElementById('wikiIncludeFriendlies').checked;
+  const translate=document.getElementById('wikiTranslateComps').checked;
+  const onlyPlayed=document.getElementById('wikiOnlyPlayed').checked;
+  for(const template of templates){
+    const p=wikiTemplateParams(template.text);
+    const team1=wikiClean(p.team1||p.home||p.hometeam||'');
+    const team2=wikiClean(p.team2||p.away||p.awayteam||'');
+    const score=wikiCleanScore(p.score||p.result||'');
+    const dateInfo=wikiParseDate(p.date||'');
+    const original=wikiInferCompetition(wikiHeadingStackAt(headings,template.start),p.round||p.stage||'');
+    const competition=translate?wikiTranslateCompetition(original):original;
+    if(!team1||!team2||!dateInfo.display)continue;
+    if(onlyPlayed&&!/^\d+–\d+$/.test(score))continue;
+    if(!includeFriendlies&&wikiIsFriendly(original))continue;
+    const key=wikiNormalize(`${dateInfo.display}|${team1}|${score}|${team2}|${competition}`);if(seen.has(key))continue;seen.add(key);
+    games.push({dateDisplay:dateInfo.display,dateIso:dateInfo.iso,timestamp:dateInfo.timestamp,team1,score,team2,competition,playerGoals:0,playerAssists:0});
+  }
+  games.sort((a,b)=>a.timestamp-b.timestamp||a.competition.localeCompare(b.competition,'pt-BR'));return games;
+}
+
+function openWikipediaImport(){
+  if(state.activePlayerIdx===null||!state.activeSeason){toast('Selecione uma temporada','err');return;}
+  wikipediaImportGames=[];wikipediaImportPage='';
+  document.getElementById('wikiImportBody').innerHTML='';
+  document.getElementById('wikiMapping').classList.remove('visible');
+  document.getElementById('wikiImportBtn').style.display='none';
+  wikiStatus('Cole o link de uma página de temporada da Wikipédia.');
+  openModal('modalWikiImport');
+}
+
+async function loadWikipediaMatches(){
+  const btn=document.getElementById('wikiLoadBtn');
+  document.getElementById('wikiMapping').classList.remove('visible');
+  document.getElementById('wikiImportBtn').style.display='none';
+  document.getElementById('wikiImportBody').innerHTML='';
+  wikiStatus('Consultando a Wikipédia...');btn.disabled=true;
+  try{
+    const{language,title}=wikiParseUrl(document.getElementById('wikiImportUrl').value);
+    const endpoint=new URL(`https://${language}.wikipedia.org/w/api.php`);
+    endpoint.search=new URLSearchParams({action:'parse',page:title,prop:'wikitext|displaytitle',redirects:'1',format:'json',formatversion:'2',origin:'*'}).toString();
+    const response=await fetch(endpoint.toString(),{headers:{Accept:'application/json'}});
+    if(!response.ok)throw new Error(`A Wikipédia respondeu com o código ${response.status}.`);
+    const data=await response.json();if(data.error)throw new Error(data.error.info||'A Wikipédia não conseguiu processar a página.');
+    const parsed=data.parse||{};const wikitext=typeof parsed.wikitext==='string'?parsed.wikitext:parsed.wikitext?.['*'];
+    if(!wikitext)throw new Error('A página não retornou o código wiki necessário.');
+    wikipediaImportGames=wikiBuildGames(wikitext);wikipediaImportPage=wikiClean(parsed.displaytitle||parsed.title||title);
+    if(!wikipediaImportGames.length)throw new Error('Nenhuma partida foi encontrada. A página pode usar um modelo diferente de “Football box”.');
+    populateWikipediaMainTeam();renderWikipediaPreview();
+    document.getElementById('wikiMapping').classList.add('visible');
+    document.getElementById('wikiImportBtn').style.display='inline-block';
+    wikiStatus(`${wikipediaImportGames.length} jogo(s) encontrado(s). Confira a tabela antes de importar.`,'success');
+  }catch(error){console.error(error);wikiStatus(error.message||'Não foi possível processar a página.','error');}
+  finally{btn.disabled=false;}
+}
+
+function populateWikipediaMainTeam(){
+  const counts=new Map();
+  wikipediaImportGames.forEach(g=>{counts.set(g.team1,(counts.get(g.team1)||0)+1);counts.set(g.team2,(counts.get(g.team2)||0)+1);});
+  const teams=[...counts.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'pt-BR'));
+  const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
+  const clubKey=wikiNormalize(season.club||'');
+  let best=teams[0]?.[0]||'';
+  if(clubKey){
+    const matched=teams.find(([name])=>{const key=wikiNormalize(name);return key===clubKey||key.includes(clubKey)||clubKey.includes(key);});
+    if(matched)best=matched[0];
+  }
+  const select=document.getElementById('wikiMainTeam');select.innerHTML='';
+  teams.forEach(([name,count])=>{const opt=document.createElement('option');opt.value=name;opt.textContent=`${name} (${count} jogos)`;if(name===best)opt.selected=true;select.appendChild(opt);});
+}
+
+function wikiEscape(value=''){
+  return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+function renderWikipediaPreview(){
+  const body=document.getElementById('wikiImportBody');body.innerHTML='';
+  wikipediaImportGames.forEach((g,index)=>{
+    const tr=document.createElement('tr');tr.dataset.index=index;
+    tr.innerHTML=`
+      <td><input class="wiki-check" type="checkbox" checked onchange="refreshWikipediaRow(this.closest('tr'))"></td>
+      <td class="wiki-date" contenteditable="true" data-field="date" oninput="refreshWikipediaRow(this.closest('tr'))">${wikiEscape(g.dateDisplay)}</td>
+      <td class="wiki-team" contenteditable="true" data-field="team1" oninput="refreshWikipediaRow(this.closest('tr'))">${wikiEscape(g.team1)}</td>
+      <td class="wiki-score" contenteditable="true" data-field="score" oninput="refreshWikipediaRow(this.closest('tr'))">${wikiEscape(g.score)}</td>
+      <td class="wiki-team" contenteditable="true" data-field="team2" oninput="refreshWikipediaRow(this.closest('tr'))">${wikiEscape(g.team2)}</td>
+      <td class="wiki-comp" contenteditable="true" data-field="competition" oninput="refreshWikipediaRow(this.closest('tr'))">${wikiEscape(g.competition)}</td>
+      <td><input class="wiki-num-input" data-field="goals" type="number" min="0" step="1" value="0"></td>
+      <td><input class="wiki-num-input" data-field="assists" type="number" min="0" step="1" value="0"></td>
+      <td><span class="wiki-row-status"></span></td>
+      <td><button class="btn danger" style="padding:3px 7px;font-size:.68rem" onclick="removeWikipediaRow(this.closest('tr'))">✕</button></td>`;
+    body.appendChild(tr);
+  });
+  refreshWikipediaPreviewMapping();
+}
+
+function wikiDateToIso(value){
+  const text=String(value||'').trim();
+  let m=text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(m)return`${m[3]}-${m[2]}-${m[1]}`;
+  m=text.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(m)return text;
+  return'';
+}
+
+function wikiReadPreviewRow(row){
+  const read=name=>row.querySelector(`[data-field="${name}"]`);
+  return{
+    selected:row.querySelector('.wiki-check')?.checked!==false,
+    dateDisplay:(read('date')?.textContent||'').trim(),
+    team1:(read('team1')?.textContent||'').trim(),
+    score:(read('score')?.textContent||'').trim().replace(/[—-]/g,'–').replace(/\s+/g,''),
+    team2:(read('team2')?.textContent||'').trim(),
+    competition:(read('competition')?.textContent||'').trim(),
+    playerGoals:Math.max(0,parseInt(read('goals')?.value)||0),
+    playerAssists:Math.max(0,parseInt(read('assists')?.value)||0)
+  };
+}
+
+function wikiMapPreviewGame(data){
+  const mainTeam=document.getElementById('wikiMainTeam').value;
+  const mainKey=wikiNormalize(mainTeam),t1=wikiNormalize(data.team1),t2=wikiNormalize(data.team2);
+  const scoreMatch=data.score.match(/^(\d+)–(\d+)$/);const date=wikiDateToIso(data.dateDisplay);
+  if(!data.selected)return{valid:false,reason:'Desmarcado',kind:'warn'};
+  if(!date)return{valid:false,reason:'Data inválida',kind:'err'};
+  if(!scoreMatch)return{valid:false,reason:'Placar inválido',kind:'err'};
+  if(!data.competition)return{valid:false,reason:'Sem competição',kind:'err'};
+  let loc,opponent,gf,ga;
+  if(t1===mainKey){loc='home';opponent=data.team2;gf=+scoreMatch[1];ga=+scoreMatch[2];}
+  else if(t2===mainKey){loc='away';opponent=data.team1;gf=+scoreMatch[2];ga=+scoreMatch[1];}
+  else return{valid:false,reason:'Time não encontrado',kind:'err'};
+  if(!opponent)return{valid:false,reason:'Sem adversário',kind:'err'};
+  const mapped={valid:true,date,loc,opponent,gf,ga,competition:data.competition,playerGoals:data.playerGoals,playerAssists:data.playerAssists};
+  if(wikiMatchAlreadyExists(mapped))return{...mapped,valid:false,duplicate:true,reason:'Já cadastrado',kind:'warn'};
+  return{...mapped,reason:loc==='home'?'Casa':'Fora',kind:'ok'};
+}
+
+function wikiMatchAlreadyExists(mapped){
+  const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
+  return(season.matches||[]).some(m=>m.date===mapped.date&&m.loc===mapped.loc&&wikiNormalize(m.opponent)===wikiNormalize(mapped.opponent)&&Number(m.gf)===Number(mapped.gf)&&Number(m.ga)===Number(mapped.ga)&&wikiNormalize(getCompName(season,m.compId))===wikiNormalize(mapped.competition));
+}
+
+function refreshWikipediaRow(row){
+  if(!row||row.classList.contains('wiki-row-removed'))return;
+  const mapped=wikiMapPreviewGame(wikiReadPreviewRow(row));const status=row.querySelector('.wiki-row-status');
+  row.classList.toggle('wiki-row-invalid',!mapped.valid&&!mapped.duplicate);
+  row.classList.toggle('wiki-row-duplicate',!!mapped.duplicate);
+  status.textContent=mapped.reason;status.className=`wiki-row-status ${mapped.kind||''}`;
+  refreshWikipediaCount();
+}
+
+function refreshWikipediaPreviewMapping(){
+  document.querySelectorAll('#wikiImportBody tr').forEach(refreshWikipediaRow);refreshWikipediaCount();
+}
+
+function refreshWikipediaCount(){
+  const rows=[...document.querySelectorAll('#wikiImportBody tr:not(.wiki-row-removed)')];let selected=0,valid=0,duplicates=0;
+  rows.forEach(row=>{const data=wikiReadPreviewRow(row);if(data.selected)selected++;const mapped=wikiMapPreviewGame(data);if(mapped.valid)valid++;if(mapped.duplicate)duplicates++;});
+  const el=document.getElementById('wikiImportCount');if(el)el.textContent=`${rows.length} linhas · ${selected} marcadas · ${valid} prontas${duplicates?` · ${duplicates} duplicadas`:''}`;
+}
+
+function toggleAllWikipediaRows(value){
+  document.querySelectorAll('#wikiImportBody tr:not(.wiki-row-removed) .wiki-check').forEach(cb=>cb.checked=value);refreshWikipediaPreviewMapping();
+}
+
+function removeWikipediaRow(row){row.classList.add('wiki-row-removed');refreshWikipediaCount();}
+
+function importWikipediaMatches(){
+  const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
+  if(!season.comps)season.comps=[];if(!season.matches)season.matches=[];
+  const rows=[...document.querySelectorAll('#wikiImportBody tr:not(.wiki-row-removed)')];const ready=[];let invalid=0,duplicates=0;
+  rows.forEach(row=>{const data=wikiReadPreviewRow(row);if(!data.selected)return;const mapped=wikiMapPreviewGame(data);if(mapped.valid)ready.push(mapped);else if(mapped.duplicate)duplicates++;else invalid++;});
+  if(!ready.length){wikiStatus(duplicates?'Todos os jogos marcados já estão cadastrados.':'Nenhum jogo válido está pronto para importar.','error');return;}
+  const compCache=new Map();
+  season.comps.forEach(c=>compCache.set(wikiNormalize(c.name),c));
+  const stamp=Date.now();
+  ready.forEach((m,index)=>{
+    const compKey=wikiNormalize(m.competition);let comp=compCache.get(compKey);
+    if(!comp){comp={id:`comp_${stamp}_${index}_${Math.random().toString(36).slice(2,6)}`,name:m.competition};season.comps.push(comp);compCache.set(compKey,comp);}
+    season.matches.push({id:`m_${stamp}_${index}_${Math.random().toString(36).slice(2,7)}`,compId:comp.id,loc:m.loc,opponent:m.opponent,date:m.date,gf:m.gf,ga:m.ga,playerGoals:m.playerGoals,playerAssists:m.playerAssists,year:m.date.substring(0,4),source:'wikipedia',sourcePage:wikipediaImportPage});
+  });
+  save();closeModal('modalWikiImport');seasonSubView='jogos';activeCompFilter=null;renderSeasonContent();
+  const notes=[];if(duplicates)notes.push(`${duplicates} duplicado(s) ignorado(s)`);if(invalid)notes.push(`${invalid} linha(s) inválida(s)`);
+  toast(`${ready.length} jogo(s) importado(s)!${notes.length?' '+notes.join(' · '):''}`);
 }
 
 // ===================== TITLES =====================
