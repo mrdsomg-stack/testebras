@@ -1030,17 +1030,18 @@ function wikiParseUrl(raw){
 }
 
 function wikiExtractFootballBoxes(source){
-  const templates=[];const lower=source.toLowerCase();let index=0;
-  while(index<source.length){
-    const start=lower.indexOf('{{football box',index);if(start===-1)break;
-    let depth=0,end=-1;
+  // Aceita tanto "Football box" quanto o alias antigo "Footballbox",
+  // incluindo a variante collapsible usada em muitas páginas de temporadas.
+  const templates=[];const matcher=/\{\{\s*football\s*box(?:\s+collapsible)?/gi;let match;
+  while((match=matcher.exec(source))!==null){
+    const start=match.index;let depth=0,end=-1;
     for(let i=start;i<source.length-1;i++){
       const pair=source.slice(i,i+2);
       if(pair==='{{'){depth++;i++;}
       else if(pair==='}}'){depth--;i++;if(depth===0){end=i+1;break;}}
     }
     if(end===-1)break;
-    templates.push({start,text:source.slice(start,end)});index=end;
+    templates.push({start,text:source.slice(start,end)});matcher.lastIndex=end;
   }
   return templates;
 }
@@ -1128,11 +1129,18 @@ function wikiCleanScore(value){
   return match?match[0].replace(/\s+/g,'').replace(/[—-]/g,'–'):text;
 }
 
-function wikiBuildGames(wikitext){
-  const headings=wikiHeadings(wikitext),templates=wikiExtractFootballBoxes(wikitext),games=[],seen=new Set();
+function wikiGameAllowed(game,originalCompetition=''){
   const includeFriendlies=document.getElementById('wikiIncludeFriendlies').checked;
-  const translate=document.getElementById('wikiTranslateComps').checked;
   const onlyPlayed=document.getElementById('wikiOnlyPlayed').checked;
+  if(!game.team1||!game.team2||!game.dateDisplay)return false;
+  if(onlyPlayed&&!/^\d+–\d+$/.test(game.score))return false;
+  if(!includeFriendlies&&wikiIsFriendly(originalCompetition||game.competition))return false;
+  return true;
+}
+
+function wikiBuildGamesFromWikitext(wikitext){
+  const headings=wikiHeadings(wikitext),templates=wikiExtractFootballBoxes(wikitext),games=[];
+  const translate=document.getElementById('wikiTranslateComps').checked;
   for(const template of templates){
     const p=wikiTemplateParams(template.text);
     const team1=wikiClean(p.team1||p.home||p.hometeam||'');
@@ -1141,13 +1149,80 @@ function wikiBuildGames(wikitext){
     const dateInfo=wikiParseDate(p.date||'');
     const original=wikiInferCompetition(wikiHeadingStackAt(headings,template.start),p.round||p.stage||'');
     const competition=translate?wikiTranslateCompetition(original):original;
-    if(!team1||!team2||!dateInfo.display)continue;
-    if(onlyPlayed&&!/^\d+–\d+$/.test(score))continue;
-    if(!includeFriendlies&&wikiIsFriendly(original))continue;
-    const key=wikiNormalize(`${dateInfo.display}|${team1}|${score}|${team2}|${competition}`);if(seen.has(key))continue;seen.add(key);
-    games.push({dateDisplay:dateInfo.display,dateIso:dateInfo.iso,timestamp:dateInfo.timestamp,team1,score,team2,competition,playerGoals:0,playerAssists:0});
+    const game={dateDisplay:dateInfo.display,dateIso:dateInfo.iso,timestamp:dateInfo.timestamp,team1,score,team2,competition,playerGoals:0,playerAssists:0};
+    if(wikiGameAllowed(game,original))games.push(game);
   }
-  games.sort((a,b)=>a.timestamp-b.timestamp||a.competition.localeCompare(b.competition,'pt-BR'));return games;
+  return games;
+}
+
+function wikiHeadingTextFromElement(element){
+  const clone=element.cloneNode(true);
+  clone.querySelectorAll('.mw-editsection,style,script').forEach(el=>el.remove());
+  return wikiClean(clone.textContent||'');
+}
+
+function wikiHtmlAttendees(event){
+  const names=[];const seen=new Set();
+  [...event.querySelectorAll('.attendee')].forEach(attendee=>{
+    const target=attendee.querySelector('.fn')||attendee;
+    const name=wikiClean(target.textContent||'');const key=wikiNormalize(name);
+    if(name&&key&&!seen.has(key)){seen.add(key);names.push(name);}
+  });
+  if(names.length>=2)return names.slice(0,2);
+  [...event.querySelectorAll('.vcard .fn, .fn.org')].forEach(target=>{
+    const name=wikiClean(target.textContent||'');const key=wikiNormalize(name);
+    if(name&&key&&!seen.has(key)){seen.add(key);names.push(name);}
+  });
+  if(names.length>=2)return names.slice(0,2);
+  const summary=wikiClean(event.querySelector('.summary')?.textContent||'');
+  const m=summary.match(/^(.+?)\s+v(?:s\.?|ersus)?\s+(.+?)$/i);
+  if(m)return[wikiClean(m[1]),wikiClean(m[2])];
+  return names.slice(0,2);
+}
+
+function wikiBuildGamesFromHtml(html){
+  if(!html)return[];
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  const eventSet=new Set([...doc.querySelectorAll('.vevent')]);
+  doc.querySelectorAll('.dtstart').forEach(el=>{const root=el.closest('.vevent,table');if(root)eventSet.add(root);});
+  const headings=[...doc.querySelectorAll('h2,h3,h4,h5,h6')];
+  const ordered=[...headings,...eventSet].sort((a,b)=>{
+    if(a===b)return 0;
+    return a.compareDocumentPosition(b)&4?-1:1;
+  });
+  const stack=[];const games=[];const translate=document.getElementById('wikiTranslateComps').checked;
+  for(const node of ordered){
+    if(/^H[2-6]$/.test(node.tagName)){
+      const level=Number(node.tagName.slice(1));const slot=level-2;
+      stack[slot]=wikiHeadingTextFromElement(node);stack.length=slot+1;continue;
+    }
+    const teams=wikiHtmlAttendees(node);if(teams.length<2)continue;
+    const dateEl=node.querySelector('.dtstart');
+    const rawDate=dateEl?.getAttribute('datetime')||dateEl?.getAttribute('title')||dateEl?.textContent||'';
+    const dateInfo=wikiParseDate(rawDate);
+    const scoreSources=[...node.querySelectorAll('.fscore,[class~="score"],.summary'),node]
+      .map(el=>wikiCleanScore(el.textContent||''));
+    let score='';
+    for(const value of scoreSources){const m=String(value).match(/\b\d+\s*[–—-]\s*\d+\b/);if(m){score=m[0].replace(/\s+/g,'').replace(/[—-]/g,'–');break;}}
+    const original=wikiInferCompetition(stack,'');
+    const competition=translate?wikiTranslateCompetition(original):original;
+    const game={dateDisplay:dateInfo.display,dateIso:dateInfo.iso,timestamp:dateInfo.timestamp,team1:teams[0],score,team2:teams[1],competition,playerGoals:0,playerAssists:0};
+    if(wikiGameAllowed(game,original))games.push(game);
+  }
+  return games;
+}
+
+function wikiBuildGames(wikitext,html=''){
+  // O wikitext não expande subpáginas/modelos transcluídos. O HTML renderizado
+  // contém essas partidas; por isso combinamos as duas leituras e removemos duplicatas.
+  const candidates=[...wikiBuildGamesFromWikitext(wikitext),...wikiBuildGamesFromHtml(html)];
+  const games=[],seen=new Set();
+  for(const game of candidates){
+    const key=wikiNormalize(`${game.dateDisplay}|${game.team1}|${game.score}|${game.team2}`);
+    if(!key||seen.has(key))continue;seen.add(key);games.push(game);
+  }
+  games.sort((a,b)=>a.timestamp-b.timestamp||a.competition.localeCompare(b.competition,'pt-BR'));
+  return games;
 }
 
 function openWikipediaImport(){
@@ -1169,13 +1244,13 @@ async function loadWikipediaMatches(){
   try{
     const{language,title}=wikiParseUrl(document.getElementById('wikiImportUrl').value);
     const endpoint=new URL(`https://${language}.wikipedia.org/w/api.php`);
-    endpoint.search=new URLSearchParams({action:'parse',page:title,prop:'wikitext|displaytitle',redirects:'1',format:'json',formatversion:'2',origin:'*'}).toString();
+    endpoint.search=new URLSearchParams({action:'parse',page:title,prop:'wikitext|text|displaytitle',redirects:'1',format:'json',formatversion:'2',origin:'*'}).toString();
     const response=await fetch(endpoint.toString(),{headers:{Accept:'application/json'}});
     if(!response.ok)throw new Error(`A Wikipédia respondeu com o código ${response.status}.`);
     const data=await response.json();if(data.error)throw new Error(data.error.info||'A Wikipédia não conseguiu processar a página.');
     const parsed=data.parse||{};const wikitext=typeof parsed.wikitext==='string'?parsed.wikitext:parsed.wikitext?.['*'];
     if(!wikitext)throw new Error('A página não retornou o código wiki necessário.');
-    wikipediaImportGames=wikiBuildGames(wikitext);wikipediaImportPage=wikiClean(parsed.displaytitle||parsed.title||title);
+    wikipediaImportGames=wikiBuildGames(wikitext,parsed.text||'');wikipediaImportPage=wikiClean(parsed.displaytitle||parsed.title||title);
     if(!wikipediaImportGames.length)throw new Error('Nenhuma partida foi encontrada. A página pode usar um modelo diferente de “Football box”.');
     populateWikipediaMainTeam();renderWikipediaPreview();
     document.getElementById('wikiMapping').classList.add('visible');
