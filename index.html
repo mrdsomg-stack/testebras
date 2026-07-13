@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -1889,7 +1887,16 @@ function renderPersonal(){
     const isOpen=activeContractId===c.id;
     let tempRows='';
     [...(c.temporadas||[])].sort((a,b)=>b.temporada.localeCompare(a.temporada)).forEach(t=>{
-      tempRows+=`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(48,54,61,.35)"><span style="font-size:.8rem;color:var(--yellow);min-width:68px;font-weight:600">${t.temporada}</span><span style="font-weight:700;color:var(--gold);flex:1">${fmtEuro(t.valor)}</span><button class="btn edit-btn" style="padding:2px 8px;font-size:.72rem;border:1px solid rgba(240,136,62,.3)" onclick="editTemp('${c.id}','${t.id}')">✎</button><button class="btn danger" style="padding:2px 8px;font-size:.72rem" onclick="deleteTemp('${c.id}','${t.id}')">✖</button></div>`;
+      const temporadaNormalizada=String(t.temporada||'').trim().toLowerCase();
+      const bonusTemporada=(c.bonuses||[])
+        .filter(b=>String(b.temporada||'').trim().toLowerCase()===temporadaNormalizada)
+        .reduce((s,b)=>s+Number(b.valor||0),0);
+      const salario=Number(t.valor||0);
+      const totalTemporada=salario+bonusTemporada;
+      const bonusHtml=bonusTemporada>0
+        ?`<span style="font-size:.72rem;color:var(--dim)">+</span><span style="font-weight:700;color:var(--blue)" title="Bônus da temporada">${fmtEuro(bonusTemporada)}</span><span style="font-size:.72rem;color:var(--dim)">=</span><span style="font-weight:800;color:var(--green);background:rgba(63,185,80,.10);border:1px solid rgba(63,185,80,.25);border-radius:7px;padding:3px 8px" title="Salário + bônus">${fmtEuro(totalTemporada)}</span>`
+        :`<span style="font-size:.72rem;color:var(--dim)">Sem bônus</span>`;
+      tempRows+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(48,54,61,.35);flex-wrap:wrap"><span style="font-size:.8rem;color:var(--yellow);min-width:68px;font-weight:600">${t.temporada}</span><div style="display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap;min-width:250px"><span style="font-weight:700;color:var(--gold)" title="Valor normal da temporada">${fmtEuro(salario)}</span>${bonusHtml}</div><button class="btn edit-btn" style="padding:2px 8px;font-size:.72rem;border:1px solid rgba(240,136,62,.3)" onclick="editTemp('${c.id}','${t.id}')" title="Editar temporada">✎</button><button class="btn danger" style="padding:2px 8px;font-size:.72rem" onclick="deleteTemp('${c.id}','${t.id}')" title="Excluir temporada">✖</button></div>`;
     });
     let bonusRows='';
     [...(c.bonuses||[])].sort((a,b)=>b.temporada.localeCompare(a.temporada)).forEach(b=>{
