@@ -730,7 +730,7 @@ function renderSeasonContent(){
       <div class="stat blue"><div class="val">${overall.a}</div><div class="lbl">Assists</div></div>
       <div class="stat gold"><div class="val">${overall.g+overall.a}</div><div class="lbl">Participações</div></div>
       <div class="stat"><div class="val">${overall.starters}</div><div class="lbl">Titular</div></div>
-      <div class="stat"><div class="val" style="color:var(--purple)">${overall.minutes.toLocaleString('pt-BR')}</div><div class="lbl">Minutos</div></div>
+      <div class="stat"><div class="val" style="color:var(--purple)">${formatMinutesAverage(overall.avgMinutes)}</div><div class="lbl">Min/Jogo</div></div>
       <div class="stat"><div class="val">${overall.j>0?(overall.g/overall.j).toFixed(2):'0.00'}</div><div class="lbl">G/Jogo</div></div>
     </div>
   </div>`;
@@ -751,15 +751,23 @@ function renderSeasonContent(){
 function setSubView(v){seasonSubView=v;activeCompFilter=null;renderSeasonContent();}
 function setCompFilter(cid){seasonSubView='jogos';activeCompFilter=cid;renderSeasonContent();}
 
+function formatMinutesAverage(value){
+  return Number(value||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:1});
+}
+
 function calcStats(matches){
-  let j=0,g=0,a=0,gf=0,ga=0,w=0,d=0,l=0,starters=0,minutes=0;
+  let j=0,g=0,a=0,gf=0,ga=0,w=0,d=0,l=0,starters=0,minutes=0,minutesGames=0;
   matches.forEach(m=>{j++;g+=m.playerGoals||0;a+=m.playerAssists||0;gf+=m.gf||0;ga+=m.ga||0;
     if(m.starter===true)starters++;
-    minutes+=Math.max(0,Number(m.minutes)||0);
+    if(m.minutes!==undefined&&m.minutes!==null&&m.minutes!==''){
+      minutes+=Math.max(0,Number(m.minutes)||0);
+      minutesGames++;
+    }
     const r=m.gf>m.ga?'W':m.gf===m.ga?'D':'L';
     if(r==='W')w++;else if(r==='D')d++;else l++;
   });
-  return{j,g,a,gf,ga,w,d,l,starters,minutes};
+  const avgMinutes=minutesGames>0?minutes/minutesGames:0;
+  return{j,g,a,gf,ga,w,d,l,starters,minutes,minutesGames,avgMinutes};
 }
 
 function getCompName(sd,compId){
@@ -830,7 +838,7 @@ function renderSubPorComp(sd,matches,comps){
         <div class="stat blue"><div class="val">${st.a}</div><div class="lbl">Assists</div></div>
         <div class="stat gold"><div class="val">${st.g+st.a}</div><div class="lbl">Partic.</div></div>
         <div class="stat"><div class="val">${st.starters}</div><div class="lbl">Titular</div></div>
-        <div class="stat"><div class="val" style="color:var(--purple)">${st.minutes.toLocaleString('pt-BR')}</div><div class="lbl">Minutos</div></div>
+        <div class="stat"><div class="val" style="color:var(--purple)">${formatMinutesAverage(st.avgMinutes)}</div><div class="lbl">Min/Jogo</div></div>
         <div class="stat"><div class="val">${st.j>0?(st.g/st.j).toFixed(2):'0.00'}</div><div class="lbl">G/J</div></div>
         <div class="stat"><div class="val" style="color:var(--dim)">${st.gf}</div><div class="lbl">Pró</div></div>
         <div class="stat"><div class="val" style="color:var(--red)">${st.ga}</div><div class="lbl">Contra</div></div>
@@ -857,7 +865,7 @@ function renderSubPorAno(sd,matches){
         <div class="stat blue"><div class="val">${st.a}</div><div class="lbl">Assists</div></div>
         <div class="stat gold"><div class="val">${st.g+st.a}</div><div class="lbl">Partic.</div></div>
         <div class="stat"><div class="val">${st.starters}</div><div class="lbl">Titular</div></div>
-        <div class="stat"><div class="val" style="color:var(--purple)">${st.minutes.toLocaleString('pt-BR')}</div><div class="lbl">Minutos</div></div>
+        <div class="stat"><div class="val" style="color:var(--purple)">${formatMinutesAverage(st.avgMinutes)}</div><div class="lbl">Min/Jogo</div></div>
         <div class="stat"><div class="val">${st.j>0?(st.g/st.j).toFixed(2):'0.00'}</div><div class="lbl">G/J</div></div>
         <div class="stat"><div class="val" style="color:var(--dim)">${st.gf}</div><div class="lbl">Pró</div></div>
         <div class="stat"><div class="val" style="color:var(--red)">${st.ga}</div><div class="lbl">Contra</div></div>
@@ -1566,7 +1574,7 @@ function calcMilestones(playerIdx){
 
 function getCareerData(playerIdx){
   const player=state.players[playerIdx];
-  let totalJ=0,totalG=0,totalA=0,totalStarts=0,totalMinutes=0;
+  let totalJ=0,totalG=0,totalA=0,totalStarts=0,totalMinutes=0,totalMinuteGames=0;
   const compMap={},clubMap={},yearMap={},opponentMap={},ageMap={};
   const seasonStats=[],allTitles=[],allAwards=[];
   const keys=Object.keys(player.seasons||{}).sort((a,b)=>{if(a==='SELEÇÃO')return-1;if(b==='SELEÇÃO')return 1;return b-a;});
@@ -1580,7 +1588,10 @@ function getCareerData(playerIdx){
       sJ++;sG+=m.playerGoals||0;sA+=m.playerAssists||0;
       totalJ++;totalG+=m.playerGoals||0;totalA+=m.playerAssists||0;
       if(m.starter===true)totalStarts++;
-      totalMinutes+=Math.max(0,Number(m.minutes)||0);
+      if(m.minutes!==undefined&&m.minutes!==null&&m.minutes!==''){
+        totalMinutes+=Math.max(0,Number(m.minutes)||0);
+        totalMinuteGames++;
+      }
       const compName=getCompName(s,m.compId)||'SEM COMP';
       if(!compMap[compName])compMap[compName]={j:0,g:0,a:0};
       compMap[compName].j++;compMap[compName].g+=m.playerGoals||0;compMap[compName].a+=m.playerAssists||0;
@@ -1625,7 +1636,7 @@ function getCareerData(playerIdx){
     }
   });
   seasonStats.sort((a,b)=>b.year-a.year);
-  return{totalJ,totalG,totalA,totalStarts,totalMinutes,compMap,clubMap,yearMap,ageMap,opponentMap,seasonStats,allTitles,allAwards,
+  return{totalJ,totalG,totalA,totalStarts,totalMinutes,totalMinuteGames,compMap,clubMap,yearMap,ageMap,opponentMap,seasonStats,allTitles,allAwards,
     clubs:[...new Set(Object.values(player.seasons||{}).filter(s=>!s.isNT).map(s=>s.club))],
     seasons:keys.length};
 }
@@ -1648,7 +1659,7 @@ function renderCareer(){
   const initials=getPlayerInitials(player);
   const avatarContent=player.profilePhoto?`<img src="${player.profilePhoto}" alt="Foto do atleta">`:initials;
   const avgGoals=d.totalJ>0?(d.totalG/d.totalJ).toFixed(2):'0.00';
-  const avgMinutes=d.totalJ>0?Math.round(d.totalMinutes/d.totalJ):0;
+  const avgMinutes=d.totalMinuteGames>0?d.totalMinutes/d.totalMinuteGames:0;
   const compsorted=Object.entries(d.compMap).sort((a,b)=>b[1].g-a[1].g);
   const clubsorted=Object.entries(d.clubMap).sort((a,b)=>b[1].g-a[1].g);
   const yearsorted=Object.entries(d.yearMap).sort((a,b)=>b[0].localeCompare(a[0]));
@@ -1666,7 +1677,7 @@ function renderCareer(){
       <div class="avatar">${avatarContent}</div>
       <div><div class="career-name">${player.name}</div><div class="career-meta">${age?age+' anos · ':''}${d.seasons} temporada${d.seasons!==1?'s':''} · ${d.clubs.join(', ')||'—'}</div></div>
     </div>
-    <div class="section-label">Totais da carreira</div>
+    <div class="section-label">Estatísticas da carreira</div>
     <div class="career-stats-grid">
       <div class="career-stat"><div class="val" style="color:#fff">${d.totalJ}</div><div class="lbl">Jogos</div></div>
       <div class="career-stat"><div class="val" style="color:var(--green)">${d.totalG}</div><div class="lbl">Gols</div></div>
@@ -1674,8 +1685,7 @@ function renderCareer(){
       <div class="career-stat"><div class="val" style="color:var(--gold)">${d.totalG+d.totalA}</div><div class="lbl">Participações</div></div>
       <div class="career-stat"><div class="val" style="color:var(--dim)">${avgGoals}</div><div class="lbl">Gols/Jogo</div></div>
       <div class="career-stat"><div class="val" style="color:var(--green)">${d.totalStarts}</div><div class="lbl">Titular</div></div>
-      <div class="career-stat"><div class="val" style="color:var(--purple)">${d.totalMinutes.toLocaleString('pt-BR')}</div><div class="lbl">Minutos</div></div>
-      <div class="career-stat"><div class="val" style="color:var(--dim)">${avgMinutes}</div><div class="lbl">Min/Jogo</div></div>
+      <div class="career-stat"><div class="val" style="color:var(--purple)">${formatMinutesAverage(avgMinutes)}</div><div class="lbl">Min/Jogo</div></div>
       <div class="career-stat"><div class="val" style="color:var(--yellow)">${d.allTitles.length}</div><div class="lbl">Títulos</div></div>
       <div class="career-stat"><div class="val" style="color:var(--purple)">${d.allAwards.length}</div><div class="lbl">Prêmios</div></div>
     </div>
