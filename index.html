@@ -1,5 +1,7 @@
 
 
+
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -88,6 +90,19 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .title-add-row input{background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:8px 12px;border-radius:8px;font-size:.85rem;flex:1;outline:none}
 .title-add-row input:focus{border-color:var(--yellow)}
 .title-add-row .btn{background:rgba(227,179,65,.2);color:var(--yellow);border:1px solid rgba(227,179,65,.4);font-size:.8rem;padding:8px 14px;white-space:nowrap}
+.award-list{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.award-item{display:flex;align-items:center;gap:8px;background:rgba(163,113,247,.08);border:1px solid rgba(163,113,247,.3);border-radius:8px;padding:8px 12px}
+.award-icon{font-size:1rem}
+.award-name{flex:1;font-size:.85rem;font-weight:600;color:var(--purple)}
+.award-add-row{display:flex;gap:8px;margin-top:8px}
+.award-add-row input{background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:8px 12px;border-radius:8px;font-size:.85rem;flex:1;outline:none}
+.award-add-row input:focus{border-color:var(--purple)}
+.award-add-row .btn{background:rgba(163,113,247,.18);color:var(--purple);border:1px solid rgba(163,113,247,.4);font-size:.8rem;padding:8px 14px;white-space:nowrap}
+.starter-badge,.minutes-badge{display:inline-flex;align-items:center;gap:4px;border-radius:8px;padding:2px 7px;font-size:.68rem;font-weight:700;white-space:nowrap}
+.starter-badge.yes{background:rgba(63,185,80,.14);border:1px solid rgba(63,185,80,.28);color:var(--green)}
+.starter-badge.no{background:rgba(139,148,158,.10);border:1px solid rgba(139,148,158,.22);color:var(--dim)}
+.starter-badge.unknown{background:rgba(227,179,65,.10);border:1px solid rgba(227,179,65,.22);color:var(--yellow)}
+.minutes-badge{background:rgba(163,113,247,.11);border:1px solid rgba(163,113,247,.26);color:var(--purple)}
 .nt-season-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(227,179,65,.15);border:1px solid rgba(227,179,65,.3);border-radius:12px;padding:2px 10px;font-size:.72rem;color:var(--yellow);font-weight:600;margin-left:6px}
 .career-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
 .career-hero{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
@@ -101,7 +116,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .profile-help{font-size:.78rem;color:var(--dim);line-height:1.5;margin-bottom:12px}
 .profile-photo-actions{display:flex;gap:8px;flex-wrap:wrap}
 .profile-file-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-@media(max-width:520px){.profile-card{justify-content:center;text-align:center}.profile-info{min-width:100%}.profile-photo-actions{justify-content:center}}
+@media(max-width:520px){.profile-card{justify-content:center;text-align:center}.profile-info{min-width:100%}.profile-photo-actions{justify-content:center}.rank-section>div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}}
 .career-name{font-size:1.2rem;font-weight:700}
 .career-meta{font-size:.8rem;color:var(--dim);margin-top:3px}
 .career-stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:16px}
@@ -190,7 +205,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .wiki-map-control select{margin:0!important}
 .wiki-count{font-size:.75rem;color:var(--dim)}
 .wiki-preview-wrap{overflow:auto;max-height:55vh;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
-.wiki-table{min-width:980px;font-size:.78rem}
+.wiki-table{min-width:1180px;font-size:.78rem}
 .wiki-table th{position:sticky;top:0;z-index:2;background:var(--surface2)}
 .wiki-table td{padding:7px 8px;vertical-align:middle}
 .wiki-table td[contenteditable="true"]{outline:none;border-radius:5px;min-width:90px}
@@ -200,7 +215,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .wiki-table .wiki-score{min-width:70px;text-align:center;font-weight:700}
 .wiki-table .wiki-comp{min-width:170px}
 .wiki-table .wiki-num-input{width:62px!important;min-width:62px;margin:0!important;padding:6px 8px!important;text-align:center}
-.wiki-table .wiki-check{width:15px!important;height:15px!important;margin:0!important;accent-color:var(--green)}
+.wiki-table .wiki-check,.wiki-table .wiki-starter-check{width:15px!important;height:15px!important;margin:0!important;accent-color:var(--green)}
 .wiki-row-invalid{opacity:.55}
 .wiki-row-duplicate{opacity:.58}
 .wiki-row-removed{display:none}
@@ -311,7 +326,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
       <div>
         <label class="modal-label">Gols do jogador</label>
         <input type="number" id="mMatchPlayerGoals" min="0" value="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
@@ -319,6 +334,18 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div>
         <label class="modal-label">Assists do jogador</label>
         <input type="number" id="mMatchAssists" min="0" value="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div class="toggle-wrap" style="margin-bottom:0;min-height:63px" onclick="const cb=document.getElementById('mMatchStarter');cb.checked=!cb.checked;updateMatchPreview()">
+        <input type="checkbox" id="mMatchStarter" checked onclick="event.stopPropagation()" onchange="updateMatchPreview()">
+        <label for="mMatchStarter">Foi titular</label>
+        <span class="nt-badge" style="background:rgba(63,185,80,.15);color:var(--green)">XI</span>
+      </div>
+      <div>
+        <label class="modal-label">Minutos jogados</label>
+        <input type="number" id="mMatchMinutes" min="0" max="130" value="90" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
       </div>
     </div>
 
@@ -383,6 +410,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
               <th>Competição</th>
               <th style="color:var(--green)">Gols</th>
               <th style="color:var(--blue)">Assists</th>
+              <th style="color:var(--green)">Titular</th>
+              <th style="color:var(--purple)">Minutos</th>
               <th>Situação</th>
               <th></th>
             </tr>
@@ -392,7 +421,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
       <div style="font-size:.7rem;color:var(--dim);margin-top:8px;line-height:1.45">
-        Você pode corrigir data, times, placar e competição diretamente na tabela. Gols e assistências começam em zero e seguem os mesmos campos usados no registro manual.
+        Você pode corrigir data, times, placar e competição diretamente na tabela. Gols e assistências começam em zero; titularidade e minutos começam como titular por 90 minutos e podem ser ajustados.
       </div>
     </div>
 
@@ -434,23 +463,34 @@ let editingTempId=null;
 let editingBonusId=null;
 
 window.onload=()=>{
-  const saved=localStorage.getItem('marechal_lott_v8');
-  if(saved){state=JSON.parse(saved);}
-  else{
-    const old=localStorage.getItem('marechal_lott_v7');
-    if(old){
-      const d=JSON.parse(old);
-      state.players=(d.players||[]).map(p=>({
-        ...p,
-        contracts:p.contracts||[],
-        seasons:Object.fromEntries(Object.entries(p.seasons||{}).map(([k,s])=>[k,migrateSeasonV8(k,s)]))
-      }));
-      state.activePlayerIdx=d.activePlayerIdx!==undefined?d.activePlayerIdx:null;
-      state.activeSeason=d.activeSeason||null;
-    }
+  const savedV9=localStorage.getItem('marechal_lott_v9');
+  const savedV8=localStorage.getItem('marechal_lott_v8');
+  const savedV7=localStorage.getItem('marechal_lott_v7');
+  if(savedV9)state=JSON.parse(savedV9);
+  else if(savedV8)state=JSON.parse(savedV8);
+  else if(savedV7){
+    const d=JSON.parse(savedV7);
+    state.players=(d.players||[]).map(p=>({
+      ...p,
+      contracts:p.contracts||[],
+      seasons:Object.fromEntries(Object.entries(p.seasons||{}).map(([k,s])=>[k,migrateSeasonV8(k,s)]))
+    }));
+    state.activePlayerIdx=d.activePlayerIdx!==undefined?d.activePlayerIdx:null;
+    state.activeSeason=d.activeSeason||null;
   }
-  state.activeView='season';render();
+  state.players=(state.players||[]).map(p=>({
+    ...p,
+    profilePhoto:p.profilePhoto||'',
+    contracts:p.contracts||[],
+    seasons:Object.fromEntries(Object.entries(p.seasons||{}).map(([k,s])=>[k,normalizeSeasonV9(k,s)]))
+  }));
+  state.activeView='season';save();render();
 };
+
+function normalizeSeasonV9(sKey,s){
+  const season=migrateSeasonV8(sKey,s||{});
+  return{...season,comps:season.comps||[],matches:season.matches||[],ntYears:season.ntYears||[],titles:season.titles||[],awards:season.awards||[]};
+}
 
 function migrateSeasonV8(sKey,s){
   if(s.matches)return s;
@@ -464,10 +504,10 @@ function migrateSeasonV8(sKey,s){
       matches.push({id:'m_'+Math.random().toString(36).substr(2,8),compId:compObj?compObj.id:'',loc:'home',opponent:'—',gf:i===0?Math.max(e.g,0):0,ga:0,playerGoals:i===0?e.g:0,playerAssists:i===0?e.a:0,date:e.year||sKey,year:e.year||sKey});
     }
   });
-  return{club:s.club,isNT:s.isNT||false,comps,matches,ntYears:s.ntYears||[],titles:s.titles||[]};
+  return{club:s.club,isNT:s.isNT||false,comps,matches,ntYears:s.ntYears||[],titles:s.titles||[],awards:s.awards||[]};
 }
 
-function save(){localStorage.setItem('marechal_lott_v8',JSON.stringify(state));}
+function save(){localStorage.setItem('marechal_lott_v9',JSON.stringify(state));}
 
 function toast(msg,isErr){
   const t=document.getElementById('toast');
@@ -598,11 +638,11 @@ function saveSeason(){
   if(!isNT&&!club){toast('Preencha o clube','err');return;}
   const player=state.players[state.activePlayerIdx];
   if(isNT){
-    if(!player.seasons['SELEÇÃO'])player.seasons['SELEÇÃO']={club:'',isNT:true,comps:[],matches:[],ntYears:[],titles:[]};
+    if(!player.seasons['SELEÇÃO'])player.seasons['SELEÇÃO']={club:'',isNT:true,comps:[],matches:[],ntYears:[],titles:[],awards:[]};
     state.activeSeason='SELEÇÃO';
   } else {
     if(player.seasons[name]){toast('Temporada já existe','err');return;}
-    player.seasons[name]={club,isNT:false,comps:[],matches:[],ntYears:[],titles:[]};
+    player.seasons[name]={club,isNT:false,comps:[],matches:[],ntYears:[],titles:[],awards:[]};
     state.activeSeason=name;
   }
   state.activeView='season';seasonSubView='geral';save();render();closeModal('modalSeason');
@@ -680,6 +720,7 @@ function renderSeasonContent(){
   const matches=sd.matches||[];
   const comps=sd.comps||[];
   const titles=sd.titles||[];
+  const awards=sd.awards||[];
   const overall=calcStats(matches);
   const heroHtml=`<div class="hero" style="${sd.isNT?'border-color:rgba(227,179,65,.3)':''}">
     <div class="hero-top"><span>${sd.isNT?'🏴 <b style="color:var(--yellow)">Seleção Nacional</b>':`Clube: <b style="color:#fff">${sd.club}</b> &nbsp;·&nbsp; Temporada: <b style="color:#fff">${state.activeSeason}</b>`}</span></div>
@@ -688,6 +729,8 @@ function renderSeasonContent(){
       <div class="stat green"><div class="val">${overall.g}</div><div class="lbl">Gols</div></div>
       <div class="stat blue"><div class="val">${overall.a}</div><div class="lbl">Assists</div></div>
       <div class="stat gold"><div class="val">${overall.g+overall.a}</div><div class="lbl">Participações</div></div>
+      <div class="stat"><div class="val">${overall.starters}</div><div class="lbl">Titular</div></div>
+      <div class="stat"><div class="val" style="color:var(--purple)">${overall.minutes.toLocaleString('pt-BR')}</div><div class="lbl">Minutos</div></div>
       <div class="stat"><div class="val">${overall.j>0?(overall.g/overall.j).toFixed(2):'0.00'}</div><div class="lbl">G/Jogo</div></div>
     </div>
   </div>`;
@@ -698,7 +741,7 @@ function renderSeasonContent(){
     <button class="sub-tab${seasonSubView==='jogos'?' active':''}" onclick="setSubView('jogos')">⚽ Jogos (${matches.length})</button>
   </div>`;
   let main='';
-  if(seasonSubView==='geral') main=renderSubGeral(sd,matches,comps,titles,overall);
+  if(seasonSubView==='geral') main=renderSubGeral(sd,matches,comps,titles,awards,overall);
   else if(seasonSubView==='porcomp') main=renderSubPorComp(sd,matches,comps);
   else if(seasonSubView==='porano') main=renderSubPorAno(sd,matches);
   else if(seasonSubView==='jogos') main=renderSubJogos(sd,matches,comps);
@@ -709,12 +752,14 @@ function setSubView(v){seasonSubView=v;activeCompFilter=null;renderSeasonContent
 function setCompFilter(cid){seasonSubView='jogos';activeCompFilter=cid;renderSeasonContent();}
 
 function calcStats(matches){
-  let j=0,g=0,a=0,gf=0,ga=0,w=0,d=0,l=0;
+  let j=0,g=0,a=0,gf=0,ga=0,w=0,d=0,l=0,starters=0,minutes=0;
   matches.forEach(m=>{j++;g+=m.playerGoals||0;a+=m.playerAssists||0;gf+=m.gf||0;ga+=m.ga||0;
+    if(m.starter===true)starters++;
+    minutes+=Math.max(0,Number(m.minutes)||0);
     const r=m.gf>m.ga?'W':m.gf===m.ga?'D':'L';
     if(r==='W')w++;else if(r==='D')d++;else l++;
   });
-  return{j,g,a,gf,ga,w,d,l};
+  return{j,g,a,gf,ga,w,d,l,starters,minutes};
 }
 
 function getCompName(sd,compId){
@@ -728,9 +773,11 @@ function getMatchYear(m,sKey){
 }
 
 // --- RESUMO GERAL ---
-function renderSubGeral(sd,matches,comps,titles,overall){
+function renderSubGeral(sd,matches,comps,titles,awards,overall){
   let titlesHtml='';
   titles.forEach(t=>{titlesHtml+=`<div class="title-item"><span class="title-trophy">🏆</span><span class="title-name">${t.name}</span><button class="title-del" onclick="deleteTitle('${t.id}')">✕</button></div>`;});
+  let awardsHtml='';
+  awards.forEach(a=>{awardsHtml+=`<div class="award-item"><span class="award-icon">🏅</span><span class="award-name">${a.name}</span><button class="title-del" onclick="deleteAward('${a.id}')">✕</button></div>`;});
   let compListHtml='';
   comps.forEach(c=>{
     const cnt=matches.filter(m=>m.compId===c.id).length;
@@ -741,6 +788,11 @@ function renderSubGeral(sd,matches,comps,titles,overall){
       <div class="sec-header"><span class="sec-title" style="color:var(--yellow)">🏆 Títulos</span><span style="font-size:.72rem;color:var(--dim)">${titles.length}</span></div>
       ${titlesHtml.length>0?`<div class="title-list">${titlesHtml}</div>`:'<div style="color:var(--dim);font-size:.8rem;padding:4px 0 8px">Nenhum título ainda.</div>'}
       <div class="title-add-row"><input type="text" id="titleInput" placeholder="Nome do título" onkeydown="if(event.key==='Enter')addTitle()"><button class="btn" onclick="addTitle()">+ Título</button></div>
+    </div>
+    <div class="form-wrap" style="border-color:rgba(163,113,247,.3)">
+      <div class="sec-header"><span class="sec-title" style="color:var(--purple)">🏅 Prêmios individuais</span><span style="font-size:.72rem;color:var(--dim)">${awards.length}</span></div>
+      ${awardsHtml.length>0?`<div class="award-list">${awardsHtml}</div>`:'<div style="color:var(--dim);font-size:.8rem;padding:4px 0 8px">Nenhum prêmio individual ainda.</div>'}
+      <div class="award-add-row"><input type="text" id="awardInput" placeholder="Nome do prêmio (ex: Melhor Jogador)" onkeydown="if(event.key==='Enter')addAward()"><button class="btn" onclick="addAward()">+ Prêmio</button></div>
     </div>
     <div class="form-wrap">
       <div class="sec-header"><span class="sec-title">🏷️ Competições da temporada</span><span style="font-size:.72rem;color:var(--dim)">${comps.length}</span></div>
@@ -777,6 +829,8 @@ function renderSubPorComp(sd,matches,comps){
         <div class="stat green"><div class="val">${st.g}</div><div class="lbl">Gols</div></div>
         <div class="stat blue"><div class="val">${st.a}</div><div class="lbl">Assists</div></div>
         <div class="stat gold"><div class="val">${st.g+st.a}</div><div class="lbl">Partic.</div></div>
+        <div class="stat"><div class="val">${st.starters}</div><div class="lbl">Titular</div></div>
+        <div class="stat"><div class="val" style="color:var(--purple)">${st.minutes.toLocaleString('pt-BR')}</div><div class="lbl">Minutos</div></div>
         <div class="stat"><div class="val">${st.j>0?(st.g/st.j).toFixed(2):'0.00'}</div><div class="lbl">G/J</div></div>
         <div class="stat"><div class="val" style="color:var(--dim)">${st.gf}</div><div class="lbl">Pró</div></div>
         <div class="stat"><div class="val" style="color:var(--red)">${st.ga}</div><div class="lbl">Contra</div></div>
@@ -802,6 +856,8 @@ function renderSubPorAno(sd,matches){
         <div class="stat green"><div class="val">${st.g}</div><div class="lbl">Gols</div></div>
         <div class="stat blue"><div class="val">${st.a}</div><div class="lbl">Assists</div></div>
         <div class="stat gold"><div class="val">${st.g+st.a}</div><div class="lbl">Partic.</div></div>
+        <div class="stat"><div class="val">${st.starters}</div><div class="lbl">Titular</div></div>
+        <div class="stat"><div class="val" style="color:var(--purple)">${st.minutes.toLocaleString('pt-BR')}</div><div class="lbl">Minutos</div></div>
         <div class="stat"><div class="val">${st.j>0?(st.g/st.j).toFixed(2):'0.00'}</div><div class="lbl">G/J</div></div>
         <div class="stat"><div class="val" style="color:var(--dim)">${st.gf}</div><div class="lbl">Pró</div></div>
         <div class="stat"><div class="val" style="color:var(--red)">${st.ga}</div><div class="lbl">Contra</div></div>
@@ -839,6 +895,12 @@ function renderSubJogos(sd,matches,comps){
     const paDisp=m.playerAssists>0
       ?`<span style="color:var(--blue);font-weight:700;font-size:.82rem">🎯 ${m.playerAssists}</span>`
       :`<span style="color:var(--border);font-size:.82rem">🎯 0</span>`;
+    const starterDisp=m.starter===true
+      ?'<span class="starter-badge yes">✓ Titular</span>'
+      :m.starter===false?'<span class="starter-badge no">Reserva</span>':'<span class="starter-badge unknown">Não informado</span>';
+    const minutesDisp=m.minutes===undefined||m.minutes===null||m.minutes===''
+      ?'<span class="minutes-badge">— min</span>'
+      :`<span class="minutes-badge">⏱ ${Math.max(0,Number(m.minutes)||0)} min</span>`;
     matchesHtml+=`<div class="match-card" style="gap:8px;padding:9px 12px">
       <span style="min-width:82px;font-weight:600;color:var(--dim);font-size:.72rem;flex-shrink:0">${dateFmt}</span>
       <span style="width:1px;height:20px;background:var(--border);flex-shrink:0;align-self:center"></span>
@@ -850,6 +912,7 @@ function renderSubJogos(sd,matches,comps){
       </div>
       <span style="width:1px;height:20px;background:var(--border);flex-shrink:0;align-self:center"></span>
       <div style="display:flex;gap:10px;align-items:center;flex-shrink:0">${pgDisp}${paDisp}</div>
+      <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap">${starterDisp}${minutesDisp}</div>
       <span style="width:1px;height:20px;background:var(--border);flex-shrink:0;align-self:center"></span>
       <span class="match-comp-tag" style="font-size:.65rem;flex-shrink:0">${compName}</span>
       <div class="match-actions" style="flex-shrink:0">
@@ -896,6 +959,8 @@ function updateMatchPreview(){
   const opp=document.getElementById('mMatchOpponent').value.trim()||'Adversário';
   const gf=parseInt(document.getElementById('mMatchGF').value)||0;
   const ga=parseInt(document.getElementById('mMatchGA').value)||0;
+  const starter=document.getElementById('mMatchStarter')?.checked===true;
+  const minutes=Math.min(130,Math.max(0,parseInt(document.getElementById('mMatchMinutes')?.value)||0));
   const season=state.players[state.activePlayerIdx]?.seasons[state.activeSeason];
   const club=season?.club||'Clube';
   let previewText;
@@ -904,6 +969,7 @@ function updateMatchPreview(){
   } else {
     previewText=`✈️ ${opp} <span style="color:var(--red);font-weight:700">${ga}</span> – <span style="color:var(--green);font-weight:700">${gf}</span> <b style="color:#fff">${club}</b>`;
   }
+  previewText+=`<div style="margin-top:5px;font-size:.72rem;color:var(--dim)">${starter?'✓ Titular':'Reserva'} · ⏱ ${minutes} min</div>`;
   const prev=document.getElementById('matchPreview');
   if(prev)prev.innerHTML=previewText;
 }
@@ -922,8 +988,10 @@ function openAddMatch(){
   document.getElementById('mMatchGA').value='0';
   document.getElementById('mMatchPlayerGoals').value='0';
   document.getElementById('mMatchAssists').value='0';
+  document.getElementById('mMatchStarter').checked=true;
+  document.getElementById('mMatchMinutes').value='90';
   document.getElementById('modalMatchTitle').textContent='Registrar Jogo';
-  ['mMatchLoc','mMatchOpponent','mMatchGF','mMatchGA'].forEach(id=>{
+  ['mMatchLoc','mMatchOpponent','mMatchGF','mMatchGA','mMatchMinutes'].forEach(id=>{
     const el=document.getElementById(id);
     if(el){el.oninput=updateMatchPreview;el.onchange=updateMatchPreview;}
   });
@@ -947,8 +1015,10 @@ function editMatch(mid){
   document.getElementById('mMatchGA').value=m.ga||0;
   document.getElementById('mMatchPlayerGoals').value=m.playerGoals||0;
   document.getElementById('mMatchAssists').value=m.playerAssists||0;
+  document.getElementById('mMatchStarter').checked=m.starter===true;
+  document.getElementById('mMatchMinutes').value=m.minutes===undefined||m.minutes===null?'0':m.minutes;
   document.getElementById('modalMatchTitle').textContent='Editar Jogo';
-  ['mMatchLoc','mMatchOpponent','mMatchGF','mMatchGA'].forEach(id=>{
+  ['mMatchLoc','mMatchOpponent','mMatchGF','mMatchGA','mMatchMinutes'].forEach(id=>{
     const el=document.getElementById(id);if(el){el.oninput=updateMatchPreview;el.onchange=updateMatchPreview;}
   });
   openModal('modalMatch');
@@ -964,11 +1034,14 @@ function saveMatch(){
   const ga=parseInt(document.getElementById('mMatchGA').value)||0;
   const playerGoals=parseInt(document.getElementById('mMatchPlayerGoals').value)||0;
   const playerAssists=parseInt(document.getElementById('mMatchAssists').value)||0;
+  const starter=document.getElementById('mMatchStarter').checked;
+  const minutes=Math.min(130,Math.max(0,parseInt(document.getElementById('mMatchMinutes').value)||0));
   if(!compId){toast('Selecione uma competição','err');return;}
   if(!opponent){toast('Preencha o adversário','err');return;}
   const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
   if(!season.matches)season.matches=[];
-  const obj={id:editingMatchId||'m_'+Date.now(),compId,loc,opponent,date,gf,ga,playerGoals,playerAssists,year:date?date.substring(0,4):state.activeSeason};
+  const existing=editingMatchId?season.matches.find(x=>x.id===editingMatchId):null;
+  const obj={...(existing||{}),id:editingMatchId||'m_'+Date.now(),compId,loc,opponent,date,gf,ga,playerGoals,playerAssists,starter,minutes,year:date?date.substring(0,4):state.activeSeason};
   if(editingMatchId){const idx=season.matches.findIndex(x=>x.id===editingMatchId);if(idx!==-1)season.matches[idx]=obj;editingMatchId=null;}
   else season.matches.push(obj);
   save();closeModal('modalMatch');seasonSubView='jogos';renderSeasonContent();toast('Jogo salvo!');
@@ -1300,8 +1373,10 @@ function renderWikipediaPreview(){
       <td class="wiki-score" contenteditable="true" data-field="score" oninput="refreshWikipediaRow(this.closest('tr'))">${wikiEscape(g.score)}</td>
       <td class="wiki-team" contenteditable="true" data-field="team2" oninput="refreshWikipediaRow(this.closest('tr'))">${wikiEscape(g.team2)}</td>
       <td class="wiki-comp" contenteditable="true" data-field="competition" oninput="refreshWikipediaRow(this.closest('tr'))">${wikiEscape(g.competition)}</td>
-      <td><input class="wiki-num-input" data-field="goals" type="number" min="0" step="1" value="0"></td>
-      <td><input class="wiki-num-input" data-field="assists" type="number" min="0" step="1" value="0"></td>
+      <td><input class="wiki-num-input" data-field="goals" type="number" min="0" step="1" value="${g.playerGoals||0}"></td>
+      <td><input class="wiki-num-input" data-field="assists" type="number" min="0" step="1" value="${g.playerAssists||0}"></td>
+      <td style="text-align:center"><input class="wiki-starter-check" data-field="starter" type="checkbox" ${g.starter===false?'':'checked'} onchange="refreshWikipediaRow(this.closest('tr'))"></td>
+      <td><input class="wiki-num-input" data-field="minutes" type="number" min="0" max="130" step="1" value="${g.minutes===undefined?90:g.minutes}" oninput="refreshWikipediaRow(this.closest('tr'))"></td>
       <td><span class="wiki-row-status"></span></td>
       <td><button class="btn danger" style="padding:3px 7px;font-size:.68rem" onclick="removeWikipediaRow(this.closest('tr'))">✕</button></td>`;
     body.appendChild(tr);
@@ -1326,7 +1401,9 @@ function wikiReadPreviewRow(row){
     team2:(read('team2')?.textContent||'').trim(),
     competition:(read('competition')?.textContent||'').trim(),
     playerGoals:Math.max(0,parseInt(read('goals')?.value)||0),
-    playerAssists:Math.max(0,parseInt(read('assists')?.value)||0)
+    playerAssists:Math.max(0,parseInt(read('assists')?.value)||0),
+    starter:read('starter')?.checked===true,
+    minutes:Math.min(130,Math.max(0,parseInt(read('minutes')?.value)||0))
   };
 }
 
@@ -1343,7 +1420,7 @@ function wikiMapPreviewGame(data){
   else if(t2===mainKey){loc='away';opponent=data.team1;gf=+scoreMatch[2];ga=+scoreMatch[1];}
   else return{valid:false,reason:'Time não encontrado',kind:'err'};
   if(!opponent)return{valid:false,reason:'Sem adversário',kind:'err'};
-  const mapped={valid:true,date,loc,opponent,gf,ga,competition:data.competition,playerGoals:data.playerGoals,playerAssists:data.playerAssists};
+  const mapped={valid:true,date,loc,opponent,gf,ga,competition:data.competition,playerGoals:data.playerGoals,playerAssists:data.playerAssists,starter:data.starter,minutes:data.minutes};
   if(wikiMatchAlreadyExists(mapped))return{...mapped,valid:false,duplicate:true,reason:'Já cadastrado',kind:'warn'};
   return{...mapped,reason:loc==='home'?'Casa':'Fora',kind:'ok'};
 }
@@ -1390,7 +1467,7 @@ function importWikipediaMatches(){
   ready.forEach((m,index)=>{
     const compKey=wikiNormalize(m.competition);let comp=compCache.get(compKey);
     if(!comp){comp={id:`comp_${stamp}_${index}_${Math.random().toString(36).slice(2,6)}`,name:m.competition};season.comps.push(comp);compCache.set(compKey,comp);}
-    season.matches.push({id:`m_${stamp}_${index}_${Math.random().toString(36).slice(2,7)}`,compId:comp.id,loc:m.loc,opponent:m.opponent,date:m.date,gf:m.gf,ga:m.ga,playerGoals:m.playerGoals,playerAssists:m.playerAssists,year:m.date.substring(0,4),source:'wikipedia',sourcePage:wikipediaImportPage});
+    season.matches.push({id:`m_${stamp}_${index}_${Math.random().toString(36).slice(2,7)}`,compId:comp.id,loc:m.loc,opponent:m.opponent,date:m.date,gf:m.gf,ga:m.ga,playerGoals:m.playerGoals,playerAssists:m.playerAssists,starter:m.starter,minutes:m.minutes,year:m.date.substring(0,4),source:'wikipedia',sourcePage:wikipediaImportPage});
   });
   save();closeModal('modalWikiImport');seasonSubView='jogos';activeCompFilter=null;renderSeasonContent();
   const notes=[];if(duplicates)notes.push(`${duplicates} duplicado(s) ignorado(s)`);if(invalid)notes.push(`${invalid} linha(s) inválida(s)`);
@@ -1413,6 +1490,24 @@ function deleteTitle(tid){
   confirmDialog('Excluir título','Remover este título?',()=>{
     season.titles=(season.titles||[]).filter(t=>t.id!==tid);
     save();renderSeasonContent();toast('Título removido');
+  });
+}
+
+function addAward(){
+  const inp=document.getElementById('awardInput');
+  const name=(inp?.value||'').trim();
+  if(!name){toast('Preencha o nome do prêmio','err');return;}
+  const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
+  if(!season.awards)season.awards=[];
+  season.awards.push({id:'award_'+Date.now(),name});
+  inp.value='';save();renderSeasonContent();toast('Prêmio individual adicionado! 🏅');
+}
+
+function deleteAward(aid){
+  const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
+  confirmDialog('Excluir prêmio individual','Remover este prêmio?',()=>{
+    season.awards=(season.awards||[]).filter(a=>a.id!==aid);
+    save();renderSeasonContent();toast('Prêmio individual removido');
   });
 }
 
@@ -1471,18 +1566,21 @@ function calcMilestones(playerIdx){
 
 function getCareerData(playerIdx){
   const player=state.players[playerIdx];
-  let totalJ=0,totalG=0,totalA=0;
+  let totalJ=0,totalG=0,totalA=0,totalStarts=0,totalMinutes=0;
   const compMap={},clubMap={},yearMap={},opponentMap={},ageMap={};
-  const seasonStats=[],allTitles=[];
+  const seasonStats=[],allTitles=[],allAwards=[];
   const keys=Object.keys(player.seasons||{}).sort((a,b)=>{if(a==='SELEÇÃO')return-1;if(b==='SELEÇÃO')return 1;return b-a;});
   keys.forEach(sKey=>{
     const s=player.seasons[sKey];
     let sJ=0,sG=0,sA=0;
     (s.titles||[]).forEach(t=>{allTitles.push({name:t.name,season:sKey,club:s.isNT?'Seleção':s.club,isNT:s.isNT});});
+    (s.awards||[]).forEach(a=>{allAwards.push({name:a.name,season:sKey,club:s.isNT?'Seleção':s.club,isNT:s.isNT});});
     const matches=s.matches||[];
     matches.forEach(m=>{
       sJ++;sG+=m.playerGoals||0;sA+=m.playerAssists||0;
       totalJ++;totalG+=m.playerGoals||0;totalA+=m.playerAssists||0;
+      if(m.starter===true)totalStarts++;
+      totalMinutes+=Math.max(0,Number(m.minutes)||0);
       const compName=getCompName(s,m.compId)||'SEM COMP';
       if(!compMap[compName])compMap[compName]={j:0,g:0,a:0};
       compMap[compName].j++;compMap[compName].g+=m.playerGoals||0;compMap[compName].a+=m.playerAssists||0;
@@ -1527,7 +1625,7 @@ function getCareerData(playerIdx){
     }
   });
   seasonStats.sort((a,b)=>b.year-a.year);
-  return{totalJ,totalG,totalA,compMap,clubMap,yearMap,ageMap,opponentMap,seasonStats,allTitles,
+  return{totalJ,totalG,totalA,totalStarts,totalMinutes,compMap,clubMap,yearMap,ageMap,opponentMap,seasonStats,allTitles,allAwards,
     clubs:[...new Set(Object.values(player.seasons||{}).filter(s=>!s.isNT).map(s=>s.club))],
     seasons:keys.length};
 }
@@ -1550,6 +1648,7 @@ function renderCareer(){
   const initials=getPlayerInitials(player);
   const avatarContent=player.profilePhoto?`<img src="${player.profilePhoto}" alt="Foto do atleta">`:initials;
   const avgGoals=d.totalJ>0?(d.totalG/d.totalJ).toFixed(2):'0.00';
+  const avgMinutes=d.totalJ>0?Math.round(d.totalMinutes/d.totalJ):0;
   const compsorted=Object.entries(d.compMap).sort((a,b)=>b[1].g-a[1].g);
   const clubsorted=Object.entries(d.clubMap).sort((a,b)=>b[1].g-a[1].g);
   const yearsorted=Object.entries(d.yearMap).sort((a,b)=>b[0].localeCompare(a[0]));
@@ -1557,6 +1656,10 @@ function renderCareer(){
   let titlesCareerHtml='';
   d.allTitles.forEach(t=>{
     titlesCareerHtml+=`<div class="title-card"><div class="title-card-trophy">🏆</div><div><div class="title-card-name">${t.name}</div><div class="title-card-season">${t.isNT?'🏴 ':''}${t.club} · ${t.season!=='SELEÇÃO'?t.season:'Seleção Nacional'}</div></div></div>`;
+  });
+  let awardsCareerHtml='';
+  d.allAwards.forEach(a=>{
+    awardsCareerHtml+=`<div class="title-card" style="background:rgba(163,113,247,.08);border-color:rgba(163,113,247,.25)"><div class="title-card-trophy">🏅</div><div><div class="title-card-name" style="color:var(--purple)">${a.name}</div><div class="title-card-season">${a.isNT?'🏴 ':''}${a.club} · ${a.season!=='SELEÇÃO'?a.season:'Seleção Nacional'}</div></div></div>`;
   });
   let html=`<div class="career-section">
     <div class="career-hero">
@@ -1570,11 +1673,18 @@ function renderCareer(){
       <div class="career-stat"><div class="val" style="color:var(--blue)">${d.totalA}</div><div class="lbl">Assists</div></div>
       <div class="career-stat"><div class="val" style="color:var(--gold)">${d.totalG+d.totalA}</div><div class="lbl">Participações</div></div>
       <div class="career-stat"><div class="val" style="color:var(--dim)">${avgGoals}</div><div class="lbl">Gols/Jogo</div></div>
+      <div class="career-stat"><div class="val" style="color:var(--green)">${d.totalStarts}</div><div class="lbl">Titular</div></div>
+      <div class="career-stat"><div class="val" style="color:var(--purple)">${d.totalMinutes.toLocaleString('pt-BR')}</div><div class="lbl">Minutos</div></div>
+      <div class="career-stat"><div class="val" style="color:var(--dim)">${avgMinutes}</div><div class="lbl">Min/Jogo</div></div>
       <div class="career-stat"><div class="val" style="color:var(--yellow)">${d.allTitles.length}</div><div class="lbl">Títulos</div></div>
+      <div class="career-stat"><div class="val" style="color:var(--purple)">${d.allAwards.length}</div><div class="lbl">Prêmios</div></div>
     </div>
     <div class="divider"></div>
     <div class="section-label" style="color:var(--yellow)">🏆 Títulos</div>
-    ${d.allTitles.length>0?`<div class="titles-grid">${titlesCareerHtml}</div>`:'<div class="empty" style="padding:16px">Nenhum título ainda</div>'}`;
+    ${d.allTitles.length>0?`<div class="titles-grid">${titlesCareerHtml}</div>`:'<div class="empty" style="padding:16px">Nenhum título ainda</div>'}
+    <div class="divider"></div>
+    <div class="section-label" style="color:var(--purple)">🏅 Prêmios individuais</div>
+    ${d.allAwards.length>0?`<div class="titles-grid">${awardsCareerHtml}</div>`:'<div class="empty" style="padding:16px">Nenhum prêmio individual ainda</div>'}`;
 
   // ===== MARCOS DE GOLS =====
   const msData=calcMilestones(state.activePlayerIdx);
@@ -1860,6 +1970,8 @@ function renderRanking(){
   const rc=rankComp?state.players.map(p=>{let j=0,g=0,a=0;getPlayerAllMatches(p).filter(m=>m.compName===rankComp).forEach(m=>{j++;g+=m.playerGoals||0;a+=m.playerAssists||0;});return{name:p.name,j,g,a};}):[];
   const titleCounts=state.players.map(p=>{let count=0;Object.values(p.seasons||{}).forEach(s=>{count+=(s.titles||[]).length;});return{name:p.name,count};}).sort((a,b)=>b.count-a.count);
   let titlesRankHtml=titleCounts.every(x=>x.count===0)?'<div class="empty" style="padding:16px">Nenhum título</div>':titleCounts.map((x,i)=>`<div class="rank-row">${posIcon(i)}<div class="rank-name">${x.name}</div><div class="rank-val" style="color:var(--yellow)">${x.count} 🏆</div></div>`).join('');
+  const awardCounts=state.players.map(p=>{let count=0;Object.values(p.seasons||{}).forEach(s=>{count+=(s.awards||[]).length;});return{name:p.name,count};}).sort((a,b)=>b.count-a.count);
+  let awardsRankHtml=awardCounts.every(x=>x.count===0)?'<div class="empty" style="padding:16px">Nenhum prêmio</div>':awardCounts.map((x,i)=>`<div class="rank-row">${posIcon(i)}<div class="rank-name">${x.name}</div><div class="rank-val" style="color:var(--purple)">${x.count} 🏅</div></div>`).join('');
   document.getElementById('rankingContent').innerHTML=`
     <div class="rank-section">
       <div class="section-label">Ranking Geral</div>
@@ -1867,7 +1979,10 @@ function renderRanking(){
         <div><div style="font-size:.72rem;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">⚽ Artilheiros</div>${buildList(generalRank,'g','var(--green)')}</div>
         <div><div style="font-size:.72rem;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">🎯 Garçons</div>${buildList(generalRank,'a','var(--blue)')}</div>
       </div>
-      <div><div style="font-size:.72rem;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">🏆 Mais títulos</div>${titlesRankHtml}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div><div style="font-size:.72rem;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">🏆 Mais títulos</div>${titlesRankHtml}</div>
+        <div><div style="font-size:.72rem;color:var(--purple);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">🏅 Mais prêmios individuais</div>${awardsRankHtml}</div>
+      </div>
     </div>
     ${compList.length>0?`<div class="rank-section"><div class="section-label">Ranking por Competição</div><div class="rank-tabs">${compTabsHtml}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div><div style="font-size:.72rem;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">⚽ Artilheiros</div>${buildList(rc,'g','var(--green)')}</div><div><div style="font-size:.72rem;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">🎯 Garçons</div>${buildList(rc,'a','var(--blue)')}</div></div></div>`:'<div class="rank-section"><div class="empty">Nenhuma competição ainda</div></div>'}`;
 }
