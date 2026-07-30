@@ -1,7 +1,3 @@
-
-
-
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -227,6 +223,134 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .wiki-footer-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
 @media(max-width:700px){.wiki-import-top{grid-template-columns:1fr}.wiki-modal{padding:18px}.wiki-preview-wrap{max-height:50vh}}
 
+
+
+/* ===================== INSTAGRAM ===================== */
+.instagram-shell{max-width:935px;margin:0 auto 24px;background:#000;border:1px solid #262626;border-radius:14px;overflow:hidden;color:#f5f5f5;box-shadow:0 18px 50px rgba(0,0,0,.22)}
+.ig-topbar{height:58px;border-bottom:1px solid #262626;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#000;position:sticky;top:0;z-index:5}
+.ig-brand{font-family:"Segoe Script","Brush Script MT",cursive;font-size:1.45rem;font-weight:700;letter-spacing:-1px;color:#fff}
+.ig-top-actions{display:flex;align-items:center;gap:8px}
+.ig-icon-btn{width:36px;height:36px;border:0;background:transparent;color:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.15rem;transition:background .15s}
+.ig-icon-btn:hover{background:#1a1a1a}
+.ig-profile{padding:34px 7% 26px;display:grid;grid-template-columns:minmax(150px,1fr) minmax(340px,2fr);gap:42px;border-bottom:1px solid #262626}
+.ig-avatar-wrap{display:flex;align-items:flex-start;justify-content:center}
+.ig-avatar-ring{width:154px;height:154px;border-radius:50%;padding:4px;background:linear-gradient(135deg,#f9ce34,#ee2a7b 54%,#6228d7);box-shadow:0 0 0 1px #262626}
+.ig-avatar{width:100%;height:100%;border-radius:50%;border:4px solid #000;background:#1c1c1c;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:2.3rem;font-weight:700;color:#fff}
+.ig-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.ig-profile-main{min-width:0}
+.ig-profile-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.ig-username{font-size:1.25rem;font-weight:400;line-height:1.2;overflow:hidden;text-overflow:ellipsis}
+.ig-verified{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#0095f6;color:#fff;font-size:.68rem;font-weight:900}
+.ig-action-btn{border:0;border-radius:8px;padding:7px 16px;font-size:.82rem;font-weight:700;cursor:pointer;background:#363636;color:#fff;transition:background .15s,opacity .15s}
+.ig-action-btn:hover{background:#4a4a4a}
+.ig-action-btn.primary{background:#0095f6}
+.ig-action-btn.primary:hover{background:#1877f2}
+.ig-stats{display:flex;gap:36px;align-items:center;margin-bottom:18px;font-size:.9rem;flex-wrap:wrap}
+.ig-stat strong{font-weight:700;margin-right:4px}
+.ig-display-name{font-size:.88rem;font-weight:700;margin-bottom:5px}
+.ig-bio{font-size:.88rem;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;color:#f5f5f5}
+.ig-highlights{display:flex;gap:24px;padding:18px 6% 28px;overflow-x:auto;scrollbar-width:thin;border-bottom:1px solid #262626}
+.ig-highlight{min-width:78px;text-align:center}
+.ig-highlight-circle{width:72px;height:72px;margin:0 auto 7px;border:1px solid #555;border-radius:50%;padding:3px;background:#000}
+.ig-highlight-inner{width:100%;height:100%;border-radius:50%;background:#1c1c1c;display:flex;align-items:center;justify-content:center;font-size:1.65rem;border:2px solid #000}
+.ig-highlight-name{font-size:.72rem;color:#f5f5f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ig-highlight{border:0;background:transparent;color:#fff;cursor:pointer;padding:0;border-radius:10px}
+.ig-highlight:hover .ig-highlight-circle{border-color:#a8a8a8}
+.ig-highlight-add .ig-highlight-inner{font-size:1.9rem;color:#a8a8a8;border-style:dashed}
+.ig-highlight-manager{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;max-height:310px;overflow:auto}
+.ig-highlight-manager-item{display:flex;align-items:center;gap:10px;background:#0a0a0a;border:1px solid #363636;border-radius:10px;padding:10px 12px}
+.ig-highlight-manager-icon{width:44px;height:44px;border-radius:50%;background:#1c1c1c;border:1px solid #555;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
+.ig-highlight-manager-name{flex:1;min-width:0;font-size:.86rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ig-highlight-manager-actions{display:flex;gap:4px;align-items:center}
+.ig-mini-control{border:1px solid #363636;background:#1c1c1c;color:#fff;border-radius:7px;min-width:31px;height:31px;padding:0 7px;cursor:pointer;font-weight:700}
+.ig-mini-control:hover{background:#303030}
+.ig-mini-control.danger{color:#ff5a66}
+.ig-highlight-form{background:#0a0a0a;border:1px solid #363636;border-radius:10px;padding:13px;margin-top:10px}
+.ig-highlight-form-grid{display:grid;grid-template-columns:100px 1fr;gap:10px}
+.ig-likes-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.ig-likes-row .ig-likes{margin:0}
+.ig-edit-link{border:0;background:transparent;color:#a8a8a8;font-size:.7rem;font-weight:700;cursor:pointer;padding:2px 0}
+.ig-edit-link:hover{color:#fff}
+.ig-mini-control:disabled{opacity:.3;cursor:not-allowed}
+#modalInstagramLikes{z-index:350}
+#modalConfirm{z-index:500}
+.ig-profile-tabs{height:52px;display:flex;align-items:center;justify-content:center;gap:58px;border-bottom:1px solid #262626}
+.ig-profile-tab{height:52px;border:0;border-top:1px solid transparent;background:transparent;color:#a8a8a8;text-transform:uppercase;font-size:.72rem;letter-spacing:1.2px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;padding:0 4px;margin-top:-1px}
+.ig-profile-tab.active{border-top-color:#f5f5f5;color:#f5f5f5}
+.ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;background:#000;padding:3px}
+.ig-grid-item{aspect-ratio:1/1;position:relative;background:#111;overflow:hidden;cursor:pointer;border:0;padding:0;color:#fff}
+.ig-grid-item img,.ig-grid-item video{width:100%;height:100%;object-fit:cover;display:block}
+.ig-grid-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;gap:24px;opacity:0;transition:opacity .16s;font-weight:700;font-size:.9rem}
+.ig-grid-item:hover .ig-grid-overlay{opacity:1}
+.ig-grid-badge{position:absolute;right:8px;top:8px;font-size:1.1rem;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+.ig-media-placeholder{width:100%;height:100%;background:linear-gradient(110deg,#111 8%,#1d1d1d 18%,#111 33%);background-size:200% 100%;animation:igShimmer 1.25s linear infinite;display:flex;align-items:center;justify-content:center;color:#777;font-size:.72rem}
+@keyframes igShimmer{to{background-position-x:-200%}}
+.ig-empty{padding:72px 20px;text-align:center;color:#a8a8a8;background:#000}
+.ig-empty-icon{width:62px;height:62px;border:2px solid #f5f5f5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.7rem;color:#fff}
+.ig-empty-title{font-size:1.6rem;font-weight:800;color:#f5f5f5;margin-bottom:8px}
+.ig-empty-text{font-size:.84rem;line-height:1.45;margin-bottom:16px}
+.ig-modal{max-width:560px;background:#121212;border-color:#363636}
+.ig-modal .modal-label{color:#a8a8a8}
+.ig-modal input,.ig-modal textarea,.ig-modal select{background:#1c1c1c;border:1px solid #363636;color:#fff;padding:10px 12px;border-radius:8px;width:100%;outline:none;font:inherit;margin-bottom:12px}
+.ig-modal textarea{resize:vertical;min-height:94px;line-height:1.45}
+.ig-profile-photo-edit{display:flex;align-items:center;gap:14px;padding:12px;background:#0a0a0a;border:1px solid #363636;border-radius:10px;margin-bottom:16px}
+.ig-profile-photo-preview{width:62px;height:62px;border-radius:50%;overflow:hidden;background:#262626;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;flex-shrink:0}
+.ig-profile-photo-preview img{width:100%;height:100%;object-fit:cover}
+.ig-modal input:focus,.ig-modal textarea:focus,.ig-modal select:focus{border-color:#737373}
+.ig-upload-zone{min-height:230px;border:1px dashed #555;border-radius:12px;background:#0a0a0a;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px;text-align:center;padding:20px;cursor:pointer;margin-bottom:14px;overflow:hidden}
+.ig-upload-zone:hover{border-color:#0095f6}
+.ig-upload-zone img,.ig-upload-zone video{max-width:100%;max-height:340px;border-radius:8px;display:block}
+.ig-upload-icon{font-size:2rem}
+.ig-upload-hint{font-size:.8rem;color:#a8a8a8;line-height:1.45}
+.ig-viewer-modal{max-width:930px;padding:0;background:#000;border-color:#363636;overflow:hidden}
+.ig-viewer{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(310px,.65fr);min-height:560px;max-height:82vh}
+.ig-viewer-media{background:#050505;display:flex;align-items:center;justify-content:center;min-height:430px;overflow:hidden}
+.ig-viewer-media img,.ig-viewer-media video{width:100%;height:100%;max-height:82vh;object-fit:contain;display:block}
+.ig-viewer-side{border-left:1px solid #262626;display:flex;flex-direction:column;min-height:0;background:#000}
+.ig-viewer-head{display:flex;align-items:center;gap:10px;padding:14px;border-bottom:1px solid #262626}
+.ig-mini-avatar{width:34px;height:34px;border-radius:50%;overflow:hidden;background:#262626;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0}
+.ig-mini-avatar img{width:100%;height:100%;object-fit:cover}
+.ig-viewer-copy{padding:16px 14px;overflow-y:auto;flex:1;font-size:.84rem;line-height:1.5}
+.ig-viewer-caption{margin-bottom:18px;overflow-wrap:anywhere}
+.ig-comments{display:flex;flex-direction:column;gap:12px}
+.ig-comment{display:flex;gap:7px;align-items:flex-start}
+.ig-comment-text{overflow-wrap:anywhere;min-width:0}
+.ig-viewer-actions{border-top:1px solid #262626;padding:11px 14px}
+.ig-viewer-action-row{display:flex;align-items:center;gap:12px;margin-bottom:7px}
+.ig-viewer-action{border:0;background:transparent;color:#fff;font-size:1.35rem;cursor:pointer;padding:0}
+.ig-viewer-action:hover{opacity:.65}
+.ig-liked{color:#ff3040}
+.ig-likes{font-size:.82rem;font-weight:700;margin-bottom:6px}
+.ig-date{font-size:.65rem;color:#a8a8a8;text-transform:uppercase;letter-spacing:.5px}
+.ig-comment-form{display:flex;border-top:1px solid #262626;margin-top:10px;padding-top:10px;gap:8px}
+.ig-comment-form input{margin:0!important;border:0!important;background:transparent!important;padding:7px 0!important;min-width:0}
+.ig-comment-form button{border:0;background:transparent;color:#0095f6;font-weight:700;cursor:pointer;padding:0 2px}
+.ig-close-float{position:absolute;right:18px;top:14px;z-index:3;width:34px;height:34px;border:0;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;font-size:1.15rem}
+@media(max-width:760px){
+  .instagram-shell{border-radius:0;border-left:0;border-right:0}
+  .ig-profile{padding:22px 16px 18px;grid-template-columns:86px 1fr;gap:16px}
+  .ig-avatar-ring{width:86px;height:86px;padding:3px}
+  .ig-avatar{border-width:3px;font-size:1.35rem}
+  .ig-profile-row{margin-bottom:12px;gap:8px}
+  .ig-username{font-size:1.05rem;max-width:100%}
+  .ig-stats{grid-column:1/-1;justify-content:space-around;gap:8px;border-top:1px solid #262626;border-bottom:1px solid #262626;padding:12px 0;margin:12px -102px 14px 0;text-align:center}
+  .ig-stat{display:flex;flex-direction:column;font-size:.72rem;color:#a8a8a8}
+  .ig-stat strong{color:#fff;margin:0;font-size:.88rem}
+  .ig-highlights{padding:14px 14px 20px;gap:14px}
+  .ig-highlight-circle{width:62px;height:62px}
+  .ig-profile-tabs{gap:0;justify-content:space-around}
+  .ig-profile-tab{font-size:0;width:50%;justify-content:center}
+  .ig-profile-tab span{font-size:1rem}
+  .ig-grid{gap:2px;padding:2px}
+  .ig-grid-overlay{display:none}
+  .ig-viewer-modal{max-width:100%;border-radius:0}
+  .ig-viewer{display:block;max-height:90vh;overflow-y:auto}
+  .ig-viewer-media{min-height:300px;height:auto;max-height:58vh}
+  .ig-viewer-media img,.ig-viewer-media video{max-height:58vh}
+  .ig-viewer-side{border-left:0;border-top:1px solid #262626;min-height:320px}
+}
+@media(max-width:430px){.ig-action-btn{padding:7px 10px}.ig-profile-row .ig-action-btn.secondary{display:none}.ig-topbar{padding:0 10px}.ig-highlights{gap:10px}.ig-highlight{min-width:67px}.ig-stat{font-size:.66rem}.ig-highlight-form-grid{grid-template-columns:1fr}.ig-highlight-manager-actions{flex-wrap:wrap;justify-content:flex-end}}
+
 </style>
 </head>
 <body>
@@ -248,6 +372,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div id="careerContent" style="display:none"></div>
     <div id="rankingContent" style="display:none"></div>
     <div id="personalContent" style="display:none"></div>
+    <div id="instagramContent" style="display:none"></div>
   </div>
   <div id="emptyPlayers" class="empty" style="padding:60px 20px">
     <div style="font-size:1rem;color:#fff;margin-bottom:6px">Nenhum atleta cadastrado</div>
@@ -432,6 +557,104 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
+
+<!-- Modal Instagram: nova mídia -->
+<div id="modalInstagramComposer" class="overlay" onclick="closeInstagramComposerOnBg(event)">
+  <div class="modal ig-modal">
+    <h2 id="instagramComposerTitle">Nova publicação</h2>
+    <input type="hidden" id="instagramMediaKind" value="post">
+    <input class="profile-file-input" type="file" id="instagramMediaInput" accept="image/jpeg,image/png,image/webp" onchange="previewInstagramMedia(event)">
+    <div id="instagramUploadZone" class="ig-upload-zone" onclick="chooseInstagramMedia()">
+      <div class="ig-upload-icon">▧</div>
+      <div style="font-weight:700">Selecionar foto</div>
+      <div class="ig-upload-hint">A publicação ficará salva somente neste navegador.</div>
+    </div>
+    <label class="modal-label">Legenda</label>
+    <textarea id="instagramCaptionInput" maxlength="2200" placeholder="Escreva uma legenda..."></textarea>
+    <label class="modal-label">Localização (opcional)</label>
+    <input type="text" id="instagramLocationInput" maxlength="80" placeholder="Adicionar localização">
+    <label class="modal-label">Curtidas iniciais</label>
+    <input type="number" id="instagramLikesInput" min="0" step="1" value="0" placeholder="0">
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeInstagramComposer()">Cancelar</button>
+      <button class="btn" id="instagramPublishBtn" style="background:#0095f6;color:#fff" onclick="saveInstagramMedia()">Compartilhar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Instagram: editar perfil -->
+<div id="modalInstagramProfile" class="overlay" onclick="closeModalOnBg(event,'modalInstagramProfile')">
+  <div class="modal ig-modal">
+    <h2>Editar perfil do Instagram</h2>
+    <div class="ig-profile-photo-edit">
+      <div id="instagramProfilePhotoPreview" class="ig-profile-photo-preview">?</div>
+      <div style="flex:1"><div style="font-size:.82rem;font-weight:700;margin-bottom:7px">Foto do perfil</div><button class="ig-action-btn primary" onclick="chooseInstagramProfilePhoto()">Trocar foto</button> <button class="ig-action-btn" onclick="removeProfilePhoto()">Remover</button></div>
+      <input class="profile-file-input" type="file" id="instagramProfilePhotoInput" accept="image/jpeg,image/png,image/webp" onchange="handleProfilePhoto(event)">
+    </div>
+    <label class="modal-label">Nome de usuário</label>
+    <input type="text" id="instagramUsernameInput" maxlength="30" placeholder="nome_de_usuario">
+    <label class="modal-label">Biografia</label>
+    <textarea id="instagramBioInput" maxlength="150" placeholder="Conte um pouco sobre o atleta"></textarea>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label class="modal-label">Seguidores</label><input type="number" id="instagramFollowersInput" min="0" step="1"></div>
+      <div><label class="modal-label">Seguindo</label><input type="number" id="instagramFollowingInput" min="0" step="1"></div>
+    </div>
+    <label class="toggle-wrap" style="margin-bottom:14px" onclick="const cb=document.getElementById('instagramVerifiedInput');cb.checked=!cb.checked">
+      <input type="checkbox" id="instagramVerifiedInput" onclick="event.stopPropagation()">
+      <span style="flex:1;font-size:.86rem">Exibir selo de verificação</span>
+      <span class="ig-verified">✓</span>
+    </label>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('modalInstagramProfile')">Cancelar</button>
+      <button class="btn" style="background:#0095f6;color:#fff" onclick="saveInstagramProfile()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Instagram: destaques -->
+<div id="modalInstagramHighlights" class="overlay" onclick="closeModalOnBg(event,'modalInstagramHighlights')">
+  <div class="modal ig-modal" style="max-width:640px">
+    <h2>Editar destaques</h2>
+    <div style="font-size:.78rem;color:#a8a8a8;line-height:1.45;margin-bottom:13px">Crie, renomeie, reordene ou exclua os destaques exibidos no perfil.</div>
+    <div id="instagramHighlightsList" class="ig-highlight-manager"></div>
+    <div class="ig-highlight-form">
+      <input type="hidden" id="instagramHighlightId">
+      <div id="instagramHighlightFormTitle" style="font-size:.82rem;font-weight:800;margin-bottom:10px">Novo destaque</div>
+      <div class="ig-highlight-form-grid">
+        <div><label class="modal-label">Ícone</label><input type="text" id="instagramHighlightIcon" maxlength="8" placeholder="⭐"></div>
+        <div><label class="modal-label">Nome</label><input type="text" id="instagramHighlightName" maxlength="20" placeholder="Ex.: Viagens"></div>
+      </div>
+      <div class="modal-actions" style="margin-top:0">
+        <button class="btn ghost" onclick="resetInstagramHighlightForm()">Limpar</button>
+        <button class="btn" id="instagramHighlightSaveBtn" style="background:#0095f6;color:#fff" onclick="saveInstagramHighlight()">Adicionar</button>
+      </div>
+    </div>
+    <div class="modal-actions" style="margin-top:14px"><button class="btn ghost" onclick="closeModal('modalInstagramHighlights')">Concluir</button></div>
+  </div>
+</div>
+
+<!-- Modal Instagram: curtidas -->
+<div id="modalInstagramLikes" class="overlay" onclick="closeModalOnBg(event,'modalInstagramLikes')">
+  <div class="modal ig-modal" style="max-width:420px">
+    <h2>Editar número de curtidas</h2>
+    <input type="hidden" id="instagramLikesPostId">
+    <label class="modal-label">Curtidas</label>
+    <input type="number" id="instagramEditLikesInput" min="0" step="1" placeholder="0" onkeydown="if(event.key==='Enter')saveInstagramLikes()">
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('modalInstagramLikes')">Cancelar</button>
+      <button class="btn" style="background:#0095f6;color:#fff" onclick="saveInstagramLikes()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Instagram: visualizador -->
+<div id="modalInstagramViewer" class="overlay" onclick="closeInstagramViewerOnBg(event)">
+  <div class="modal ig-viewer-modal" style="position:relative">
+    <button class="ig-close-float" onclick="closeInstagramViewer()">✕</button>
+    <div id="instagramViewerContent"></div>
+  </div>
+</div>
+
 <!-- Modal Confirmar -->
 <div id="modalConfirm" class="overlay" onclick="closeModalOnBg(event,'modalConfirm')">
   <div class="modal">
@@ -461,6 +684,12 @@ let editingContractId=null;
 let activeContractId=null;
 let editingTempId=null;
 let editingBonusId=null;
+let instagramGridView='posts';
+let instagramPreviewUrl='';
+let instagramViewerUrl='';
+let instagramObjectUrls=[];
+const INSTAGRAM_DB_NAME='marechal_lott_instagram_media_v1';
+const INSTAGRAM_STORE_NAME='media';
 
 window.onload=()=>{
   const savedV9=localStorage.getItem('marechal_lott_v9');
@@ -482,6 +711,7 @@ window.onload=()=>{
     ...p,
     profilePhoto:p.profilePhoto||'',
     contracts:p.contracts||[],
+    instagram:normalizeInstagramProfile(p.instagram,p.name),
     seasons:Object.fromEntries(Object.entries(p.seasons||{}).map(([k,s])=>[k,normalizeSeasonV9(k,s)]))
   }));
   state.activeView='season';save();render();
@@ -564,7 +794,7 @@ function savePlayer(){
     save();render();closeModal('modalPlayer');
     toast('Jogador atualizado!');
   } else {
-    state.players.push({name,birth,profilePhoto:'',seasons:{},contracts:[]});
+    state.players.push({name,birth,profilePhoto:'',seasons:{},contracts:[],instagram:normalizeInstagramProfile(null,name)});
     save();render();closeModal('modalPlayer');
     document.getElementById('pNameInput').value='';document.getElementById('pBirthInput').value='';
     toast('Jogador cadastrado!');
@@ -573,6 +803,7 @@ function savePlayer(){
 function deletePlayer(idx,e){
   e.stopPropagation();
   confirmDialog('Excluir jogador',`Excluir "${state.players[idx].name}"? Todos os dados serão perdidos.`,()=>{
+    cleanupInstagramPlayerMedia(state.players[idx]);
     state.players.splice(idx,1);
     if(state.activePlayerIdx===idx){state.activePlayerIdx=state.players.length>0?0:null;state.activeSeason=null;}
     else if(state.activePlayerIdx>idx)state.activePlayerIdx--;
@@ -625,6 +856,7 @@ function showRanking(){
   document.getElementById('seasonContent').style.display='none';
   document.getElementById('careerContent').style.display='none';
   document.getElementById('personalContent').style.display='none';
+  document.getElementById('instagramContent').style.display='none';
   document.getElementById('rankingContent').style.display='block';
   renderRanking();
 }
@@ -664,20 +896,21 @@ function deleteSeason(sKey){
 function renderDash(){
   renderTabs();
   document.getElementById('rankingContent').style.display='none';
+  document.getElementById('careerContent').style.display='none';
+  document.getElementById('seasonContent').style.display='none';
+  document.getElementById('personalContent').style.display='none';
+  document.getElementById('instagramContent').style.display='none';
   if(state.activeView==='career'){
     document.getElementById('careerContent').style.display='block';
-    document.getElementById('seasonContent').style.display='none';
-    document.getElementById('personalContent').style.display='none';
     renderCareer();
   } else if(state.activeView==='personal'){
-    document.getElementById('careerContent').style.display='none';
-    document.getElementById('seasonContent').style.display='none';
     document.getElementById('personalContent').style.display='block';
     renderPersonal();
+  } else if(state.activeView==='instagram'){
+    document.getElementById('instagramContent').style.display='block';
+    renderInstagram();
   } else {
-    document.getElementById('careerContent').style.display='none';
     document.getElementById('seasonContent').style.display='block';
-    document.getElementById('personalContent').style.display='none';
     renderSeasonContent();
   }
 }
@@ -697,6 +930,11 @@ function renderTabs(){
   if(state.activeView==='personal')personalBtn.style.cssText='border-color:var(--blue);color:var(--blue);background:rgba(88,166,255,.18)';
   personalBtn.textContent='👤 Pessoal';personalBtn.onclick=()=>{state.activeView='personal';save();renderDash();};
   container.appendChild(personalBtn);
+  const instagramBtn=document.createElement('button');
+  instagramBtn.className='btn tab-btn'+(state.activeView==='instagram'?' active':'');
+  if(state.activeView==='instagram')instagramBtn.style.cssText='border-color:#e1306c;color:#fff;background:linear-gradient(135deg,rgba(249,206,52,.22),rgba(225,48,108,.25),rgba(98,40,215,.22))';
+  instagramBtn.textContent='📸 Instagram';instagramBtn.onclick=()=>{state.activeView='instagram';instagramGridView='posts';save();renderDash();};
+  container.appendChild(instagramBtn);
   const sep=document.createElement('span');sep.textContent='|';sep.style.cssText='color:var(--border);margin:0 4px;font-size:.8rem';container.appendChild(sep);
   keys.forEach(s=>{
     const wrap=document.createElement('span');wrap.style.cssText='display:inline-flex;align-items:center;gap:2px';
@@ -1997,6 +2235,297 @@ function renderRanking(){
     ${compList.length>0?`<div class="rank-section"><div class="section-label">Ranking por Competição</div><div class="rank-tabs">${compTabsHtml}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div><div style="font-size:.72rem;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">⚽ Artilheiros</div>${buildList(rc,'g','var(--green)')}</div><div><div style="font-size:.72rem;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">🎯 Garçons</div>${buildList(rc,'a','var(--blue)')}</div></div></div>`:'<div class="rank-section"><div class="empty">Nenhuma competição ainda</div></div>'}`;
 }
 
+
+// ===================== INSTAGRAM =====================
+function instagramDefaultUsername(name){
+  const normalized=String(name||'atleta').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9._]+/g,'_').replace(/^_+|_+$/g,'').replace(/_+/g,'_');
+  return (normalized||'atleta').slice(0,30);
+}
+function defaultInstagramHighlights(){
+  return[
+    {id:'igh_'+Math.random().toString(36).slice(2,9),name:'Carreira',icon:'⚽'},
+    {id:'igh_'+Math.random().toString(36).slice(2,9),name:'Clubes',icon:'👕'},
+    {id:'igh_'+Math.random().toString(36).slice(2,9),name:'Títulos',icon:'🏆'},
+    {id:'igh_'+Math.random().toString(36).slice(2,9),name:'Temporadas',icon:'📅'}
+  ];
+}
+function normalizeInstagramProfile(data,name){
+  const ig=data&&typeof data==='object'?data:{};
+  const highlights=Array.isArray(ig.highlights)?ig.highlights.map(h=>({
+    id:h.id||('igh_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)),
+    name:String(h.name||'Destaque').trim().slice(0,20)||'Destaque',
+    icon:String(h.icon||'⭐').trim().slice(0,8)||'⭐'
+  })):defaultInstagramHighlights();
+  return{
+    username:String(ig.username||instagramDefaultUsername(name)).slice(0,30),
+    bio:String(ig.bio||'Atleta profissional ⚽').slice(0,150),
+    followers:Math.max(0,Number(ig.followers)||0),
+    following:Math.max(0,Number(ig.following)||0),
+    verified:Boolean(ig.verified),
+    highlights,
+    posts:Array.isArray(ig.posts)?ig.posts.map(p=>({
+      id:p.id||('igp_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)),
+      mediaId:p.mediaId||'',kind:p.kind==='reel'?'reel':'post',mime:p.mime||'',caption:p.caption||'',location:p.location||'',
+      createdAt:p.createdAt||new Date().toISOString(),likes:Math.max(0,Number(p.likes)||0),liked:Boolean(p.liked),comments:Array.isArray(p.comments)?p.comments:[]
+    })).filter(p=>p.mediaId):[]
+  };
+}
+function getInstagramProfile(){
+  const player=state.players[state.activePlayerIdx];
+  if(!player)return normalizeInstagramProfile(null,'atleta');
+  player.instagram=normalizeInstagramProfile(player.instagram,player.name);
+  return player.instagram;
+}
+function igEscape(value){
+  return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function formatInstagramNumber(value){
+  const n=Math.max(0,Number(value)||0);
+  if(n>=1000000)return (n/1000000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' mi';
+  if(n>=1000)return (n/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' mil';
+  return n.toLocaleString('pt-BR');
+}
+function formatInstagramDate(value){
+  const d=new Date(value);if(Number.isNaN(d.getTime()))return'';
+  return d.toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
+}
+function openInstagramDb(){
+  return new Promise((resolve,reject)=>{
+    if(!window.indexedDB){reject(new Error('IndexedDB indisponível'));return;}
+    const req=indexedDB.open(INSTAGRAM_DB_NAME,1);
+    req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(INSTAGRAM_STORE_NAME))db.createObjectStore(INSTAGRAM_STORE_NAME);};
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error||new Error('Erro ao abrir armazenamento'));
+  });
+}
+async function instagramStoreMedia(id,blob){
+  const db=await openInstagramDb();
+  await new Promise((resolve,reject)=>{const tx=db.transaction(INSTAGRAM_STORE_NAME,'readwrite');tx.objectStore(INSTAGRAM_STORE_NAME).put(blob,id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);});
+  db.close();
+}
+async function instagramGetMedia(id){
+  const db=await openInstagramDb();
+  const blob=await new Promise((resolve,reject)=>{const tx=db.transaction(INSTAGRAM_STORE_NAME,'readonly');const req=tx.objectStore(INSTAGRAM_STORE_NAME).get(id);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});
+  db.close();return blob;
+}
+async function instagramDeleteMedia(id){
+  if(!id)return;
+  try{const db=await openInstagramDb();await new Promise((resolve,reject)=>{const tx=db.transaction(INSTAGRAM_STORE_NAME,'readwrite');tx.objectStore(INSTAGRAM_STORE_NAME).delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();}catch(err){console.warn('Não foi possível excluir mídia',err);}
+}
+function cleanupInstagramPlayerMedia(player){
+  (player?.instagram?.posts||[]).forEach(post=>instagramDeleteMedia(post.mediaId));
+}
+function revokeInstagramObjectUrls(){
+  instagramObjectUrls.forEach(url=>URL.revokeObjectURL(url));instagramObjectUrls=[];
+}
+function instagramTrackObjectUrl(blob){const url=URL.createObjectURL(blob);instagramObjectUrls.push(url);return url;}
+async function hydrateInstagramMedia(){
+  const placeholders=[...document.querySelectorAll('#instagramContent [data-instagram-media]')];
+  for(const el of placeholders){
+    const mediaId=el.dataset.instagramMedia;if(!mediaId)continue;
+    try{
+      const blob=await instagramGetMedia(mediaId);
+      if(!blob){el.innerHTML='<span>Mídia indisponível</span>';continue;}
+      const url=instagramTrackObjectUrl(blob);
+      if((blob.type||el.dataset.mime||'').startsWith('video/')){
+        const video=document.createElement('video');video.src=url;video.muted=true;video.playsInline=true;video.preload='metadata';video.setAttribute('aria-label','Reel');el.replaceChildren(video);
+      }else{
+        const img=document.createElement('img');img.src=url;img.alt='Publicação do Instagram';img.loading='lazy';el.replaceChildren(img);
+      }
+    }catch(err){el.innerHTML='<span>Mídia indisponível</span>';}
+  }
+}
+function renderInstagram(){
+  const content=document.getElementById('instagramContent');
+  const player=state.players[state.activePlayerIdx];if(!content||!player)return;
+  revokeInstagramObjectUrls();
+  const ig=getInstagramProfile();
+  const allPosts=[...ig.posts].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  const filtered=allPosts.filter(p=>instagramGridView==='reels'?p.kind==='reel':p.kind==='post');
+  const postsCount=allPosts.length;
+  const initials=getPlayerInitials(player);
+  const avatar=player.profilePhoto?`<img src="${player.profilePhoto}" alt="Foto de ${igEscape(player.name)}">`:`<span>${igEscape(initials)}</span>`;
+  const highlightsHtml=(ig.highlights||[]).map(h=>`<button class="ig-highlight" onclick="openInstagramHighlightsEditor('${h.id}')" title="Editar destaque ${igEscape(h.name)}"><div class="ig-highlight-circle"><div class="ig-highlight-inner">${igEscape(h.icon)}</div></div><div class="ig-highlight-name">${igEscape(h.name)}</div></button>`).join('');
+  const gridHtml=filtered.map(post=>`<button class="ig-grid-item" onclick="openInstagramViewer('${post.id}')" aria-label="Abrir ${post.kind==='reel'?'reel':'publicação'}">
+      <div class="ig-media-placeholder" data-instagram-media="${post.mediaId}" data-mime="${igEscape(post.mime)}"><span>Carregando...</span></div>
+      ${post.kind==='reel'?'<span class="ig-grid-badge">▶</span>':''}
+      <span class="ig-grid-overlay"><span>♥ ${formatInstagramNumber(post.likes)}</span><span>● ${(post.comments||[]).length}</span></span>
+    </button>`).join('');
+  const emptyText=instagramGridView==='reels'?'Compartilhe vídeos ou fotos verticais como reels.':'Compartilhe fotos para criar o feed deste atleta.';
+  content.innerHTML=`<div class="instagram-shell">
+    <div class="ig-topbar"><div class="ig-brand">Instagram</div><div class="ig-top-actions"><button class="ig-icon-btn" onclick="openInstagramComposer('post')" title="Nova publicação">⊞</button><button class="ig-icon-btn" onclick="openInstagramComposer('reel')" title="Novo reel">▶</button><button class="ig-icon-btn" onclick="openInstagramProfileEditor()" title="Configurações">☰</button></div></div>
+    <section class="ig-profile">
+      <div class="ig-avatar-wrap"><div class="ig-avatar-ring"><div class="ig-avatar">${avatar}</div></div></div>
+      <div class="ig-profile-main">
+        <div class="ig-profile-row"><h2 class="ig-username">${igEscape(ig.username)}</h2>${ig.verified?'<span class="ig-verified" title="Verificado">✓</span>':''}<button class="ig-action-btn" onclick="openInstagramProfileEditor()">Editar perfil</button><button class="ig-action-btn secondary" onclick="openInstagramComposer('post')">Compartilhar foto</button></div>
+        <div class="ig-stats"><span class="ig-stat"><strong>${formatInstagramNumber(postsCount)}</strong> publicações</span><span class="ig-stat"><strong>${formatInstagramNumber(ig.followers)}</strong> seguidores</span><span class="ig-stat"><strong>${formatInstagramNumber(ig.following)}</strong> seguindo</span></div>
+        <div class="ig-display-name">${igEscape(player.name)}</div><div class="ig-bio">${igEscape(ig.bio)}</div>
+      </div>
+    </section>
+    <div class="ig-highlights">
+      ${highlightsHtml}
+      <button class="ig-highlight ig-highlight-add" onclick="openInstagramHighlightsEditor()" title="Adicionar destaque"><div class="ig-highlight-circle"><div class="ig-highlight-inner">＋</div></div><div class="ig-highlight-name">Novo</div></button>
+    </div>
+    <div class="ig-profile-tabs"><button class="ig-profile-tab${instagramGridView==='posts'?' active':''}" onclick="setInstagramGridView('posts')"><span>▦</span> Publicações</button><button class="ig-profile-tab${instagramGridView==='reels'?' active':''}" onclick="setInstagramGridView('reels')"><span>▶</span> Reels</button></div>
+    ${filtered.length?`<div class="ig-grid">${gridHtml}</div>`:`<div class="ig-empty"><div class="ig-empty-icon">${instagramGridView==='reels'?'▶':'▧'}</div><div class="ig-empty-title">${instagramGridView==='reels'?'Nenhum reel ainda':'Compartilhe fotos'}</div><div class="ig-empty-text">${emptyText}</div><button class="ig-action-btn primary" onclick="openInstagramComposer('${instagramGridView==='reels'?'reel':'post'}')">${instagramGridView==='reels'?'Adicionar reel':'Nova publicação'}</button></div>`}
+  </div>`;
+  hydrateInstagramMedia();
+}
+function setInstagramGridView(view){instagramGridView=view==='reels'?'reels':'posts';renderInstagram();}
+function openInstagramHighlightsEditor(highlightId=''){
+  renderInstagramHighlightsEditor();resetInstagramHighlightForm();
+  openModal('modalInstagramHighlights');
+  if(highlightId)startInstagramHighlightEdit(highlightId);
+}
+function renderInstagramHighlightsEditor(){
+  const list=document.getElementById('instagramHighlightsList');if(!list)return;
+  const highlights=getInstagramProfile().highlights||[];
+  list.innerHTML=highlights.length?highlights.map((h,idx)=>`<div class="ig-highlight-manager-item"><div class="ig-highlight-manager-icon">${igEscape(h.icon)}</div><div class="ig-highlight-manager-name">${igEscape(h.name)}</div><div class="ig-highlight-manager-actions"><button class="ig-mini-control" onclick="moveInstagramHighlight('${h.id}',-1)" title="Mover para a esquerda" ${idx===0?'disabled':''}>←</button><button class="ig-mini-control" onclick="moveInstagramHighlight('${h.id}',1)" title="Mover para a direita" ${idx===highlights.length-1?'disabled':''}>→</button><button class="ig-mini-control" onclick="startInstagramHighlightEdit('${h.id}')" title="Editar">✎</button><button class="ig-mini-control danger" onclick="deleteInstagramHighlight('${h.id}')" title="Excluir">✕</button></div></div>`).join(''):'<div style="color:#a8a8a8;font-size:.82rem;padding:12px;text-align:center">Nenhum destaque criado.</div>';
+}
+function resetInstagramHighlightForm(){
+  const id=document.getElementById('instagramHighlightId'),icon=document.getElementById('instagramHighlightIcon'),name=document.getElementById('instagramHighlightName');
+  if(id)id.value='';if(icon)icon.value='⭐';if(name)name.value='';
+  const title=document.getElementById('instagramHighlightFormTitle'),btn=document.getElementById('instagramHighlightSaveBtn');if(title)title.textContent='Novo destaque';if(btn)btn.textContent='Adicionar';
+}
+function startInstagramHighlightEdit(highlightId){
+  const h=(getInstagramProfile().highlights||[]).find(item=>item.id===highlightId);if(!h)return;
+  document.getElementById('instagramHighlightId').value=h.id;document.getElementById('instagramHighlightIcon').value=h.icon;document.getElementById('instagramHighlightName').value=h.name;
+  document.getElementById('instagramHighlightFormTitle').textContent='Editar destaque';document.getElementById('instagramHighlightSaveBtn').textContent='Salvar alterações';document.getElementById('instagramHighlightName').focus();
+}
+function saveInstagramHighlight(){
+  const ig=getInstagramProfile(),id=document.getElementById('instagramHighlightId').value;
+  const name=document.getElementById('instagramHighlightName').value.trim().slice(0,20),icon=(document.getElementById('instagramHighlightIcon').value.trim()||'⭐').slice(0,8);
+  if(!name){toast('Informe o nome do destaque','err');return;}
+  if(id){const h=ig.highlights.find(item=>item.id===id);if(!h)return;h.name=name;h.icon=icon;toast('Destaque atualizado!');}
+  else{ig.highlights.push({id:'igh_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),name,icon});toast('Destaque adicionado!');}
+  save();renderInstagramHighlightsEditor();resetInstagramHighlightForm();renderInstagram();
+}
+function moveInstagramHighlight(highlightId,direction){
+  const ig=getInstagramProfile(),idx=ig.highlights.findIndex(h=>h.id===highlightId),next=idx+(direction<0?-1:1);if(idx<0||next<0||next>=ig.highlights.length)return;
+  [ig.highlights[idx],ig.highlights[next]]=[ig.highlights[next],ig.highlights[idx]];save();renderInstagramHighlightsEditor();renderInstagram();
+}
+function deleteInstagramHighlight(highlightId){
+  const ig=getInstagramProfile(),h=ig.highlights.find(item=>item.id===highlightId);if(!h)return;
+  confirmDialog('Excluir destaque',`Excluir o destaque "${h.name}"?`,()=>{ig.highlights=ig.highlights.filter(item=>item.id!==highlightId);save();resetInstagramHighlightForm();renderInstagramHighlightsEditor();renderInstagram();toast('Destaque excluído');});
+}
+function chooseInstagramProfilePhoto(){document.getElementById('instagramProfilePhotoInput')?.click();}
+function updateInstagramProfilePhotoPreview(){
+  const el=document.getElementById('instagramProfilePhotoPreview'),player=state.players[state.activePlayerIdx];if(!el||!player)return;
+  el.innerHTML=player.profilePhoto?`<img src="${player.profilePhoto}" alt="Foto do atleta">`:`<span>${igEscape(getPlayerInitials(player))}</span>`;
+}
+function openInstagramProfileEditor(){
+  const ig=getInstagramProfile();
+  updateInstagramProfilePhotoPreview();
+  document.getElementById('instagramUsernameInput').value=ig.username;
+  document.getElementById('instagramBioInput').value=ig.bio;
+  document.getElementById('instagramFollowersInput').value=ig.followers;
+  document.getElementById('instagramFollowingInput').value=ig.following;
+  document.getElementById('instagramVerifiedInput').checked=ig.verified;
+  openModal('modalInstagramProfile');
+}
+function saveInstagramProfile(){
+  const player=state.players[state.activePlayerIdx];if(!player)return;
+  let username=document.getElementById('instagramUsernameInput').value.trim().toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9._]/g,'');
+  username=username.replace(/\.{2,}/g,'.').replace(/^\.+|\.+$/g,'').slice(0,30);
+  if(!username){toast('Informe um nome de usuário válido','err');return;}
+  const ig=getInstagramProfile();ig.username=username;ig.bio=document.getElementById('instagramBioInput').value.trim().slice(0,150);ig.followers=Math.max(0,parseInt(document.getElementById('instagramFollowersInput').value)||0);ig.following=Math.max(0,parseInt(document.getElementById('instagramFollowingInput').value)||0);ig.verified=document.getElementById('instagramVerifiedInput').checked;
+  save();closeModal('modalInstagramProfile');renderInstagram();toast('Perfil do Instagram atualizado!');
+}
+function chooseInstagramMedia(){document.getElementById('instagramMediaInput')?.click();}
+function openInstagramComposer(kind){
+  const isReel=kind==='reel';
+  document.getElementById('instagramMediaKind').value=isReel?'reel':'post';
+  document.getElementById('instagramComposerTitle').textContent=isReel?'Novo reel':'Nova publicação';
+  const input=document.getElementById('instagramMediaInput');input.accept=isReel?'video/mp4,video/webm,video/quicktime,image/jpeg,image/png,image/webp':'image/jpeg,image/png,image/webp';input.value='';
+  document.getElementById('instagramCaptionInput').value='';document.getElementById('instagramLocationInput').value='';document.getElementById('instagramLikesInput').value='0';
+  resetInstagramUploadZone(isReel);
+  openModal('modalInstagramComposer');
+}
+function resetInstagramUploadZone(isReel){
+  if(instagramPreviewUrl){URL.revokeObjectURL(instagramPreviewUrl);instagramPreviewUrl='';}
+  const zone=document.getElementById('instagramUploadZone');if(!zone)return;
+  zone.innerHTML=`<div class="ig-upload-icon">${isReel?'▶':'▧'}</div><div style="font-weight:700">${isReel?'Selecionar vídeo ou foto':'Selecionar foto'}</div><div class="ig-upload-hint">${isReel?'Vídeos MP4, WebM ou MOV de até 100 MB.':'Imagens JPG, PNG ou WebP de até 20 MB.'}<br>A mídia ficará salva somente neste navegador.</div>`;
+}
+function previewInstagramMedia(event){
+  const file=event.target.files&&event.target.files[0];if(!file)return;
+  const kind=document.getElementById('instagramMediaKind').value;
+  const isVideo=file.type.startsWith('video/');
+  if(kind==='post'&&!file.type.startsWith('image/')){toast('Publicações do feed precisam ser imagens','err');event.target.value='';return;}
+  if(!file.type.startsWith('image/')&&!isVideo){toast('Selecione uma imagem ou vídeo compatível','err');event.target.value='';return;}
+  const max=isVideo?100*1024*1024:20*1024*1024;if(file.size>max){toast(isVideo?'O vídeo deve ter no máximo 100 MB':'A imagem deve ter no máximo 20 MB','err');event.target.value='';return;}
+  if(instagramPreviewUrl)URL.revokeObjectURL(instagramPreviewUrl);instagramPreviewUrl=URL.createObjectURL(file);
+  const zone=document.getElementById('instagramUploadZone');
+  zone.innerHTML=isVideo?`<video src="${instagramPreviewUrl}" controls muted playsinline></video><div class="ig-upload-hint">Clique para trocar o arquivo</div>`:`<img src="${instagramPreviewUrl}" alt="Prévia"><div class="ig-upload-hint">Clique para trocar a imagem</div>`;
+}
+function closeInstagramComposer(){closeModal('modalInstagramComposer');resetInstagramUploadZone(document.getElementById('instagramMediaKind').value==='reel');document.getElementById('instagramMediaInput').value='';}
+function closeInstagramComposerOnBg(event){if(event.target.id==='modalInstagramComposer')closeInstagramComposer();}
+async function resizeInstagramImage(file){
+  let source,width,height,release=()=>{};
+  if('createImageBitmap' in window){source=await createImageBitmap(file);width=source.width;height=source.height;release=()=>source.close();}
+  else{
+    const url=URL.createObjectURL(file);
+    source=await new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('Imagem inválida'));img.src=url;});
+    width=source.naturalWidth;height=source.naturalHeight;release=()=>URL.revokeObjectURL(url);
+  }
+  const maxSide=1600,scale=Math.min(1,maxSide/Math.max(width,height)),outW=Math.max(1,Math.round(width*scale)),outH=Math.max(1,Math.round(height*scale));
+  const canvas=document.createElement('canvas');canvas.width=outW;canvas.height=outH;const ctx=canvas.getContext('2d');ctx.drawImage(source,0,0,outW,outH);release();
+  return await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Falha ao processar imagem')),'image/jpeg',.9));
+}
+async function saveInstagramMedia(){
+  const input=document.getElementById('instagramMediaInput');const file=input.files&&input.files[0];if(!file){toast('Selecione uma mídia','err');return;}
+  const kind=document.getElementById('instagramMediaKind').value==='reel'?'reel':'post';
+  const publishBtn=document.getElementById('instagramPublishBtn');publishBtn.disabled=true;publishBtn.textContent='Salvando...';
+  let mediaId='';
+  try{
+    const blob=file.type.startsWith('image/')?await resizeInstagramImage(file):file;
+    mediaId='igm_'+Date.now()+'_'+Math.random().toString(36).slice(2,9);
+    await instagramStoreMedia(mediaId,blob);
+    const ig=getInstagramProfile();
+    const initialLikes=Math.max(0,parseInt(document.getElementById('instagramLikesInput').value)||0);
+    const post={id:'igp_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),mediaId,kind,mime:blob.type||file.type,caption:document.getElementById('instagramCaptionInput').value.trim(),location:document.getElementById('instagramLocationInput').value.trim(),createdAt:new Date().toISOString(),likes:initialLikes,liked:false,comments:[]};
+    ig.posts.unshift(post);
+    try{save();}catch(err){ig.posts=ig.posts.filter(p=>p.id!==post.id);await instagramDeleteMedia(mediaId);throw err;}
+    closeInstagramComposer();instagramGridView=kind==='reel'?'reels':'posts';renderInstagram();toast(kind==='reel'?'Reel publicado!':'Publicação compartilhada!');
+  }catch(err){console.error(err);if(mediaId)await instagramDeleteMedia(mediaId);toast('Não foi possível salvar a mídia. Verifique o espaço do navegador.','err');}
+  finally{publishBtn.disabled=false;publishBtn.textContent='Compartilhar';}
+}
+async function openInstagramViewer(postId){
+  const player=state.players[state.activePlayerIdx],ig=getInstagramProfile(),post=ig.posts.find(p=>p.id===postId);if(!player||!post)return;
+  if(instagramViewerUrl){URL.revokeObjectURL(instagramViewerUrl);instagramViewerUrl='';}
+  const content=document.getElementById('instagramViewerContent');content.innerHTML='<div class="ig-empty" style="min-height:420px"><div class="ig-empty-icon">⌛</div><div>Carregando publicação...</div></div>';openModal('modalInstagramViewer');
+  try{
+    const blob=await instagramGetMedia(post.mediaId);if(!blob)throw new Error('Mídia não encontrada');instagramViewerUrl=URL.createObjectURL(blob);
+    const initials=getPlayerInitials(player);const avatar=player.profilePhoto?`<img src="${player.profilePhoto}" alt="">`:`<span>${igEscape(initials)}</span>`;
+    const media=blob.type.startsWith('video/')?`<video src="${instagramViewerUrl}" controls autoplay muted loop playsinline></video>`:`<img src="${instagramViewerUrl}" alt="Publicação de ${igEscape(ig.username)}">`;
+    const comments=(post.comments||[]).map(c=>`<div class="ig-comment"><strong>${igEscape(ig.username)}</strong><span class="ig-comment-text">${igEscape(c.text)}</span></div>`).join('');
+    content.innerHTML=`<div class="ig-viewer"><div class="ig-viewer-media">${media}</div><aside class="ig-viewer-side">
+      <div class="ig-viewer-head"><div class="ig-mini-avatar">${avatar}</div><div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:700">${igEscape(ig.username)} ${ig.verified?'<span class="ig-verified" style="width:14px;height:14px;font-size:.52rem">✓</span>':''}</div>${post.location?`<div style="font-size:.68rem;color:#a8a8a8">${igEscape(post.location)}</div>`:''}</div><button class="ig-viewer-action" style="font-size:1rem" onclick="deleteInstagramPost('${post.id}')" title="Excluir">•••</button></div>
+      <div class="ig-viewer-copy">${post.caption?`<div class="ig-viewer-caption"><strong>${igEscape(ig.username)}</strong> ${igEscape(post.caption)}</div>`:''}<div class="ig-comments">${comments||'<span style="color:#a8a8a8">Nenhum comentário ainda.</span>'}</div></div>
+      <div class="ig-viewer-actions"><div class="ig-viewer-action-row"><button class="ig-viewer-action${post.liked?' ig-liked':''}" onclick="toggleInstagramLike('${post.id}')">${post.liked?'♥':'♡'}</button><button class="ig-viewer-action" onclick="document.getElementById('igCommentInput_${post.id}')?.focus()">○</button><button class="ig-viewer-action">⌁</button></div><div class="ig-likes-row"><div class="ig-likes">${formatInstagramNumber(post.likes)} curtida${post.likes===1?'':'s'}</div><button class="ig-edit-link" onclick="openInstagramLikesEditor('${post.id}')">Editar curtidas</button></div><div class="ig-date">${formatInstagramDate(post.createdAt)}</div><div class="ig-comment-form"><input id="igCommentInput_${post.id}" maxlength="240" placeholder="Adicione um comentário..." onkeydown="if(event.key==='Enter'){event.preventDefault();addInstagramComment('${post.id}')}"/><button onclick="addInstagramComment('${post.id}')">Publicar</button></div></div>
+    </aside></div>`;
+  }catch(err){content.innerHTML='<div class="ig-empty" style="min-height:420px"><div class="ig-empty-icon">!</div><div class="ig-empty-title" style="font-size:1.2rem">Mídia indisponível</div><div class="ig-empty-text">O arquivo pode ter sido removido do armazenamento do navegador.</div></div>';}
+}
+function closeInstagramViewer(){if(instagramViewerUrl){URL.revokeObjectURL(instagramViewerUrl);instagramViewerUrl='';}closeModal('modalInstagramViewer');}
+function closeInstagramViewerOnBg(event){if(event.target.id==='modalInstagramViewer')closeInstagramViewer();}
+function openInstagramLikesEditor(postId){
+  const post=getInstagramProfile().posts.find(p=>p.id===postId);if(!post)return;
+  document.getElementById('instagramLikesPostId').value=postId;document.getElementById('instagramEditLikesInput').value=Math.max(0,Math.floor(Number(post.likes)||0));openModal('modalInstagramLikes');setTimeout(()=>document.getElementById('instagramEditLikesInput')?.select(),0);
+}
+function saveInstagramLikes(){
+  const postId=document.getElementById('instagramLikesPostId').value,post=getInstagramProfile().posts.find(p=>p.id===postId);if(!post)return;
+  post.likes=Math.max(0,parseInt(document.getElementById('instagramEditLikesInput').value)||0);save();closeModal('modalInstagramLikes');renderInstagram();openInstagramViewer(postId);toast('Curtidas atualizadas!');
+}
+function toggleInstagramLike(postId){
+  const post=getInstagramProfile().posts.find(p=>p.id===postId);if(!post)return;post.liked=!post.liked;post.likes=Math.max(0,(Number(post.likes)||0)+(post.liked?1:-1));save();openInstagramViewer(postId);renderInstagram();
+}
+function addInstagramComment(postId){
+  const input=document.getElementById('igCommentInput_'+postId),text=input?.value.trim();if(!text)return;const post=getInstagramProfile().posts.find(p=>p.id===postId);if(!post)return;if(!Array.isArray(post.comments))post.comments=[];post.comments.push({id:'igc_'+Date.now(),text:text.slice(0,240),createdAt:new Date().toISOString()});save();openInstagramViewer(postId);renderInstagram();
+}
+function deleteInstagramPost(postId){
+  const ig=getInstagramProfile(),post=ig.posts.find(p=>p.id===postId);if(!post)return;
+  confirmDialog(post.kind==='reel'?'Excluir reel':'Excluir publicação','Esta mídia será removida permanentemente deste navegador.',async()=>{ig.posts=ig.posts.filter(p=>p.id!==postId);save();await instagramDeleteMedia(post.mediaId);closeInstagramViewer();renderInstagram();toast(post.kind==='reel'?'Reel excluído':'Publicação excluída');});
+}
+
 // ===================== PERSONAL / CONTRACTS =====================
 function getPlayerInitials(player){
   return String(player?.name||'?').trim().split(/\s+/).filter(Boolean).map(n=>n[0]).slice(0,2).join('').toUpperCase()||'?';
@@ -2028,7 +2557,7 @@ function handleProfilePhoto(event){
       const previousPhoto=player.profilePhoto||'';
       player.profilePhoto=canvas.toDataURL('image/jpeg',0.86);
       try{
-        save();renderPersonal();toast('Foto de perfil atualizada!');
+        save();if(state.activeView==='instagram'){renderInstagram();updateInstagramProfilePhotoPreview();}else renderPersonal();toast('Foto de perfil atualizada!');
       }catch(err){
         player.profilePhoto=previousPhoto;
         toast('Não foi possível salvar a foto. Tente uma imagem menor.','err');
@@ -2042,7 +2571,7 @@ function removeProfilePhoto(){
   const player=state.players[state.activePlayerIdx];
   if(!player?.profilePhoto)return;
   confirmDialog('Remover foto','Deseja remover a foto de perfil deste atleta?',()=>{
-    player.profilePhoto='';save();renderPersonal();toast('Foto removida');
+    player.profilePhoto='';save();if(state.activeView==='instagram'){renderInstagram();updateInstagramProfilePhotoPreview();}else renderPersonal();toast('Foto removida');
   });
 }
 function getContracts(){const p=state.players[state.activePlayerIdx];if(!p.contracts)p.contracts=[];return p.contracts;}
