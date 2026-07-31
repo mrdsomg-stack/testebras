@@ -269,10 +269,13 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .ig-highlight-form-grid{display:grid;grid-template-columns:100px 1fr;gap:10px}
 .ig-likes-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
 .ig-likes-row .ig-likes{margin:0}
+.ig-date-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ig-delete-post-btn{border:1px solid rgba(255,90,102,.45);background:rgba(255,90,102,.10);color:#ff6b75;border-radius:8px;padding:7px 10px;font-size:.72rem;font-weight:800;cursor:pointer;white-space:nowrap}
+.ig-delete-post-btn:hover{background:rgba(255,90,102,.20);border-color:#ff5a66}
 .ig-edit-link{border:0;background:transparent;color:#a8a8a8;font-size:.7rem;font-weight:700;cursor:pointer;padding:2px 0}
 .ig-edit-link:hover{color:#fff}
 .ig-mini-control:disabled{opacity:.3;cursor:not-allowed}
-#modalInstagramLikes{z-index:350}
+#modalInstagramLikes,#modalInstagramDate{z-index:350}
 #modalConfirm{z-index:500}
 .ig-profile-tabs{height:52px;display:flex;align-items:center;justify-content:center;gap:58px;border-bottom:1px solid #262626}
 .ig-profile-tab{height:52px;border:0;border-top:1px solid transparent;background:transparent;color:#a8a8a8;text-transform:uppercase;font-size:.72rem;letter-spacing:1.2px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;padding:0 4px;margin-top:-1px}
@@ -349,7 +352,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   .ig-viewer-media img,.ig-viewer-media video{max-height:58vh}
   .ig-viewer-side{border-left:0;border-top:1px solid #262626;min-height:320px}
 }
-@media(max-width:430px){.ig-action-btn{padding:7px 10px}.ig-profile-row .ig-action-btn.secondary{display:none}.ig-topbar{padding:0 10px}.ig-highlights{gap:10px}.ig-highlight{min-width:67px}.ig-stat{font-size:.66rem}.ig-highlight-form-grid{grid-template-columns:1fr}.ig-highlight-manager-actions{flex-wrap:wrap;justify-content:flex-end}}
+@media(max-width:430px){.ig-delete-post-btn{font-size:0;padding:7px 9px}.ig-delete-post-btn::before{content:'🗑';font-size:.9rem}.ig-action-btn{padding:7px 10px}.ig-profile-row .ig-action-btn.secondary{display:none}.ig-topbar{padding:0 10px}.ig-highlights{gap:10px}.ig-highlight{min-width:67px}.ig-stat{font-size:.66rem}.ig-highlight-form-grid{grid-template-columns:1fr}.ig-highlight-manager-actions{flex-wrap:wrap;justify-content:flex-end}}
 
 </style>
 </head>
@@ -573,6 +576,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <textarea id="instagramCaptionInput" maxlength="2200" placeholder="Escreva uma legenda..."></textarea>
     <label class="modal-label">Localização (opcional)</label>
     <input type="text" id="instagramLocationInput" maxlength="80" placeholder="Adicionar localização">
+    <label class="modal-label">Data da publicação</label>
+    <input type="date" id="instagramDateInput">
     <label class="modal-label">Curtidas iniciais</label>
     <input type="number" id="instagramLikesInput" min="0" step="1" value="0" placeholder="0">
     <div class="modal-actions">
@@ -643,6 +648,20 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-actions">
       <button class="btn ghost" onclick="closeModal('modalInstagramLikes')">Cancelar</button>
       <button class="btn" style="background:#0095f6;color:#fff" onclick="saveInstagramLikes()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Instagram: data da publicação -->
+<div id="modalInstagramDate" class="overlay" onclick="closeModalOnBg(event,'modalInstagramDate')">
+  <div class="modal ig-modal" style="max-width:420px">
+    <h2>Editar data da publicação</h2>
+    <input type="hidden" id="instagramDatePostId">
+    <label class="modal-label">Data</label>
+    <input type="date" id="instagramEditDateInput" onkeydown="if(event.key==='Enter')saveInstagramDate()">
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('modalInstagramDate')">Cancelar</button>
+      <button class="btn" style="background:#0095f6;color:#fff" onclick="saveInstagramDate()">Salvar</button>
     </div>
   </div>
 </div>
@@ -2289,6 +2308,18 @@ function formatInstagramDate(value){
   const d=new Date(value);if(Number.isNaN(d.getTime()))return'';
   return d.toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
 }
+function instagramDateInputValue(value=new Date()){
+  const d=value instanceof Date?value:new Date(value);
+  const safe=Number.isNaN(d.getTime())?new Date():d;
+  const y=safe.getFullYear(),m=String(safe.getMonth()+1).padStart(2,'0'),day=String(safe.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function instagramDateToIso(value){
+  const match=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!match)return new Date().toISOString();
+  const d=new Date(Number(match[1]),Number(match[2])-1,Number(match[3]),12,0,0,0);
+  return Number.isNaN(d.getTime())?new Date().toISOString():d.toISOString();
+}
 function openInstagramDb(){
   return new Promise((resolve,reject)=>{
     if(!window.indexedDB){reject(new Error('IndexedDB indisponível'));return;}
@@ -2437,7 +2468,7 @@ function openInstagramComposer(kind){
   document.getElementById('instagramMediaKind').value=isReel?'reel':'post';
   document.getElementById('instagramComposerTitle').textContent=isReel?'Novo reel':'Nova publicação';
   const input=document.getElementById('instagramMediaInput');input.accept=isReel?'video/mp4,video/webm,video/quicktime,image/jpeg,image/png,image/webp':'image/jpeg,image/png,image/webp';input.value='';
-  document.getElementById('instagramCaptionInput').value='';document.getElementById('instagramLocationInput').value='';document.getElementById('instagramLikesInput').value='0';
+  document.getElementById('instagramCaptionInput').value='';document.getElementById('instagramLocationInput').value='';document.getElementById('instagramDateInput').value=instagramDateInputValue();document.getElementById('instagramLikesInput').value='0';
   resetInstagramUploadZone(isReel);
   openModal('modalInstagramComposer');
 }
@@ -2482,7 +2513,7 @@ async function saveInstagramMedia(){
     await instagramStoreMedia(mediaId,blob);
     const ig=getInstagramProfile();
     const initialLikes=Math.max(0,parseInt(document.getElementById('instagramLikesInput').value)||0);
-    const post={id:'igp_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),mediaId,kind,mime:blob.type||file.type,caption:document.getElementById('instagramCaptionInput').value.trim(),location:document.getElementById('instagramLocationInput').value.trim(),createdAt:new Date().toISOString(),likes:initialLikes,liked:false,comments:[]};
+    const post={id:'igp_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),mediaId,kind,mime:blob.type||file.type,caption:document.getElementById('instagramCaptionInput').value.trim(),location:document.getElementById('instagramLocationInput').value.trim(),createdAt:instagramDateToIso(document.getElementById('instagramDateInput').value),likes:initialLikes,liked:false,comments:[]};
     ig.posts.unshift(post);
     try{save();}catch(err){ig.posts=ig.posts.filter(p=>p.id!==post.id);await instagramDeleteMedia(mediaId);throw err;}
     closeInstagramComposer();instagramGridView=kind==='reel'?'reels':'posts';renderInstagram();toast(kind==='reel'?'Reel publicado!':'Publicação compartilhada!');
@@ -2499,9 +2530,9 @@ async function openInstagramViewer(postId){
     const media=blob.type.startsWith('video/')?`<video src="${instagramViewerUrl}" controls autoplay muted loop playsinline></video>`:`<img src="${instagramViewerUrl}" alt="Publicação de ${igEscape(ig.username)}">`;
     const comments=(post.comments||[]).map(c=>`<div class="ig-comment"><strong>${igEscape(ig.username)}</strong><span class="ig-comment-text">${igEscape(c.text)}</span></div>`).join('');
     content.innerHTML=`<div class="ig-viewer"><div class="ig-viewer-media">${media}</div><aside class="ig-viewer-side">
-      <div class="ig-viewer-head"><div class="ig-mini-avatar">${avatar}</div><div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:700">${igEscape(ig.username)} ${ig.verified?'<span class="ig-verified" style="width:14px;height:14px;font-size:.52rem">✓</span>':''}</div>${post.location?`<div style="font-size:.68rem;color:#a8a8a8">${igEscape(post.location)}</div>`:''}</div><button class="ig-viewer-action" style="font-size:1rem" onclick="deleteInstagramPost('${post.id}')" title="Excluir">•••</button></div>
+      <div class="ig-viewer-head"><div class="ig-mini-avatar">${avatar}</div><div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:700">${igEscape(ig.username)} ${ig.verified?'<span class="ig-verified" style="width:14px;height:14px;font-size:.52rem">✓</span>':''}</div>${post.location?`<div style="font-size:.68rem;color:#a8a8a8">${igEscape(post.location)}</div>`:''}</div><button class="ig-delete-post-btn" onclick="deleteInstagramPost('${post.id}')" title="Excluir definitivamente esta publicação">🗑 Excluir</button></div>
       <div class="ig-viewer-copy">${post.caption?`<div class="ig-viewer-caption"><strong>${igEscape(ig.username)}</strong> ${igEscape(post.caption)}</div>`:''}<div class="ig-comments">${comments||'<span style="color:#a8a8a8">Nenhum comentário ainda.</span>'}</div></div>
-      <div class="ig-viewer-actions"><div class="ig-viewer-action-row"><button class="ig-viewer-action${post.liked?' ig-liked':''}" onclick="toggleInstagramLike('${post.id}')">${post.liked?'♥':'♡'}</button><button class="ig-viewer-action" onclick="document.getElementById('igCommentInput_${post.id}')?.focus()">○</button><button class="ig-viewer-action">⌁</button></div><div class="ig-likes-row"><div class="ig-likes">${formatInstagramNumber(post.likes)} curtida${post.likes===1?'':'s'}</div><button class="ig-edit-link" onclick="openInstagramLikesEditor('${post.id}')">Editar curtidas</button></div><div class="ig-date">${formatInstagramDate(post.createdAt)}</div><div class="ig-comment-form"><input id="igCommentInput_${post.id}" maxlength="240" placeholder="Adicione um comentário..." onkeydown="if(event.key==='Enter'){event.preventDefault();addInstagramComment('${post.id}')}"/><button onclick="addInstagramComment('${post.id}')">Publicar</button></div></div>
+      <div class="ig-viewer-actions"><div class="ig-viewer-action-row"><button class="ig-viewer-action${post.liked?' ig-liked':''}" onclick="toggleInstagramLike('${post.id}')">${post.liked?'♥':'♡'}</button><button class="ig-viewer-action" onclick="document.getElementById('igCommentInput_${post.id}')?.focus()">○</button><button class="ig-viewer-action">⌁</button></div><div class="ig-likes-row"><div class="ig-likes">${formatInstagramNumber(post.likes)} curtida${post.likes===1?'':'s'}</div><button class="ig-edit-link" onclick="openInstagramLikesEditor('${post.id}')">Editar curtidas</button></div><div class="ig-date-row"><div class="ig-date">${formatInstagramDate(post.createdAt)}</div><button class="ig-edit-link" onclick="openInstagramDateEditor('${post.id}')">Editar data</button></div><div class="ig-comment-form"><input id="igCommentInput_${post.id}" maxlength="240" placeholder="Adicione um comentário..." onkeydown="if(event.key==='Enter'){event.preventDefault();addInstagramComment('${post.id}')}"/><button onclick="addInstagramComment('${post.id}')">Publicar</button></div></div>
     </aside></div>`;
   }catch(err){content.innerHTML='<div class="ig-empty" style="min-height:420px"><div class="ig-empty-icon">!</div><div class="ig-empty-title" style="font-size:1.2rem">Mídia indisponível</div><div class="ig-empty-text">O arquivo pode ter sido removido do armazenamento do navegador.</div></div>';}
 }
@@ -2514,6 +2545,15 @@ function openInstagramLikesEditor(postId){
 function saveInstagramLikes(){
   const postId=document.getElementById('instagramLikesPostId').value,post=getInstagramProfile().posts.find(p=>p.id===postId);if(!post)return;
   post.likes=Math.max(0,parseInt(document.getElementById('instagramEditLikesInput').value)||0);save();closeModal('modalInstagramLikes');renderInstagram();openInstagramViewer(postId);toast('Curtidas atualizadas!');
+}
+function openInstagramDateEditor(postId){
+  const post=getInstagramProfile().posts.find(p=>p.id===postId);if(!post)return;
+  document.getElementById('instagramDatePostId').value=postId;document.getElementById('instagramEditDateInput').value=instagramDateInputValue(post.createdAt);openModal('modalInstagramDate');setTimeout(()=>document.getElementById('instagramEditDateInput')?.focus(),0);
+}
+function saveInstagramDate(){
+  const postId=document.getElementById('instagramDatePostId').value,post=getInstagramProfile().posts.find(p=>p.id===postId);if(!post)return;
+  const value=document.getElementById('instagramEditDateInput').value;if(!value){toast('Informe a data da publicação','err');return;}
+  post.createdAt=instagramDateToIso(value);save();closeModal('modalInstagramDate');renderInstagram();openInstagramViewer(postId);toast('Data da publicação atualizada!');
 }
 function toggleInstagramLike(postId){
   const post=getInstagramProfile().posts.find(p=>p.id===postId);if(!post)return;post.liked=!post.liked;post.likes=Math.max(0,(Number(post.likes)||0)+(post.liked?1:-1));save();openInstagramViewer(postId);renderInstagram();
