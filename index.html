@@ -413,7 +413,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <input type="text" id="sClubInput" placeholder="Ex.: Flamengo">
     </div>
     <label class="modal-label">Ano da temporada</label>
-    <input type="number" id="sNameInput" min="1900" max="2100" step="1" inputmode="numeric" placeholder="Ex.: 2026">
+    <input type="text" id="sNameInput" maxlength="9" placeholder="Ex.: 2026 ou 2023/24">
     <div id="sSeasonEditHelp" style="display:none;color:var(--dim);font-size:.75rem;line-height:1.45;margin:-2px 0 12px">
       Você pode alterar o ano e o time sem perder jogos, competições, títulos ou estatísticas já cadastrados.
     </div>
@@ -938,7 +938,7 @@ function saveSeason(){
   const isNT=document.getElementById('sNtCheck').checked;
   const club=isNT?'':document.getElementById('sClubInput').value.trim();
   if(!name){toast('Preencha o ano','err');return;}
-  if(!/^\d{4}$/.test(name)){toast('Informe um ano com 4 dígitos','err');return;}
+  if(!/^\d{4}(?:[\/-]\d{2,4})?$/.test(name)){toast('Use um formato como 2026 ou 2023/24','err');return;}
   if(!isNT&&!club){toast('Preencha o time / clube','err');return;}
   const player=state.players[state.activePlayerIdx];
 
