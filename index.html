@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -365,7 +366,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="row">
       <button class="btn ghost" onclick="openAddPlayer()">+ Jogador</button>
       <button class="btn ghost" id="btnRanking" style="display:none" onclick="showRanking()">🏆 Ranking</button>
-      <button class="btn" id="btnSeason" style="display:none" onclick="openModal('modalSeason')">+ Temporada</button>
+      <button class="btn" id="btnSeason" style="display:none" onclick="openAddSeason()">+ Temporada</button>
     </div>
   </header>
   <div id="playerList" class="chips"></div>
@@ -401,19 +402,24 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <!-- Modal Temporada -->
 <div id="modalSeason" class="overlay" onclick="closeModalOnBg(event,'modalSeason')">
   <div class="modal">
-    <h2>Nova Temporada</h2>
-    <div class="toggle-wrap" onclick="toggleNtCheckbox()">
-      <input type="checkbox" id="sNtCheck" onclick="event.stopPropagation()">
+    <h2 id="modalSeasonTitle">Nova Temporada</h2>
+    <div id="sNtToggleWrap" class="toggle-wrap" onclick="toggleNtCheckbox()">
+      <input type="checkbox" id="sNtCheck" onclick="event.stopPropagation()" onchange="updateSeasonTypeUI()">
       <label for="sNtCheck">Temporada pela Seleção Nacional</label>
       <span class="nt-badge">🏴 Seleção</span>
     </div>
     <div id="sClubRow">
-      <input type="text" id="sClubInput" placeholder="Clube (ex: Flamengo)">
+      <label class="modal-label">Time / Clube</label>
+      <input type="text" id="sClubInput" placeholder="Ex.: Flamengo">
     </div>
-    <input type="text" id="sNameInput" placeholder="Ano (ex: 2026)">
+    <label class="modal-label">Ano da temporada</label>
+    <input type="number" id="sNameInput" min="1900" max="2100" step="1" inputmode="numeric" placeholder="Ex.: 2026">
+    <div id="sSeasonEditHelp" style="display:none;color:var(--dim);font-size:.75rem;line-height:1.45;margin:-2px 0 12px">
+      Você pode alterar o ano e o time sem perder jogos, competições, títulos ou estatísticas já cadastrados.
+    </div>
     <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modalSeason')">Cancelar</button>
-      <button class="btn" onclick="saveSeason()">Criar</button>
+      <button class="btn ghost" onclick="cancelSeasonModal()">Cancelar</button>
+      <button class="btn" id="btnSaveSeason" onclick="saveSeason()">Criar</button>
     </div>
   </div>
 </div>
@@ -691,6 +697,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <script>
 let state={players:[],activePlayerIdx:null,activeSeason:null,activeView:'season'};
 let editingMatchId=null;
+let editingSeasonKey=null;
 let pendingConfirm=null;
 let rankComp=null;
 let seasonSubView='geral';
@@ -773,9 +780,13 @@ function confirmDialog(title,msg,fn){
   openModal('modalConfirm');
 }
 function confirmAction(){closeModal('modalConfirm');if(pendingConfirm)pendingConfirm();pendingConfirm=null;}
+function updateSeasonTypeUI(){
+  const cb=document.getElementById('sNtCheck');
+  document.getElementById('sClubRow').style.display=cb.checked?'none':'block';
+}
 function toggleNtCheckbox(){
   const cb=document.getElementById('sNtCheck');cb.checked=!cb.checked;
-  document.getElementById('sClubRow').style.display=cb.checked?'none':'block';
+  updateSeasonTypeUI();
 }
 function fmtEuro(v){return'€'+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 
@@ -881,13 +892,86 @@ function showRanking(){
 }
 
 // ===================== SEASONS =====================
+function resetSeasonModal(){
+  editingSeasonKey=null;
+  document.getElementById('modalSeasonTitle').textContent='Nova Temporada';
+  document.getElementById('btnSaveSeason').textContent='Criar';
+  document.getElementById('sNameInput').value='';
+  document.getElementById('sClubInput').value='';
+  document.getElementById('sNtCheck').checked=false;
+  document.getElementById('sNtCheck').disabled=false;
+  document.getElementById('sNtToggleWrap').style.display='flex';
+  document.getElementById('sClubRow').style.display='block';
+  document.getElementById('sSeasonEditHelp').style.display='none';
+}
+
+function openAddSeason(){
+  resetSeasonModal();
+  openModal('modalSeason');
+}
+
+function cancelSeasonModal(){
+  closeModal('modalSeason');
+  resetSeasonModal();
+}
+
+function editSeason(sKey,e){
+  if(e)e.stopPropagation();
+  const player=state.players[state.activePlayerIdx];
+  const season=player?.seasons?.[sKey];
+  if(!season||season.isNT)return;
+  editingSeasonKey=sKey;
+  document.getElementById('modalSeasonTitle').textContent='Editar Temporada';
+  document.getElementById('btnSaveSeason').textContent='Salvar alterações';
+  document.getElementById('sNameInput').value=sKey;
+  document.getElementById('sClubInput').value=season.club||'';
+  document.getElementById('sNtCheck').checked=false;
+  document.getElementById('sNtCheck').disabled=true;
+  document.getElementById('sNtToggleWrap').style.display='none';
+  document.getElementById('sClubRow').style.display='block';
+  document.getElementById('sSeasonEditHelp').style.display='block';
+  openModal('modalSeason');
+}
+
 function saveSeason(){
-  const name=document.getElementById('sNameInput').value.trim();
+  const name=String(document.getElementById('sNameInput').value||'').trim();
   const isNT=document.getElementById('sNtCheck').checked;
   const club=isNT?'':document.getElementById('sClubInput').value.trim();
   if(!name){toast('Preencha o ano','err');return;}
-  if(!isNT&&!club){toast('Preencha o clube','err');return;}
+  if(!/^\d{4}$/.test(name)){toast('Informe um ano com 4 dígitos','err');return;}
+  if(!isNT&&!club){toast('Preencha o time / clube','err');return;}
   const player=state.players[state.activePlayerIdx];
+
+  if(editingSeasonKey!==null){
+    const oldKey=editingSeasonKey;
+    const season=player.seasons[oldKey];
+    if(!season){toast('Temporada não encontrada','err');return;}
+    if(name!==oldKey&&player.seasons[name]){toast('Já existe uma temporada com esse ano','err');return;}
+
+    season.club=club;
+    season.isNT=false;
+
+    if(name!==oldKey){
+      (season.matches||[]).forEach(m=>{
+        if(String(m.year||'')===String(oldKey))m.year=name;
+      });
+      const renamed={};
+      Object.entries(player.seasons).forEach(([key,value])=>{
+        renamed[key===oldKey?name:key]=value;
+      });
+      player.seasons=renamed;
+    }
+
+    state.activeSeason=name;
+    state.activeView='season';
+    seasonSubView='geral';
+    editingSeasonKey=null;
+    save();render();closeModal('modalSeason');
+    resetSeasonModal();
+    toast('Temporada atualizada!');
+    return;
+  }
+
   if(isNT){
     if(!player.seasons['SELEÇÃO'])player.seasons['SELEÇÃO']={club:'',isNT:true,comps:[],matches:[],ntYears:[],titles:[],awards:[]};
     state.activeSeason='SELEÇÃO';
@@ -897,8 +981,7 @@ function saveSeason(){
     state.activeSeason=name;
   }
   state.activeView='season';seasonSubView='geral';save();render();closeModal('modalSeason');
-  document.getElementById('sNameInput').value='';document.getElementById('sClubInput').value='';
-  document.getElementById('sNtCheck').checked=false;document.getElementById('sClubRow').style.display='block';
+  resetSeasonModal();
   toast('Temporada criada!');
 }
 
@@ -964,8 +1047,19 @@ function renderTabs(){
     if(sd.isNT){t.innerHTML='🏴 Seleção';if(isActive)t.style.cssText='border-color:var(--yellow);color:var(--yellow);background:rgba(227,179,65,.18)';}
     else t.innerHTML=`${s} <span style="font-size:.7rem;opacity:.7">${sd.club}</span>`;
     t.onclick=()=>{state.activeSeason=s;state.activeView='season';seasonSubView='geral';activeCompFilter=null;save();renderDash();};
-    const del=document.createElement('button');del.className='season-del-btn';del.innerHTML='✕';del.onclick=()=>deleteSeason(s);
-    wrap.appendChild(t);wrap.appendChild(del);container.appendChild(wrap);
+    if(!sd.isNT){
+      const edit=document.createElement('button');
+      edit.className='season-del-btn';
+      edit.innerHTML='✎';
+      edit.title='Editar ano e time';
+      edit.style.color='var(--gold)';
+      edit.onclick=(e)=>editSeason(s,e);
+      wrap.appendChild(t);wrap.appendChild(edit);
+    } else {
+      wrap.appendChild(t);
+    }
+    const del=document.createElement('button');del.className='season-del-btn';del.innerHTML='✕';del.title='Excluir temporada';del.onclick=()=>deleteSeason(s);
+    wrap.appendChild(del);container.appendChild(wrap);
   });
 }
 
@@ -980,7 +1074,7 @@ function renderSeasonContent(){
   const awards=sd.awards||[];
   const overall=calcStats(matches);
   const heroHtml=`<div class="hero" style="${sd.isNT?'border-color:rgba(227,179,65,.3)':''}">
-    <div class="hero-top"><span>${sd.isNT?'🏴 <b style="color:var(--yellow)">Seleção Nacional</b>':`Clube: <b style="color:#fff">${sd.club}</b> &nbsp;·&nbsp; Temporada: <b style="color:#fff">${state.activeSeason}</b>`}</span></div>
+    <div class="hero-top"><span>${sd.isNT?'🏴 <b style="color:var(--yellow)">Seleção Nacional</b>':`Clube: <b style="color:#fff">${sd.club}</b> &nbsp;·&nbsp; Temporada: <b style="color:#fff">${state.activeSeason}</b>`}</span>${sd.isNT?'':`<button class="btn edit-btn" style="padding:4px 9px;font-size:.72rem;border:1px solid rgba(240,136,62,.3)" onclick="editSeason('${state.activeSeason}')">✎ Editar</button>`}</div>
     <div class="hero-stats">
       <div class="stat"><div class="val">${overall.j}</div><div class="lbl">Jogos</div></div>
       <div class="stat green"><div class="val">${overall.g}</div><div class="lbl">Gols</div></div>
