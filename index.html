@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -426,68 +427,128 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
 <!-- Modal Jogo -->
 <div id="modalMatch" class="overlay" onclick="closeModalOnBg(event,'modalMatch')">
-  <div class="modal" style="max-width:500px">
+  <div class="modal" style="max-width:540px">
     <h2 id="modalMatchTitle">Registrar Jogo</h2>
+
+    <label class="modal-label">Forma de lançamento</label>
+    <select id="mMatchMode" style="margin-bottom:12px" onchange="toggleMatchMode()">
+      <option value="individual">⚽ Jogo a jogo</option>
+      <option value="competition_total">📊 Totalizar por competição</option>
+    </select>
 
     <label class="modal-label">Competição</label>
     <select id="mMatchComp" style="margin-bottom:12px"></select>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-      <div>
-        <label class="modal-label">Local</label>
-        <select id="mMatchLoc" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none">
-          <option value="home">🏠 Em Casa</option>
-          <option value="away">✈️ Fora</option>
-        </select>
+    <div id="matchIndividualFields">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label class="modal-label">Local</label>
+          <select id="mMatchLoc" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none">
+            <option value="home">🏠 Em Casa</option>
+            <option value="away">✈️ Fora</option>
+          </select>
+        </div>
+        <div>
+          <label class="modal-label">Data</label>
+          <input type="date" id="mMatchDate" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
+        </div>
       </div>
-      <div>
-        <label class="modal-label">Data</label>
-        <input type="date" id="mMatchDate" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
+
+      <label class="modal-label">Adversário</label>
+      <input type="text" id="mMatchOpponent" placeholder="Nome do adversário" style="margin-bottom:12px">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label class="modal-label" id="labelGF">Gols marcados (nosso)</label>
+          <input type="number" id="mMatchGF" min="0" value="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
+        </div>
+        <div>
+          <label class="modal-label" id="labelGA">Gols sofridos (deles)</label>
+          <input type="number" id="mMatchGA" min="0" value="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
+        </div>
       </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label class="modal-label">Gols do jogador</label>
+          <input type="number" id="mMatchPlayerGoals" min="0" value="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
+        </div>
+        <div>
+          <label class="modal-label">Assists do jogador</label>
+          <input type="number" id="mMatchAssists" min="0" value="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div class="toggle-wrap" style="margin-bottom:0;min-height:63px" onclick="const cb=document.getElementById('mMatchStarter');cb.checked=!cb.checked;updateMatchPreview()">
+          <input type="checkbox" id="mMatchStarter" checked onclick="event.stopPropagation()" onchange="updateMatchPreview()">
+          <label for="mMatchStarter">Foi titular</label>
+          <span class="nt-badge" style="background:rgba(63,185,80,.15);color:var(--green)">XI</span>
+        </div>
+        <div>
+          <label class="modal-label">Minutos jogados</label>
+          <input type="number" id="mMatchMinutes" min="0" max="130" value="90" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
+        </div>
+      </div>
+
+      <div id="matchPreview" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:.88rem;color:var(--dim);text-align:center"></div>
     </div>
 
-    <label class="modal-label">Adversário</label>
-    <input type="text" id="mMatchOpponent" placeholder="Nome do adversário" style="margin-bottom:12px">
+    <div id="matchCompetitionTotalFields" style="display:none">
+      <div style="background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.28);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:.78rem;color:var(--dim);line-height:1.5">
+        Informe somente os totais da competição. Esse lançamento contará normalmente na temporada, carreira e ranking, sem criar partidas individuais fictícias.
+      </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-      <div>
-        <label class="modal-label" id="labelGF">Gols marcados (nosso)</label>
-        <input type="number" id="mMatchGF" min="0" value="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px">
+        <div>
+          <label class="modal-label">Jogos</label>
+          <input type="number" id="mTotalGames" min="1" value="1" style="margin-bottom:0">
+        </div>
+        <div>
+          <label class="modal-label">Jogos como titular</label>
+          <input type="number" id="mTotalStarters" min="0" value="0" style="margin-bottom:0">
+        </div>
       </div>
-      <div>
-        <label class="modal-label" id="labelGA">Gols sofridos (deles)</label>
-        <input type="number" id="mMatchGA" min="0" value="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px">
+        <div>
+          <label class="modal-label">Gols</label>
+          <input type="number" id="mTotalGoals" min="0" value="0" style="margin-bottom:0">
+        </div>
+        <div>
+          <label class="modal-label">Assistências</label>
+          <input type="number" id="mTotalAssists" min="0" value="0" style="margin-bottom:0">
+        </div>
       </div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px">
+        <div>
+          <label class="modal-label">Minutos totais <span style="text-transform:none;letter-spacing:0">(opcional)</span></label>
+          <input type="number" id="mTotalMinutes" min="0" placeholder="Ex.: 2.340" style="margin-bottom:0">
+        </div>
+        <div>
+          <label class="modal-label">Ano / referência</label>
+          <input type="text" id="mTotalYear" placeholder="Ex.: 2026 ou 2023/24" style="margin-bottom:0">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px">
+        <div>
+          <label class="modal-label">Gols do time <span style="text-transform:none;letter-spacing:0">(opcional)</span></label>
+          <input type="number" id="mTotalGF" min="0" placeholder="Total" style="margin-bottom:0">
+        </div>
+        <div>
+          <label class="modal-label">Gols sofridos <span style="text-transform:none;letter-spacing:0">(opcional)</span></label>
+          <input type="number" id="mTotalGA" min="0" placeholder="Total" style="margin-bottom:0">
+        </div>
+      </div>
+
+      <div id="matchTotalPreview" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:.82rem;color:var(--dim);text-align:center"></div>
     </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-      <div>
-        <label class="modal-label">Gols do jogador</label>
-        <input type="number" id="mMatchPlayerGoals" min="0" value="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
-      </div>
-      <div>
-        <label class="modal-label">Assists do jogador</label>
-        <input type="number" id="mMatchAssists" min="0" value="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-      <div class="toggle-wrap" style="margin-bottom:0;min-height:63px" onclick="const cb=document.getElementById('mMatchStarter');cb.checked=!cb.checked;updateMatchPreview()">
-        <input type="checkbox" id="mMatchStarter" checked onclick="event.stopPropagation()" onchange="updateMatchPreview()">
-        <label for="mMatchStarter">Foi titular</label>
-        <span class="nt-badge" style="background:rgba(63,185,80,.15);color:var(--green)">XI</span>
-      </div>
-      <div>
-        <label class="modal-label">Minutos jogados</label>
-        <input type="number" id="mMatchMinutes" min="0" max="130" value="90" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#e6edf3;padding:10px 14px;border-radius:8px;font-size:.9rem;outline:none;margin-bottom:0">
-      </div>
-    </div>
-
-    <div id="matchPreview" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:.88rem;color:var(--dim);text-align:center"></div>
 
     <div class="modal-actions">
       <button class="btn ghost" onclick="closeModal('modalMatch')">Cancelar</button>
-      <button class="btn" onclick="saveMatch()">Salvar Jogo</button>
+      <button class="btn" id="btnSaveMatch" onclick="saveMatch()">Salvar Jogo</button>
     </div>
   </div>
 </div>
@@ -1089,7 +1150,7 @@ function renderSeasonContent(){
     <button class="sub-tab${seasonSubView==='geral'?' active':''}" onclick="setSubView('geral')">📊 Resumo Geral</button>
     <button class="sub-tab${seasonSubView==='porcomp'?' active':''}" onclick="setSubView('porcomp')">🏷️ Por Competição</button>
     <button class="sub-tab${seasonSubView==='porano'?' active':''}" onclick="setSubView('porano')">📅 Por Ano</button>
-    <button class="sub-tab${seasonSubView==='jogos'?' active':''}" onclick="setSubView('jogos')">⚽ Jogos (${matches.length})</button>
+    <button class="sub-tab${seasonSubView==='jogos'?' active':''}" onclick="setSubView('jogos')">⚽ Jogos (${countGames(matches)})</button>
   </div>`;
   let main='';
   if(seasonSubView==='geral') main=renderSubGeral(sd,matches,comps,titles,awards,overall);
@@ -1106,16 +1167,40 @@ function formatMinutesAverage(value){
   return Number(value||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:1});
 }
 
+function isCompetitionTotal(m){return m&&m.entryType==='competition_total';}
+function getMatchGameCount(m){return isCompetitionTotal(m)?Math.max(0,parseInt(m.games)||0):1;}
+function getMatchStarterCount(m){return isCompetitionTotal(m)?Math.max(0,parseInt(m.starters)||0):(m.starter===true?1:0);}
+function getMatchMinutesTotal(m){
+  if(isCompetitionTotal(m)){
+    if(m.minutesTotal===undefined||m.minutesTotal===null||m.minutesTotal==='')return null;
+    return Math.max(0,Number(m.minutesTotal)||0);
+  }
+  if(m.minutes===undefined||m.minutes===null||m.minutes==='')return null;
+  return Math.max(0,Number(m.minutes)||0);
+}
+function getMatchMinutesGameCount(m){
+  const total=getMatchMinutesTotal(m);
+  if(total===null)return 0;
+  return isCompetitionTotal(m)?getMatchGameCount(m):1;
+}
+function countGames(matches){return (matches||[]).reduce((sum,m)=>sum+getMatchGameCount(m),0);}
+
 function calcStats(matches){
   let j=0,g=0,a=0,gf=0,ga=0,w=0,d=0,l=0,starters=0,minutes=0,minutesGames=0;
-  matches.forEach(m=>{j++;g+=m.playerGoals||0;a+=m.playerAssists||0;gf+=m.gf||0;ga+=m.ga||0;
-    if(m.starter===true)starters++;
-    if(m.minutes!==undefined&&m.minutes!==null&&m.minutes!==''){
-      minutes+=Math.max(0,Number(m.minutes)||0);
-      minutesGames++;
+  matches.forEach(m=>{
+    const gameCount=getMatchGameCount(m);
+    j+=gameCount;
+    g+=Math.max(0,Number(m.playerGoals)||0);
+    a+=Math.max(0,Number(m.playerAssists)||0);
+    gf+=Math.max(0,Number(m.gf)||0);
+    ga+=Math.max(0,Number(m.ga)||0);
+    starters+=getMatchStarterCount(m);
+    const mTotal=getMatchMinutesTotal(m);
+    if(mTotal!==null){minutes+=mTotal;minutesGames+=getMatchMinutesGameCount(m);}
+    if(!isCompetitionTotal(m)){
+      const r=m.gf>m.ga?'W':m.gf===m.ga?'D':'L';
+      if(r==='W')w++;else if(r==='D')d++;else l++;
     }
-    const r=m.gf>m.ga?'W':m.gf===m.ga?'D':'L';
-    if(r==='W')w++;else if(r==='D')d++;else l++;
   });
   const avgMinutes=minutesGames>0?minutes/minutesGames:0;
   return{j,g,a,gf,ga,w,d,l,starters,minutes,minutesGames,avgMinutes};
@@ -1139,7 +1224,7 @@ function renderSubGeral(sd,matches,comps,titles,awards,overall){
   awards.forEach(a=>{awardsHtml+=`<div class="award-item"><span class="award-icon">🏅</span><span class="award-name">${a.name}</span><button class="title-del" onclick="deleteAward('${a.id}')">✕</button></div>`;});
   let compListHtml='';
   comps.forEach(c=>{
-    const cnt=matches.filter(m=>m.compId===c.id).length;
+    const cnt=countGames(matches.filter(m=>m.compId===c.id));
     compListHtml+=`<div class="comp-list-item"><span class="comp-name">${c.name}</span><span style="font-size:.72rem;color:var(--dim)">${cnt} jogo${cnt!==1?'s':''}</span><button class="btn ghost" style="font-size:.7rem;padding:3px 10px" onclick="setCompFilter('${c.id}')">Ver jogos</button><button class="btn danger" style="padding:2px 8px;font-size:.72rem" onclick="deleteComp('${c.id}')">✕</button></div>`;
   });
   return `
@@ -1163,9 +1248,9 @@ function renderSubGeral(sd,matches,comps,titles,awards,overall){
     </div>
     <div class="form-wrap" style="border-color:rgba(63,185,80,.25)">
       <div class="sec-header"><span class="sec-title" style="color:var(--green)">⚽ Registrar jogos</span></div>
-      <div style="color:var(--dim);font-size:.82rem;margin-bottom:10px">Adicione uma partida manualmente ou importe toda a tabela de uma temporada da Wikipédia.</div>
+      <div style="color:var(--dim);font-size:.82rem;margin-bottom:10px">Adicione uma partida manualmente, totalize as estatísticas de uma competição ou importe toda a tabela de uma temporada da Wikipédia.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        ${comps.length>0?`<button class="btn" onclick="openAddMatch()">+ Novo Jogo</button>`:`<span style="font-size:.75rem;color:var(--yellow);align-self:center">Para registro manual, cadastre uma competição acima.</span>`}
+        ${comps.length>0?`<button class="btn" onclick="openAddMatch()">+ Novo Jogo / Total</button>`:`<span style="font-size:.75rem;color:var(--yellow);align-self:center">Para registro manual, cadastre uma competição acima.</span>`}
         <button class="btn ghost" style="border-color:rgba(88,166,255,.45);color:var(--blue)" onclick="openWikipediaImport()">🌐 Importar da Wikipédia</button>
       </div>
     </div>`;
@@ -1178,6 +1263,8 @@ function renderSubPorComp(sd,matches,comps){
   comps.forEach(c=>{
     const cm=matches.filter(m=>m.compId===c.id);
     const st=calcStats(cm);
+    const hasGF=cm.some(m=>!isCompetitionTotal(m)||m.gf!==undefined&&m.gf!==null&&m.gf!=='');
+    const hasGA=cm.some(m=>!isCompetitionTotal(m)||m.ga!==undefined&&m.ga!==null&&m.ga!=='');
     html+=`<div class="summary-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
         <span style="font-size:.95rem;font-weight:700;color:var(--gold)">${c.name}</span>
@@ -1191,8 +1278,8 @@ function renderSubPorComp(sd,matches,comps){
         <div class="stat"><div class="val">${st.starters}</div><div class="lbl">Titular</div></div>
         <div class="stat"><div class="val" style="color:var(--purple)">${formatMinutesAverage(st.avgMinutes)}</div><div class="lbl">Min/Jogo</div></div>
         <div class="stat"><div class="val">${st.j>0?(st.g/st.j).toFixed(2):'0.00'}</div><div class="lbl">G/J</div></div>
-        <div class="stat"><div class="val" style="color:var(--dim)">${st.gf}</div><div class="lbl">Pró</div></div>
-        <div class="stat"><div class="val" style="color:var(--red)">${st.ga}</div><div class="lbl">Contra</div></div>
+        <div class="stat"><div class="val" style="color:var(--dim)">${hasGF?st.gf:'—'}</div><div class="lbl">Pró</div></div>
+        <div class="stat"><div class="val" style="color:var(--red)">${hasGA?st.ga:'—'}</div><div class="lbl">Contra</div></div>
       </div>
     </div>`;
   });
@@ -1230,13 +1317,35 @@ function renderSubPorAno(sd,matches){
 function renderSubJogos(sd,matches,comps){
   const club=sd.club||'Seleção';
   let filtered=activeCompFilter?matches.filter(m=>m.compId===activeCompFilter):matches;
-  filtered=[...filtered].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  filtered=[...filtered].sort((a,b)=>String(b.date||b.year||'').localeCompare(String(a.date||a.year||'')));
   let filterHtml=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
     <button class="sub-tab${!activeCompFilter?' active':''}" onclick="activeCompFilter=null;renderSeasonContent()">Todos</button>`;
   comps.forEach(c=>{filterHtml+=`<button class="sub-tab${activeCompFilter===c.id?' active':''}" onclick="setCompFilter('${c.id}')">${c.name}</button>`;});
   filterHtml+=`</div>`;
   let matchesHtml='';
   filtered.forEach(m=>{
+    if(isCompetitionTotal(m)){
+      const compName=getCompName(sd,m.compId);
+      const games=getMatchGameCount(m);
+      const starters=getMatchStarterCount(m);
+      const mins=getMatchMinutesTotal(m);
+      const avg=mins!==null&&games>0?mins/games:null;
+      const ref=m.year||state.activeSeason||'—';
+      const gfInfo=m.gf===undefined||m.gf===null?'':` · Pró ${Math.max(0,Number(m.gf)||0)}`;
+      const gaInfo=m.ga===undefined||m.ga===null?'':` · Contra ${Math.max(0,Number(m.ga)||0)}`;
+      matchesHtml+=`<div class="match-card" style="gap:10px;padding:12px 14px;border-color:rgba(88,166,255,.35);background:rgba(88,166,255,.05)">
+        <span style="font-size:.65rem;background:rgba(88,166,255,.16);color:var(--blue);padding:3px 8px;border-radius:8px;font-weight:800;flex-shrink:0">📊 TOTAL</span>
+        <div style="flex:1;min-width:220px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px"><span style="font-size:.9rem;font-weight:800;color:#fff">${compName}</span><span style="font-size:.7rem;color:var(--dim)">${ref}</span></div>
+          <div style="font-size:.78rem;color:var(--dim);line-height:1.55"><b style="color:#fff">${games}</b> jogos · <b style="color:var(--green)">${Math.max(0,Number(m.playerGoals)||0)}</b> gols · <b style="color:var(--blue)">${Math.max(0,Number(m.playerAssists)||0)}</b> assists · ${starters} titular${starters!==1?'es':''}${avg===null?'':` · ${formatMinutesAverage(avg)} min/jogo`}${gfInfo}${gaInfo}</div>
+        </div>
+        <div class="match-actions" style="flex-shrink:0">
+          <button class="btn edit-btn" style="padding:3px 8px;font-size:.72rem;border:1px solid rgba(240,136,62,.3)" onclick="editMatch('${m.id}')">✎</button>
+          <button class="btn danger" style="padding:3px 8px;font-size:.72rem" onclick="deleteMatch('${m.id}')">✖</button>
+        </div>
+      </div>`;
+      return;
+    }
     const res=m.gf>m.ga?'W':m.gf===m.ga?'D':'L';
     const resColor=res==='W'?'var(--green)':res==='D'?'var(--yellow)':'var(--red)';
     const resLabel=res==='W'?'V':res==='D'?'E':'D';
@@ -1282,7 +1391,7 @@ function renderSubJogos(sd,matches,comps){
   });
   return filterHtml+`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap">
-      <span class="sec-title">${filtered.length} jogo${filtered.length!==1?'s':''}</span>
+      <span class="sec-title">${countGames(filtered)} jogo${countGames(filtered)!==1?'s':''}</span>
       <div style="display:flex;gap:7px;flex-wrap:wrap">
         <button class="btn ghost" style="padding:6px 12px;font-size:.75rem;border-color:rgba(88,166,255,.45);color:var(--blue)" onclick="openWikipediaImport()">🌐 Wikipédia</button>
         ${comps.length>0?`<button class="btn" style="padding:6px 14px;font-size:.78rem" onclick="openAddMatch()">+ Novo Jogo</button>`:''}
@@ -1305,7 +1414,7 @@ function addComp(){
 
 function deleteComp(cid){
   const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
-  const cnt=(season.matches||[]).filter(m=>m.compId===cid).length;
+  const cnt=countGames((season.matches||[]).filter(m=>m.compId===cid));
   confirmDialog('Excluir competição',cnt>0?`Esta competição tem ${cnt} jogo(s). Excluir mesmo assim?`:'Excluir esta competição?',()=>{
     season.comps=season.comps.filter(c=>c.id!==cid);
     save();renderSeasonContent();toast('Competição removida');
@@ -1333,13 +1442,60 @@ function updateMatchPreview(){
   if(prev)prev.innerHTML=previewText;
 }
 
-function openAddMatch(){
-  editingMatchId=null;
+function updateCompetitionTotalPreview(){
+  const games=Math.max(0,parseInt(document.getElementById('mTotalGames')?.value)||0);
+  const goals=Math.max(0,parseInt(document.getElementById('mTotalGoals')?.value)||0);
+  const assists=Math.max(0,parseInt(document.getElementById('mTotalAssists')?.value)||0);
+  const starters=Math.min(games,Math.max(0,parseInt(document.getElementById('mTotalStarters')?.value)||0));
+  const minsRaw=document.getElementById('mTotalMinutes')?.value;
+  const mins=minsRaw===''?null:Math.max(0,Number(minsRaw)||0);
+  const avg=mins!==null&&games>0?mins/games:null;
+  const compSel=document.getElementById('mMatchComp');
+  const compName=compSel?.options[compSel.selectedIndex]?.textContent||'Competição';
+  const prev=document.getElementById('matchTotalPreview');
+  if(prev)prev.innerHTML=`<b style="color:#fff">${compName}</b> · ${games} jogo${games!==1?'s':''} · <span style="color:var(--green);font-weight:700">${goals} gols</span> · <span style="color:var(--blue);font-weight:700">${assists} assists</span> · ${starters} titular${starters!==1?'es':''}${avg===null?'':` · ${formatMinutesAverage(avg)} min/jogo`}`;
+}
+
+function toggleMatchMode(){
+  const mode=document.getElementById('mMatchMode')?.value||'individual';
+  const total=mode==='competition_total';
+  const individualFields=document.getElementById('matchIndividualFields');
+  const totalFields=document.getElementById('matchCompetitionTotalFields');
+  if(individualFields)individualFields.style.display=total?'none':'block';
+  if(totalFields)totalFields.style.display=total?'block':'none';
+  const title=document.getElementById('modalMatchTitle');
+  const btn=document.getElementById('btnSaveMatch');
+  if(title)title.textContent=editingMatchId?(total?'Editar total da competição':'Editar Jogo'):(total?'Totalizar por competição':'Registrar Jogo');
+  if(btn)btn.textContent=total?'Salvar Totais':'Salvar Jogo';
+  if(total)updateCompetitionTotalPreview();else updateMatchPreview();
+}
+
+function fillMatchCompetitionSelect(selectedId=''){
   const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
   const comps=season.comps||[];
   const sel=document.getElementById('mMatchComp');
   sel.innerHTML='';
-  comps.forEach(c=>{const opt=document.createElement('option');opt.value=c.id;opt.textContent=c.name;sel.appendChild(opt);});
+  comps.forEach(c=>{
+    const opt=document.createElement('option');opt.value=c.id;opt.textContent=c.name;
+    if(c.id===selectedId)opt.selected=true;
+    sel.appendChild(opt);
+  });
+  sel.onchange=()=>{updateMatchPreview();updateCompetitionTotalPreview();};
+}
+
+function setupMatchModalListeners(){
+  ['mMatchLoc','mMatchOpponent','mMatchGF','mMatchGA','mMatchMinutes'].forEach(id=>{
+    const el=document.getElementById(id);if(el){el.oninput=updateMatchPreview;el.onchange=updateMatchPreview;}
+  });
+  ['mTotalGames','mTotalStarters','mTotalGoals','mTotalAssists','mTotalMinutes','mTotalYear','mTotalGF','mTotalGA'].forEach(id=>{
+    const el=document.getElementById(id);if(el){el.oninput=updateCompetitionTotalPreview;el.onchange=updateCompetitionTotalPreview;}
+  });
+}
+
+function openAddMatch(){
+  editingMatchId=null;
+  fillMatchCompetitionSelect(activeCompFilter||'');
+  const mode=document.getElementById('mMatchMode');mode.disabled=false;mode.value='individual';
   document.getElementById('mMatchLoc').value='home';
   document.getElementById('mMatchOpponent').value='';
   document.getElementById('mMatchDate').value='';
@@ -1349,13 +1505,18 @@ function openAddMatch(){
   document.getElementById('mMatchAssists').value='0';
   document.getElementById('mMatchStarter').checked=true;
   document.getElementById('mMatchMinutes').value='90';
-  document.getElementById('modalMatchTitle').textContent='Registrar Jogo';
-  ['mMatchLoc','mMatchOpponent','mMatchGF','mMatchGA','mMatchMinutes'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el){el.oninput=updateMatchPreview;el.onchange=updateMatchPreview;}
-  });
+  document.getElementById('mTotalGames').value='1';
+  document.getElementById('mTotalStarters').value='0';
+  document.getElementById('mTotalGoals').value='0';
+  document.getElementById('mTotalAssists').value='0';
+  document.getElementById('mTotalMinutes').value='';
+  document.getElementById('mTotalYear').value=state.activeSeason||'';
+  document.getElementById('mTotalGF').value='';
+  document.getElementById('mTotalGA').value='';
+  setupMatchModalListeners();
+  toggleMatchMode();
   openModal('modalMatch');
-  setTimeout(updateMatchPreview,10);
+  setTimeout(()=>{updateMatchPreview();updateCompetitionTotalPreview();},10);
 }
 
 function editMatch(mid){
@@ -1363,29 +1524,73 @@ function editMatch(mid){
   const m=(season.matches||[]).find(x=>x.id===mid);
   if(!m)return;
   editingMatchId=mid;
-  const comps=season.comps||[];
-  const sel=document.getElementById('mMatchComp');
-  sel.innerHTML='';
-  comps.forEach(c=>{const opt=document.createElement('option');opt.value=c.id;opt.textContent=c.name;if(c.id===m.compId)opt.selected=true;sel.appendChild(opt);});
-  document.getElementById('mMatchLoc').value=m.loc||'home';
-  document.getElementById('mMatchOpponent').value=m.opponent||'';
-  document.getElementById('mMatchDate').value=m.date||'';
-  document.getElementById('mMatchGF').value=m.gf||0;
-  document.getElementById('mMatchGA').value=m.ga||0;
-  document.getElementById('mMatchPlayerGoals').value=m.playerGoals||0;
-  document.getElementById('mMatchAssists').value=m.playerAssists||0;
-  document.getElementById('mMatchStarter').checked=m.starter===true;
-  document.getElementById('mMatchMinutes').value=m.minutes===undefined||m.minutes===null?'0':m.minutes;
-  document.getElementById('modalMatchTitle').textContent='Editar Jogo';
-  ['mMatchLoc','mMatchOpponent','mMatchGF','mMatchGA','mMatchMinutes'].forEach(id=>{
-    const el=document.getElementById(id);if(el){el.oninput=updateMatchPreview;el.onchange=updateMatchPreview;}
-  });
+  fillMatchCompetitionSelect(m.compId);
+  const total=isCompetitionTotal(m);
+  const mode=document.getElementById('mMatchMode');mode.value=total?'competition_total':'individual';mode.disabled=true;
+  if(total){
+    document.getElementById('mTotalGames').value=getMatchGameCount(m);
+    document.getElementById('mTotalStarters').value=getMatchStarterCount(m);
+    document.getElementById('mTotalGoals').value=Math.max(0,Number(m.playerGoals)||0);
+    document.getElementById('mTotalAssists').value=Math.max(0,Number(m.playerAssists)||0);
+    document.getElementById('mTotalMinutes').value=m.minutesTotal===undefined||m.minutesTotal===null?'':m.minutesTotal;
+    document.getElementById('mTotalYear').value=m.year||state.activeSeason||'';
+    document.getElementById('mTotalGF').value=m.gf===undefined||m.gf===null?'':m.gf;
+    document.getElementById('mTotalGA').value=m.ga===undefined||m.ga===null?'':m.ga;
+  }else{
+    document.getElementById('mMatchLoc').value=m.loc||'home';
+    document.getElementById('mMatchOpponent').value=m.opponent||'';
+    document.getElementById('mMatchDate').value=m.date||'';
+    document.getElementById('mMatchGF').value=m.gf||0;
+    document.getElementById('mMatchGA').value=m.ga||0;
+    document.getElementById('mMatchPlayerGoals').value=m.playerGoals||0;
+    document.getElementById('mMatchAssists').value=m.playerAssists||0;
+    document.getElementById('mMatchStarter').checked=m.starter===true;
+    document.getElementById('mMatchMinutes').value=m.minutes===undefined||m.minutes===null?'0':m.minutes;
+  }
+  setupMatchModalListeners();
+  toggleMatchMode();
   openModal('modalMatch');
-  setTimeout(updateMatchPreview,10);
+  setTimeout(()=>{updateMatchPreview();updateCompetitionTotalPreview();},10);
 }
 
 function saveMatch(){
   const compId=document.getElementById('mMatchComp').value;
+  const mode=document.getElementById('mMatchMode').value||'individual';
+  if(!compId){toast('Selecione uma competição','err');return;}
+  const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
+  if(!season.matches)season.matches=[];
+
+  if(mode==='competition_total'){
+    const games=Math.max(0,parseInt(document.getElementById('mTotalGames').value)||0);
+    const playerGoals=Math.max(0,parseInt(document.getElementById('mTotalGoals').value)||0);
+    const playerAssists=Math.max(0,parseInt(document.getElementById('mTotalAssists').value)||0);
+    const starters=Math.max(0,parseInt(document.getElementById('mTotalStarters').value)||0);
+    const minutesRaw=document.getElementById('mTotalMinutes').value;
+    const year=(document.getElementById('mTotalYear').value||state.activeSeason||'').trim();
+    const gfRaw=document.getElementById('mTotalGF').value;
+    const gaRaw=document.getElementById('mTotalGA').value;
+    if(games<1){toast('Informe a quantidade de jogos','err');return;}
+    if(starters>games){toast('Jogos como titular não pode ser maior que o total de jogos','err');return;}
+    const otherRecords=season.matches.filter(x=>x.compId===compId&&x.id!==editingMatchId);
+    if(otherRecords.length>0){toast('Esta competição já possui jogos lançados. Para usar a totalização, remova os lançamentos individuais primeiro.','err');return;}
+    const obj={
+      id:editingMatchId||'mt_'+Date.now(),entryType:'competition_total',compId,games,starters,
+      playerGoals,playerAssists,
+      minutesTotal:minutesRaw===''?null:Math.max(0,Number(minutesRaw)||0),
+      year:year||state.activeSeason,
+      gf:gfRaw===''?null:Math.max(0,parseInt(gfRaw)||0),
+      ga:gaRaw===''?null:Math.max(0,parseInt(gaRaw)||0),
+      source:'manual_total'
+    };
+    if(editingMatchId){const idx=season.matches.findIndex(x=>x.id===editingMatchId);if(idx!==-1)season.matches[idx]=obj;}
+    else season.matches.push(obj);
+    editingMatchId=null;
+    save();closeModal('modalMatch');seasonSubView='jogos';renderSeasonContent();toast('Totais da competição salvos!');
+    return;
+  }
+
+  const aggregateConflict=season.matches.some(x=>x.compId===compId&&x.id!==editingMatchId&&isCompetitionTotal(x));
+  if(aggregateConflict){toast('Esta competição está totalizada. Edite ou exclua o total antes de cadastrar jogos individuais.','err');return;}
   const loc=document.getElementById('mMatchLoc').value;
   const opponent=document.getElementById('mMatchOpponent').value.trim();
   const date=document.getElementById('mMatchDate').value;
@@ -1395,12 +1600,10 @@ function saveMatch(){
   const playerAssists=parseInt(document.getElementById('mMatchAssists').value)||0;
   const starter=document.getElementById('mMatchStarter').checked;
   const minutes=Math.min(130,Math.max(0,parseInt(document.getElementById('mMatchMinutes').value)||0));
-  if(!compId){toast('Selecione uma competição','err');return;}
   if(!opponent){toast('Preencha o adversário','err');return;}
-  const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
-  if(!season.matches)season.matches=[];
   const existing=editingMatchId?season.matches.find(x=>x.id===editingMatchId):null;
-  const obj={...(existing||{}),id:editingMatchId||'m_'+Date.now(),compId,loc,opponent,date,gf,ga,playerGoals,playerAssists,starter,minutes,year:date?date.substring(0,4):state.activeSeason};
+  const obj={...(existing||{}),id:editingMatchId||'m_'+Date.now(),entryType:'match',compId,loc,opponent,date,gf,ga,playerGoals,playerAssists,starter,minutes,year:date?date.substring(0,4):state.activeSeason};
+  delete obj.games;delete obj.starters;delete obj.minutesTotal;
   if(editingMatchId){const idx=season.matches.findIndex(x=>x.id===editingMatchId);if(idx!==-1)season.matches[idx]=obj;editingMatchId=null;}
   else season.matches.push(obj);
   save();closeModal('modalMatch');seasonSubView='jogos';renderSeasonContent();toast('Jogo salvo!');
@@ -1408,9 +1611,11 @@ function saveMatch(){
 
 function deleteMatch(mid){
   const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
-  confirmDialog('Excluir jogo','Remover este jogo?',()=>{
+  const item=(season.matches||[]).find(m=>m.id===mid);
+  const total=isCompetitionTotal(item);
+  confirmDialog(total?'Excluir totalização':'Excluir jogo',total?'Remover os totais lançados para esta competição?':'Remover este jogo?',()=>{
     season.matches=(season.matches||[]).filter(m=>m.id!==mid);
-    save();renderSeasonContent();toast('Jogo removido');
+    save();renderSeasonContent();toast(total?'Totalização removida':'Jogo removido');
   });
 }
 
@@ -1822,15 +2027,18 @@ function importWikipediaMatches(){
   if(!ready.length){wikiStatus(duplicates?'Todos os jogos marcados já estão cadastrados.':'Nenhum jogo válido está pronto para importar.','error');return;}
   const compCache=new Map();
   season.comps.forEach(c=>compCache.set(wikiNormalize(c.name),c));
-  const stamp=Date.now();
+  const stamp=Date.now();let blockedByTotal=0,imported=0;
   ready.forEach((m,index)=>{
     const compKey=wikiNormalize(m.competition);let comp=compCache.get(compKey);
     if(!comp){comp={id:`comp_${stamp}_${index}_${Math.random().toString(36).slice(2,6)}`,name:m.competition};season.comps.push(comp);compCache.set(compKey,comp);}
-    season.matches.push({id:`m_${stamp}_${index}_${Math.random().toString(36).slice(2,7)}`,compId:comp.id,loc:m.loc,opponent:m.opponent,date:m.date,gf:m.gf,ga:m.ga,playerGoals:m.playerGoals,playerAssists:m.playerAssists,starter:m.starter,minutes:m.minutes,year:m.date.substring(0,4),source:'wikipedia',sourcePage:wikipediaImportPage});
+    if(season.matches.some(x=>x.compId===comp.id&&isCompetitionTotal(x))){blockedByTotal++;return;}
+    season.matches.push({id:`m_${stamp}_${index}_${Math.random().toString(36).slice(2,7)}`,entryType:'match',compId:comp.id,loc:m.loc,opponent:m.opponent,date:m.date,gf:m.gf,ga:m.ga,playerGoals:m.playerGoals,playerAssists:m.playerAssists,starter:m.starter,minutes:m.minutes,year:m.date.substring(0,4),source:'wikipedia',sourcePage:wikipediaImportPage});
+    imported++;
   });
+  if(!imported){wikiStatus(blockedByTotal?'As competições selecionadas já estão totalizadas. Exclua a totalização antes de importar jogos individuais.':'Nenhum jogo foi importado.','error');return;}
   save();closeModal('modalWikiImport');seasonSubView='jogos';activeCompFilter=null;renderSeasonContent();
-  const notes=[];if(duplicates)notes.push(`${duplicates} duplicado(s) ignorado(s)`);if(invalid)notes.push(`${invalid} linha(s) inválida(s)`);
-  toast(`${ready.length} jogo(s) importado(s)!${notes.length?' '+notes.join(' · '):''}`);
+  const notes=[];if(duplicates)notes.push(`${duplicates} duplicado(s) ignorado(s)`);if(invalid)notes.push(`${invalid} linha(s) inválida(s)`);if(blockedByTotal)notes.push(`${blockedByTotal} ignorado(s) porque a competição está totalizada`);
+  toast(`${imported} jogo(s) importado(s)!${notes.length?' '+notes.join(' · '):''}`);
 }
 
 // ===================== TITLES =====================
@@ -1871,6 +2079,18 @@ function deleteAward(aid){
 }
 
 // ===================== CAREER =====================
+function getSeasonApproxDate(sKey){
+  const value=String(sKey||'');
+  const m=value.match(/^(\d{4})(?:[\/-](\d{2,4}))?$/);
+  if(!m)return'';
+  if(m[2]){
+    let endYear=Number(m[2]);
+    if(m[2].length===2)endYear=Math.floor(Number(m[1])/100)*100+endYear;
+    return `${endYear}-06-30`;
+  }
+  return `${m[1]}-12-31`;
+}
+
 function calcMilestones(playerIdx){
   const player=state.players[playerIdx];
   const allMatches=[];
@@ -1879,14 +2099,16 @@ function calcMilestones(playerIdx){
     const s=player.seasons[sKey];
     (s.matches||[]).forEach(m=>{
       if((m.playerGoals||0)===0)return;
+      const aggregate=isCompetitionTotal(m);
       allMatches.push({
-        date:m.date||'',
+        date:aggregate?getSeasonApproxDate(m.year||sKey):(m.date||''),
         goals:m.playerGoals||0,
-        opponent:m.opponent||'—',
+        opponent:aggregate?'Totalização da competição':(m.opponent||'—'),
         club:s.isNT?'🏴 Seleção':(s.club||'—'),
         season:sKey,
         comp:getCompName(s,m.compId)||'—',
-        isNT:s.isNT||false
+        isNT:s.isNT||false,
+        aggregate
       });
     });
   });
@@ -1914,6 +2136,7 @@ function calcMilestones(playerIdx){
         season:m.season,
         comp:m.comp,
         isNT:m.isNT,
+        aggregate:m.aggregate===true,
         matchGoals:m.goals,
         goalNumInMatch
       });
@@ -1936,38 +2159,44 @@ function getCareerData(playerIdx){
     (s.awards||[]).forEach(a=>{allAwards.push({name:a.name,season:sKey,club:s.isNT?'Seleção':s.club,isNT:s.isNT});});
     const matches=s.matches||[];
     matches.forEach(m=>{
-      sJ++;sG+=m.playerGoals||0;sA+=m.playerAssists||0;
-      totalJ++;totalG+=m.playerGoals||0;totalA+=m.playerAssists||0;
-      if(m.starter===true)totalStarts++;
-      if(m.minutes!==undefined&&m.minutes!==null&&m.minutes!==''){
-        totalMinutes+=Math.max(0,Number(m.minutes)||0);
-        totalMinuteGames++;
+      const gameCount=getMatchGameCount(m);
+      const goals=Math.max(0,Number(m.playerGoals)||0);
+      const assists=Math.max(0,Number(m.playerAssists)||0);
+      sJ+=gameCount;sG+=goals;sA+=assists;
+      totalJ+=gameCount;totalG+=goals;totalA+=assists;
+      totalStarts+=getMatchStarterCount(m);
+      const minuteTotal=getMatchMinutesTotal(m);
+      if(minuteTotal!==null){
+        totalMinutes+=minuteTotal;
+        totalMinuteGames+=getMatchMinutesGameCount(m);
       }
       const compName=getCompName(s,m.compId)||'SEM COMP';
       if(!compMap[compName])compMap[compName]={j:0,g:0,a:0};
-      compMap[compName].j++;compMap[compName].g+=m.playerGoals||0;compMap[compName].a+=m.playerAssists||0;
+      compMap[compName].j+=gameCount;compMap[compName].g+=goals;compMap[compName].a+=assists;
       const yr=getMatchYear(m,sKey);
       if(!yearMap[yr])yearMap[yr]={j:0,g:0,a:0};
-      yearMap[yr].j++;yearMap[yr].g+=m.playerGoals||0;yearMap[yr].a+=m.playerAssists||0;
-      if(player.birth&&m.date&&m.date.length===10){
+      yearMap[yr].j+=gameCount;yearMap[yr].g+=goals;yearMap[yr].a+=assists;
+      if(!isCompetitionTotal(m)&&player.birth&&m.date&&m.date.length===10){
         const bd=new Date(player.birth);const md=new Date(m.date);
         let age=md.getFullYear()-bd.getFullYear();
         const hadBday=(md.getMonth()>bd.getMonth())||(md.getMonth()===bd.getMonth()&&md.getDate()>=bd.getDate());
         if(!hadBday)age--;
         if(age>=0&&age<=50){
           if(!ageMap[age])ageMap[age]={j:0,g:0,a:0};
-          ageMap[age].j++;ageMap[age].g+=m.playerGoals||0;ageMap[age].a+=m.playerAssists||0;
+          ageMap[age].j++;ageMap[age].g+=goals;ageMap[age].a+=assists;
         }
       }
-      const opp=m.opponent&&m.opponent.trim()&&m.opponent!=='—'?m.opponent.trim():'Desconhecido';
-      if(!opponentMap[opp])opponentMap[opp]={j:0,g:0,a:0,w:0,d:0,l:0,gf:0,ga:0};
-      opponentMap[opp].j++;
-      opponentMap[opp].g+=m.playerGoals||0;
-      opponentMap[opp].a+=m.playerAssists||0;
-      opponentMap[opp].gf+=m.gf||0;
-      opponentMap[opp].ga+=m.ga||0;
-      const mres=m.gf>m.ga?'w':m.gf===m.ga?'d':'l';
-      opponentMap[opp][mres]++;
+      if(!isCompetitionTotal(m)){
+        const opp=m.opponent&&m.opponent.trim()&&m.opponent!=='—'?m.opponent.trim():'Desconhecido';
+        if(!opponentMap[opp])opponentMap[opp]={j:0,g:0,a:0,w:0,d:0,l:0,gf:0,ga:0};
+        opponentMap[opp].j++;
+        opponentMap[opp].g+=goals;
+        opponentMap[opp].a+=assists;
+        opponentMap[opp].gf+=m.gf||0;
+        opponentMap[opp].ga+=m.ga||0;
+        const mres=m.gf>m.ga?'w':m.gf===m.ga?'d':'l';
+        opponentMap[opp][mres]++;
+      }
     });
     (s.ntYears||[]).forEach(yr=>{
       (yr.entries||[]).forEach(e=>{
@@ -2068,11 +2297,11 @@ function renderCareer(){
       if(ms.date&&ms.date.length===10){const[yr,mo,dy]=ms.date.split('-');dateFmt=`${dy}/${mo}/${yr}`;}
       else if(ms.date)dateFmt=ms.date;
       else dateFmt='Data não registrada';
-      const inMatchNote=ms.matchGoals>1?`<div class="milestone-sub">${ms.goalNumInMatch}º gol do jogo (${ms.matchGoals} no total)</div>`:'';
+      const inMatchNote=ms.aggregate?'<div class="milestone-sub">Marco localizado dentro de uma totalização por competição.</div>':(ms.matchGoals>1?`<div class="milestone-sub">${ms.goalNumInMatch}º gol do jogo (${ms.matchGoals} no total)</div>`:'');
       html+=`<div class="milestone-card reached">
         <div class="milestone-num${isMilestone?' gold':''}">${t>=1000?'1.000':t}</div>
         <div class="milestone-label">Gol de número ${t.toLocaleString('pt-BR')}</div>
-        <div class="milestone-detail">vs ${ms.opponent}</div>
+        <div class="milestone-detail">${ms.aggregate?'📊 Total por competição':`vs ${ms.opponent}`}</div>
         <div class="milestone-sub">${ms.comp} · ${ms.season!=='SELEÇÃO'?ms.season:''}</div>
         ${inMatchNote}
         <div style="display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap">
@@ -2320,7 +2549,7 @@ function renderRanking(){
   state.players.forEach(p=>getPlayerAllMatches(p).forEach(m=>allComps.add(m.compName)));
   const compList=[...allComps].filter(Boolean).sort();
   if(!rankComp&&compList.length>0)rankComp=compList[0];
-  const generalRank=state.players.map(p=>{let j=0,g=0,a=0;getPlayerAllMatches(p).forEach(m=>{j++;g+=m.playerGoals||0;a+=m.playerAssists||0;});return{name:p.name,j,g,a};});
+  const generalRank=state.players.map(p=>{let j=0,g=0,a=0;getPlayerAllMatches(p).forEach(m=>{j+=getMatchGameCount(m);g+=m.playerGoals||0;a+=m.playerAssists||0;});return{name:p.name,j,g,a};});
   const posIcon=i=>{if(i===0)return`<span class="rank-pos">🥇</span>`;if(i===1)return`<span class="rank-pos">🥈</span>`;if(i===2)return`<span class="rank-pos">🥉</span>`;return`<span class="rank-pos" style="color:var(--dim)">${i+1}</span>`;};
   const buildList=(arr,field,color)=>{
     const sorted=[...arr].sort((a,b)=>b[field]-a[field]);
@@ -2328,7 +2557,7 @@ function renderRanking(){
     return sorted.map((x,i)=>`<div class="rank-row">${posIcon(i)}<div class="rank-name">${x.name}</div><div class="rank-val" style="color:${color}">${x[field]}</div></div>`).join('');
   };
   let compTabsHtml='';compList.forEach(c=>{compTabsHtml+=`<button class="rank-tab${rankComp===c?' active':''}" onclick="rankComp='${c.replace(/'/g,"\\'")}';renderRanking()">${c}</button>`;});
-  const rc=rankComp?state.players.map(p=>{let j=0,g=0,a=0;getPlayerAllMatches(p).filter(m=>m.compName===rankComp).forEach(m=>{j++;g+=m.playerGoals||0;a+=m.playerAssists||0;});return{name:p.name,j,g,a};}):[];
+  const rc=rankComp?state.players.map(p=>{let j=0,g=0,a=0;getPlayerAllMatches(p).filter(m=>m.compName===rankComp).forEach(m=>{j+=getMatchGameCount(m);g+=m.playerGoals||0;a+=m.playerAssists||0;});return{name:p.name,j,g,a};}):[];
   const titleCounts=state.players.map(p=>{let count=0;Object.values(p.seasons||{}).forEach(s=>{count+=(s.titles||[]).length;});return{name:p.name,count};}).sort((a,b)=>b.count-a.count);
   let titlesRankHtml=titleCounts.every(x=>x.count===0)?'<div class="empty" style="padding:16px">Nenhum título</div>':titleCounts.map((x,i)=>`<div class="rank-row">${posIcon(i)}<div class="rank-name">${x.name}</div><div class="rank-val" style="color:var(--yellow)">${x.count} 🏆</div></div>`).join('');
   const awardCounts=state.players.map(p=>{let count=0;Object.values(p.seasons||{}).forEach(s=>{count+=(s.awards||[]).length;});return{name:p.name,count};}).sort((a,b)=>b.count-a.count);
