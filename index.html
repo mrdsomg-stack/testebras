@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -364,7 +365,11 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div>
       <h1>Marechal Lott <span>Gestão por Temporada</span></h1>
     </div>
-    <div class="row">
+    <div class="row" style="align-items:center">
+      <div id="sync-indicator" style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <span style="color:var(--dim);font-size:.75rem;font-weight:500">💾 Só local</span>
+        <button onclick="openCloudModal()" class="btn ghost" style="padding:6px 10px;white-space:nowrap">☁️ Nuvem</button>
+      </div>
       <button class="btn ghost" onclick="openAddPlayer()">+ Jogador</button>
       <button class="btn ghost" id="btnRanking" style="display:none" onclick="showRanking()">🏆 Ranking</button>
       <button class="btn" id="btnSeason" style="display:none" onclick="openAddSeason()">+ Temporada</button>
@@ -825,6 +830,48 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
+
+<!-- ══ MODAL: CLOUD SYNC ══ -->
+<div class="overlay" id="modalCloud" onclick="closeModalOnBg(event,'modalCloud')">
+  <div class="modal" style="max-width:520px">
+    <h2>☁️ Sincronização na Nuvem</h2>
+
+    <div style="background:rgba(88,166,255,.07);border:1px solid rgba(88,166,255,.18);border-radius:10px;padding:14px;margin-bottom:18px;font-size:.82rem;line-height:1.7;color:var(--dim)">
+      <strong style="color:var(--blue)">Como funciona:</strong><br>
+      Seus dados ficam no <strong style="color:#e6edf3">JSONBin.io</strong> e carregam em qualquer dispositivo/navegador.<br><br>
+      <strong style="color:#e6edf3">Passos:</strong><br>
+      1. Acesse <a href="https://jsonbin.io/" target="_blank" rel="noopener" style="color:var(--blue)">jsonbin.io</a> → crie uma conta<br>
+      2. <strong>API Keys</strong> → copie a <em>Master Key</em><br>
+      3. <strong>Bins</strong> → crie um Bin com <code style="background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">{}</code> → copie o <em>Bin ID</em><br>
+      4. Cole abaixo e clique <strong>Conectar</strong>
+    </div>
+
+    <div id="cloud-status-box" style="display:none;padding:10px 14px;border-radius:9px;margin-bottom:14px;font-size:.82rem;"></div>
+
+    <div id="cloud-connected-info" style="display:none;background:rgba(63,185,80,.07);border:1px solid rgba(63,185,80,.18);border-radius:9px;padding:14px;margin-bottom:16px;">
+      <div style="color:var(--green);font-weight:600;margin-bottom:6px;font-size:.9rem">✅ Conectado ao JSONBin</div>
+      <div style="color:var(--dim);font-size:.81rem">Dados sincronizando automaticamente. Acessível em qualquer navegador com as mesmas credenciais.</div>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button onclick="manualSync()" class="btn ghost" style="color:var(--blue)">🔄 Sincronizar agora</button>
+        <button onclick="pullFromCloud()" class="btn ghost" style="color:var(--yellow)">⬇️ Carregar da nuvem</button>
+        <button onclick="disconnectCloud()" class="btn danger">🔌 Desconectar</button>
+      </div>
+    </div>
+
+    <label class="modal-label">Master Key (X-Master-Key)</label>
+    <input type="password" id="cloud-apikey" placeholder="$2a$10$..." autocomplete="off">
+
+    <label class="modal-label">Bin ID</label>
+    <input type="text" id="cloud-binid" placeholder="64abc123e3a795..." autocomplete="off">
+
+    <div class="modal-actions" style="flex-wrap:wrap">
+      <button class="btn ghost" onclick="closeModal('modalCloud')">Fechar</button>
+      <button class="btn ghost" style="color:var(--blue)" onclick="testCloudConnection()">🔍 Testar</button>
+      <button class="btn" onclick="connectCloud()">☁️ Conectar e enviar dados</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <script>
@@ -875,7 +922,23 @@ window.onload=()=>{
     instagram:normalizeInstagramProfile(p.instagram,p.name),
     seasons:Object.fromEntries(Object.entries(p.seasons||{}).map(([k,s])=>[k,normalizeSeasonV9(k,s)]))
   }));
-  state.activeView='season';save();render();
+  state.activeView='season';
+  _localSave();
+  render();
+
+  CLOUD.init();
+  if(CLOUD.isConfigured()){
+    updateSyncStatus('syncing');
+    CLOUD.syncIfNewer(true).catch(()=>updateSyncStatus('error'));
+  }else{
+    updateSyncStatus('offline');
+  }
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible'&&CLOUD.isConfigured()){
+      CLOUD.syncIfNewer(false);
+    }
+  });
 };
 
 function normalizeSeasonV9(sKey,s){
@@ -898,7 +961,245 @@ function migrateSeasonV8(sKey,s){
   return{club:s.club,isNT:s.isNT||false,comps,matches,ntYears:s.ntYears||[],titles:s.titles||[],awards:s.awards||[]};
 }
 
-function save(){localStorage.setItem('marechal_lott_v9',JSON.stringify(state));}
+function _localSave(){localStorage.setItem('marechal_lott_v9',JSON.stringify(state));}
+
+function save(){
+  _localSave();
+  CLOUD.schedulePush(state);
+}
+
+// ===================== CLOUD SYNC — JSONBin.io =====================
+const CLOUD = {
+  apiKey:null,
+  binId:null,
+  syncTimer:null,
+  syncing:false,
+
+  init(){
+    try{
+      const stored=localStorage.getItem('marechal_lott_cloud');
+      if(stored){
+        const cfg=JSON.parse(stored);
+        this.apiKey=cfg.apiKey;
+        this.binId=cfg.binId;
+      }
+    }catch(e){}
+  },
+
+  isConfigured(){return !!(this.apiKey&&this.binId);},
+
+  saveConfig(apiKey,binId){
+    this.apiKey=apiKey;
+    this.binId=binId;
+    localStorage.setItem('marechal_lott_cloud',JSON.stringify({apiKey,binId}));
+  },
+
+  clearConfig(){
+    this.apiKey=null;
+    this.binId=null;
+    localStorage.removeItem('marechal_lott_cloud');
+  },
+
+  async push(data){
+    if(!this.isConfigured()||this.syncing)return;
+    this.syncing=true;
+    updateSyncStatus('syncing');
+    try{
+      const ts=Date.now();
+      const payload={...data,lastModified:ts};
+      const res=await fetch(`https://api.jsonbin.io/v3/b/${this.binId}`,{
+        method:'PUT',
+        headers:{
+          'Content-Type':'application/json',
+          'X-Master-Key':this.apiKey,
+          'X-Bin-Versioning':'false'
+        },
+        body:JSON.stringify(payload)
+      });
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      localStorage.setItem('marechal_lott_lastModified',String(ts));
+      updateSyncStatus('ok');
+    }catch(e){
+      updateSyncStatus('error');
+      console.error('Cloud push error:',e);
+    }finally{
+      this.syncing=false;
+    }
+  },
+
+  async pull(){
+    if(!this.isConfigured())return null;
+    try{
+      const res=await fetch(`https://api.jsonbin.io/v3/b/${this.binId}/latest`,{
+        headers:{'X-Master-Key':this.apiKey}
+      });
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      const json=await res.json();
+      return json.record;
+    }catch(e){
+      console.error('Cloud pull error:',e);
+      return null;
+    }
+  },
+
+  async syncIfNewer(silent=false){
+    if(!this.isConfigured())return;
+    const remote=await this.pull();
+    if(!remote||remote.players===undefined)return;
+
+    const localTs=parseInt(localStorage.getItem('marechal_lott_lastModified')||'0',10);
+    const remoteTs=parseInt(remote.lastModified||'0',10);
+
+    if(remoteTs>localTs){
+      const {lastModified,...dados}=remote;
+      Object.assign(state,dados);
+      normalizeCloudState();
+      _localSave();
+      localStorage.setItem('marechal_lott_lastModified',String(remoteTs));
+      render();
+      updateSyncStatus('ok');
+      if(!silent)toast('☁️ Dados atualizados da nuvem!');
+    }else{
+      updateSyncStatus('ok');
+    }
+  },
+
+  schedulePush(data){
+    if(!this.isConfigured())return;
+    clearTimeout(this.syncTimer);
+    this.syncTimer=setTimeout(()=>this.push(data),1500);
+  }
+};
+
+function normalizeCloudState(){
+  state.players=(state.players||[]).map(p=>({
+    ...p,
+    profilePhoto:p.profilePhoto||'',
+    contracts:p.contracts||[],
+    instagram:normalizeInstagramProfile(p.instagram,p.name),
+    seasons:Object.fromEntries(Object.entries(p.seasons||{}).map(([k,s])=>[k,normalizeSeasonV9(k,s)]))
+  }));
+  if(state.activePlayerIdx!==null&&(state.activePlayerIdx<0||state.activePlayerIdx>=state.players.length)){
+    state.activePlayerIdx=state.players.length?0:null;
+  }
+  if(!state.activeView)state.activeView='season';
+}
+
+function updateSyncStatus(status){
+  const el=document.getElementById('sync-indicator');
+  if(!el)return;
+  const states={
+    ok:'<span style="color:var(--green);font-size:.75rem;font-weight:500">☁️ Salvo na nuvem</span>',
+    syncing:'<span style="color:var(--yellow);font-size:.75rem;font-weight:500">⏳ Sincronizando…</span>',
+    error:'<span style="color:var(--red);font-size:.75rem;font-weight:500">⚠️ Erro na nuvem</span>',
+    offline:'<span style="color:var(--dim);font-size:.75rem;font-weight:500">💾 Só local</span>'
+  };
+  const btn='<button onclick="openCloudModal()" class="btn ghost" style="padding:6px 10px;white-space:nowrap">☁️ Nuvem</button>';
+  el.innerHTML=(states[status]||states.offline)+' '+btn;
+}
+
+function openCloudModal(){
+  const connBox=document.getElementById('cloud-connected-info');
+  if(CLOUD.isConfigured()){
+    connBox.style.display='block';
+    document.getElementById('cloud-apikey').value=CLOUD.apiKey||'';
+    document.getElementById('cloud-binid').value=CLOUD.binId||'';
+  }else{
+    connBox.style.display='none';
+  }
+  document.getElementById('cloud-status-box').style.display='none';
+  openModal('modalCloud');
+}
+
+function showCloudMsg(type,msg){
+  const el=document.getElementById('cloud-status-box');
+  if(!el)return;
+  const bg={
+    ok:'rgba(63,185,80,.08)',
+    error:'rgba(248,81,73,.08)',
+    info:'rgba(88,166,255,.08)'
+  };
+  const bd={
+    ok:'rgba(63,185,80,.2)',
+    error:'rgba(248,81,73,.2)',
+    info:'rgba(88,166,255,.2)'
+  };
+  el.style.display='block';
+  el.style.background=bg[type]||bg.info;
+  el.style.border='1px solid '+(bd[type]||bd.info);
+  el.textContent=msg;
+}
+
+async function connectCloud(){
+  const apiKey=document.getElementById('cloud-apikey').value.trim();
+  const binId=document.getElementById('cloud-binid').value.trim();
+  if(!apiKey||!binId){toast('⚠️ Preencha a Master Key e o Bin ID',true);return;}
+  CLOUD.saveConfig(apiKey,binId);
+  showCloudMsg('info','⏳ Conectando e enviando seus dados para a nuvem...');
+  await CLOUD.push(state);
+  showCloudMsg('ok','✅ Dados enviados! Conectado com sucesso ao JSONBin.');
+  updateSyncStatus('ok');
+  document.getElementById('cloud-connected-info').style.display='block';
+  toast('✅ Nuvem conectada! Dados salvos.');
+}
+
+async function testCloudConnection(){
+  const apiKey=document.getElementById('cloud-apikey').value.trim();
+  const binId=document.getElementById('cloud-binid').value.trim();
+  if(!apiKey||!binId){toast('⚠️ Preencha os campos',true);return;}
+  showCloudMsg('info','⏳ Testando conexão com o JSONBin...');
+  try{
+    const res=await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`,{
+      headers:{'X-Master-Key':apiKey}
+    });
+    if(!res.ok)throw new Error('Erro HTTP '+res.status+'. Verifique Master Key e Bin ID.');
+    const json=await res.json();
+    const hasData=json.record&&Object.keys(json.record).length>2;
+    if(hasData){
+      showCloudMsg('ok','✅ Conexão OK! Bin tem dados. Use "Carregar da nuvem" para importar, ou "Conectar" para sobrescrever com seus dados atuais.');
+    }else{
+      showCloudMsg('ok','✅ Conexão OK! Bin está vazio. Clique em "Conectar" para salvar seus dados na nuvem.');
+    }
+  }catch(e){
+    showCloudMsg('error','❌ '+e.message);
+  }
+}
+
+async function pullFromCloud(){
+  if(!CLOUD.isConfigured()){toast('⚠️ Configure a nuvem primeiro',true);return;}
+  if(!confirm('Carregar dados da nuvem?\n\nIsso substituirá seus dados locais pelos dados salvos no JSONBin.'))return;
+  updateSyncStatus('syncing');
+  const remote=await CLOUD.pull();
+  if(remote&&remote.players!==undefined){
+    const {lastModified,...dados}=remote;
+    Object.assign(state,dados);
+    normalizeCloudState();
+    _localSave();
+    if(lastModified)localStorage.setItem('marechal_lott_lastModified',String(lastModified));
+    render();
+    updateSyncStatus('ok');
+    toast('☁️ Dados carregados da nuvem com sucesso!');
+    closeModal('modalCloud');
+  }else{
+    updateSyncStatus('error');
+    toast('⚠️ Não foi possível carregar da nuvem. Verifique as credenciais.',true);
+  }
+}
+
+async function manualSync(){
+  if(!CLOUD.isConfigured()){toast('⚠️ Configure a nuvem primeiro',true);return;}
+  await CLOUD.push(state);
+  toast('☁️ Dados sincronizados!');
+}
+
+function disconnectCloud(){
+  if(!confirm('Desconectar da nuvem?\n\nSeus dados locais são mantidos, mas não serão mais sincronizados automaticamente.'))return;
+  CLOUD.clearConfig();
+  updateSyncStatus('offline');
+  document.getElementById('cloud-connected-info').style.display='none';
+  showCloudMsg('info','Desconectado. Configure novamente para reativar a sincronização.');
+  toast('🔌 Desconectado da nuvem');
+}
 
 function toast(msg,isErr){
   const t=document.getElementById('toast');
@@ -1925,7 +2226,7 @@ function wikiBuildGamesFromHtml(html){
     const dateEl=node.querySelector('.dtstart');
     const rawDate=dateEl?.getAttribute('datetime')||dateEl?.getAttribute('title')||dateEl?.textContent||'';
     const dateInfo=wikiParseDate(rawDate);
-    const scoreSources=[...node.querySelectorAll('.fscore,[class~="score"],.summary'),node]
+    const scoreSources=[...node.querySelectorAll('.fscore,[class\~="score"],.summary'),node]
       .map(el=>wikiCleanScore(el.textContent||''));
     let score='';
     for(const value of scoreSources){const m=String(value).match(/\b\d+\s*[–—-]\s*\d+\b/);if(m){score=m[0].replace(/\s+/g,'').replace(/[—-]/g,'–');break;}}
