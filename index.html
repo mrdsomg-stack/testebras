@@ -2150,16 +2150,54 @@ function wikiParseDate(rawValue){
   return{display:text,iso:'',timestamp:Number.MAX_SAFE_INTEGER};
 }
 
+// Reconhece APENAS placares: nunca pode interpretar 2018-09-01 ou 2018-09 como resultado.
+// Uma data possui um ano de quatro dígitos; um placar possui 1 ou 2 por equipe.
 function wikiCleanScore(value){
-  const text=wikiClean(value).replace(/−/g,'-');const match=text.match(/\b\d+\s*[–—-]\s*\d+\b/);
-  return match?match[0].replace(/\s+/g,'').replace(/[—-]/g,'–'):text;
+  const raw=String(value??'');
+  const sources=[wikiClean(raw),raw];
+  for(const source of sources){
+    const text=source.replace(/[\u2212\u2013\u2014-]/g,'–');
+    const pattern=/(^|[^\d–])(\d{1,2})\s*–\s*(\d{1,2})(?![\d–])/g;
+    let match;
+    while((match=pattern.exec(text))!==null){
+      // Não confundir a parte intermediária de uma data com um placar.
+      const result=`${Number(match[2])}–${Number(match[3])}`;
+      return result;
+    }
+  }
+  return '';
+}
+
+function wikiValidScore(value){
+  return /^(?:\d{1,2})–(?:\d{1,2})$/.test(String(value||'').trim());
+}
+
+// Os modelos de partida da Wikipédia não têm sempre a mesma classe CSS.
+// Primeiro procuramos o elemento de resultado. Se faltar, pesquisamos células isoladas
+// e somente por último o texto do evento; o reconhecedor não aceita datas ISO.
+function wikiScoreFromHtmlEvent(event){
+  const selectors=['.fscore','[class~="score"]','[itemprop="score"]','.footballbox-score','[class~="result"]'];
+  for(const selector of selectors){
+    for(const el of event.querySelectorAll(selector)){
+      const score=wikiCleanScore(el.textContent||'');
+      if(wikiValidScore(score))return score;
+    }
+  }
+  for(const cell of event.querySelectorAll('td,th,span,b,strong')){
+    const text=wikiClean(cell.textContent||'').replace(/[\u2212\u2013\u2014-]/g,'–').trim();
+    if(/^(?:\d{1,2})\s*–\s*(?:\d{1,2})$/.test(text)){
+      const score=wikiCleanScore(text);
+      if(wikiValidScore(score))return score;
+    }
+  }
+  return wikiCleanScore(event.textContent||'');
 }
 
 function wikiGameAllowed(game,originalCompetition=''){
   const includeFriendlies=document.getElementById('wikiIncludeFriendlies').checked;
   const onlyPlayed=document.getElementById('wikiOnlyPlayed').checked;
   if(!game.team1||!game.team2||!game.dateDisplay)return false;
-  if(onlyPlayed&&!/^\d+–\d+$/.test(game.score))return false;
+  if(onlyPlayed&&!wikiValidScore(game.score))return false;
   if(!includeFriendlies&&wikiIsFriendly(originalCompetition||game.competition))return false;
   return true;
 }
@@ -2210,7 +2248,11 @@ function wikiBuildGamesFromHtml(html){
   if(!html)return[];
   const doc=new DOMParser().parseFromString(html,'text/html');
   const eventSet=new Set([...doc.querySelectorAll('.vevent')]);
-  doc.querySelectorAll('.dtstart').forEach(el=>{const root=el.closest('.vevent,table');if(root)eventSet.add(root);});
+  // Ignora tabelas que agrupam vários jogos para não misturar datas e placares.
+  doc.querySelectorAll('.dtstart').forEach(el=>{
+    const root=el.closest('.vevent,.footballbox,table');
+    if(root&&root.querySelectorAll('.dtstart').length===1)eventSet.add(root);
+  });
   const headings=[...doc.querySelectorAll('h2,h3,h4,h5,h6')];
   const ordered=[...headings,...eventSet].sort((a,b)=>{
     if(a===b)return 0;
@@ -2226,10 +2268,7 @@ function wikiBuildGamesFromHtml(html){
     const dateEl=node.querySelector('.dtstart');
     const rawDate=dateEl?.getAttribute('datetime')||dateEl?.getAttribute('title')||dateEl?.textContent||'';
     const dateInfo=wikiParseDate(rawDate);
-    const scoreSources=[...node.querySelectorAll('.fscore,[class\~="score"],.summary'),node]
-      .map(el=>wikiCleanScore(el.textContent||''));
-    let score='';
-    for(const value of scoreSources){const m=String(value).match(/\b\d+\s*[–—-]\s*\d+\b/);if(m){score=m[0].replace(/\s+/g,'').replace(/[—-]/g,'–');break;}}
+    const score=wikiScoreFromHtmlEvent(node);
     const original=wikiInferCompetition(stack,'');
     const competition=translate?wikiTranslateCompetition(original):original;
     const game={dateDisplay:dateInfo.display,dateIso:dateInfo.iso,timestamp:dateInfo.timestamp,team1:teams[0],score,team2:teams[1],competition,playerGoals:0,playerAssists:0};
@@ -2279,7 +2318,7 @@ async function loadWikipediaMatches(){
     const parsed=data.parse||{};const wikitext=typeof parsed.wikitext==='string'?parsed.wikitext:parsed.wikitext?.['*'];
     if(!wikitext)throw new Error('A página não retornou o código wiki necessário.');
     wikipediaImportGames=wikiBuildGames(wikitext,parsed.text||'');wikipediaImportPage=wikiClean(parsed.displaytitle||parsed.title||title);
-    if(!wikipediaImportGames.length)throw new Error('Nenhuma partida foi encontrada. A página pode usar um modelo diferente de “Football box”.');
+    if(!wikipediaImportGames.length)throw new Error('Não foi encontrado nenhum jogo com placar válido nesta página. Confira o link e as opções de importação.');
     populateWikipediaMainTeam();renderWikipediaPreview();
     document.getElementById('wikiMapping').classList.add('visible');
     document.getElementById('wikiImportBtn').style.display='inline-block';
@@ -2358,7 +2397,7 @@ function wikiMapPreviewGame(data){
   const scoreMatch=data.score.match(/^(\d+)–(\d+)$/);const date=wikiDateToIso(data.dateDisplay);
   if(!data.selected)return{valid:false,reason:'Desmarcado',kind:'warn'};
   if(!date)return{valid:false,reason:'Data inválida',kind:'err'};
-  if(!scoreMatch)return{valid:false,reason:'Placar inválido',kind:'err'};
+  if(!scoreMatch||!wikiValidScore(data.score))return{valid:false,reason:'Placar inválido',kind:'err'};
   if(!data.competition)return{valid:false,reason:'Sem competição',kind:'err'};
   let loc,opponent,gf,ga;
   if(t1===mainKey){loc='home';opponent=data.team2;gf=+scoreMatch[1];ga=+scoreMatch[2];}
@@ -2408,17 +2447,21 @@ function importWikipediaMatches(){
   if(!ready.length){wikiStatus(duplicates?'Todos os jogos marcados já estão cadastrados.':'Nenhum jogo válido está pronto para importar.','error');return;}
   const compCache=new Map();
   season.comps.forEach(c=>compCache.set(wikiNormalize(c.name),c));
-  const stamp=Date.now();let blockedByTotal=0,imported=0;
+  const stamp=Date.now();let blockedByTotal=0,imported=0,repaired=0;
   ready.forEach((m,index)=>{
     const compKey=wikiNormalize(m.competition);let comp=compCache.get(compKey);
     if(!comp){comp={id:`comp_${stamp}_${index}_${Math.random().toString(36).slice(2,6)}`,name:m.competition};season.comps.push(comp);compCache.set(compKey,comp);}
     if(season.matches.some(x=>x.compId===comp.id&&isCompetitionTotal(x))){blockedByTotal++;return;}
+    // Corrige importações antigas da Wikipédia com "2018–09" em vez do placar.
+    // Preserva gols, assistências, minutos e titularidade editados pelo usuário.
+    const oldBroken=season.matches.find(x=>x.source==='wikipedia'&&x.compId===comp.id&&x.date===m.date&&x.loc===m.loc&&wikiNormalize(x.opponent)===wikiNormalize(m.opponent)&&(Number(x.gf)>99||Number(x.ga)>99));
+    if(oldBroken){oldBroken.gf=m.gf;oldBroken.ga=m.ga;oldBroken.sourcePage=wikipediaImportPage;repaired++;return;}
     season.matches.push({id:`m_${stamp}_${index}_${Math.random().toString(36).slice(2,7)}`,entryType:'match',compId:comp.id,loc:m.loc,opponent:m.opponent,date:m.date,gf:m.gf,ga:m.ga,playerGoals:m.playerGoals,playerAssists:m.playerAssists,starter:m.starter,minutes:m.minutes,year:m.date.substring(0,4),source:'wikipedia',sourcePage:wikipediaImportPage});
     imported++;
   });
-  if(!imported){wikiStatus(blockedByTotal?'As competições selecionadas já estão totalizadas. Exclua a totalização antes de importar jogos individuais.':'Nenhum jogo foi importado.','error');return;}
+  if(!imported&&!repaired){wikiStatus(blockedByTotal?'As competições selecionadas já estão totalizadas. Exclua a totalização antes de importar jogos individuais.':'Nenhum jogo foi importado.','error');return;}
   save();closeModal('modalWikiImport');seasonSubView='jogos';activeCompFilter=null;renderSeasonContent();
-  const notes=[];if(duplicates)notes.push(`${duplicates} duplicado(s) ignorado(s)`);if(invalid)notes.push(`${invalid} linha(s) inválida(s)`);if(blockedByTotal)notes.push(`${blockedByTotal} ignorado(s) porque a competição está totalizada`);
+  const notes=[];if(repaired)notes.push(`${repaired} placar(es) antigo(s) corrigido(s)`);if(duplicates)notes.push(`${duplicates} duplicado(s) ignorado(s)`);if(invalid)notes.push(`${invalid} linha(s) inválida(s)`);if(blockedByTotal)notes.push(`${blockedByTotal} ignorado(s) porque a competição está totalizada`);
   toast(`${imported} jogo(s) importado(s)!${notes.length?' '+notes.join(' · '):''}`);
 }
 
@@ -2620,7 +2663,7 @@ function espnMapPreviewGame(data){
   const scoreMatch=data.score.match(/^(\d+)–(\d+)$/);const date=wikiDateToIso(data.dateDisplay);
   if(!data.selected)return{valid:false,reason:'Desmarcado',kind:'warn'};
   if(!date)return{valid:false,reason:'Data inválida',kind:'err'};
-  if(!scoreMatch)return{valid:false,reason:'Placar inválido',kind:'err'};
+  if(!scoreMatch||!wikiValidScore(data.score))return{valid:false,reason:'Placar inválido',kind:'err'};
   if(!data.competition)return{valid:false,reason:'Sem competição',kind:'err'};
   let loc,opponent,gf,ga;
   if(t1===mainKey){loc='home';opponent=data.team2;gf=+scoreMatch[1];ga=+scoreMatch[2];}
