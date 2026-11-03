@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -186,6 +183,19 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .opp-search:focus{border-color:var(--purple)}
 
 
+/* ===================== AUTORES E MINUTOS DOS GOLS ===================== */
+.match-goals-panel{width:100%;flex-basis:100%;margin-top:5px;padding:10px 12px;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.match-goals-team{font-size:.73rem;color:var(--dim);font-weight:700;margin-bottom:5px;overflow-wrap:anywhere}
+.match-goal-line{font-size:.79rem;line-height:1.6;overflow-wrap:anywhere;color:#e6edf3}
+.match-goal-line.mine{color:var(--green);font-weight:700}
+.goal-editor{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:13px}
+.goal-editor-head{color:#fff;font-size:.82rem;font-weight:700;margin:0 0 8px}
+.goal-editor-row{display:grid;grid-template-columns:minmax(100px,1fr) 80px auto;gap:7px;align-items:center;margin:7px 0}
+.goal-editor-row input{width:100%;min-width:0;margin:0!important;font-size:.8rem;padding:8px!important}
+.goal-editor-row .btn{padding:8px;font-size:.72rem;white-space:nowrap}
+.goal-editor-empty{font-size:.76rem;color:var(--dim)}
+@media(max-width:480px){.goal-editor-row{grid-template-columns:minmax(90px,1fr) 78px}.goal-editor-row .btn{grid-column:1/-1}}
+
 /* ===================== IMPORTADOR WIKIPÉDIA ===================== */
 .wiki-modal{max-width:1120px;padding:24px}
 .wiki-import-top{display:grid;grid-template-columns:minmax(260px,1fr) auto;gap:10px;align-items:end}
@@ -204,13 +214,31 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .wiki-map-control select{margin:0!important}
 .wiki-count{font-size:.75rem;color:var(--dim)}
 .wiki-preview-wrap{overflow:auto;max-height:55vh;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
-.wiki-table{min-width:1180px;font-size:.78rem}
+.wiki-table{min-width:1010px;font-size:.78rem}
 .wiki-table th{position:sticky;top:0;z-index:2;background:var(--surface2)}
 .wiki-table td{padding:7px 8px;vertical-align:middle}
 .wiki-table td[contenteditable="true"]{outline:none;border-radius:5px;min-width:90px}
 .wiki-table td[contenteditable="true"]:focus{background:rgba(88,166,255,.10);box-shadow:inset 0 0 0 1px var(--blue)}
 .wiki-table .wiki-date{min-width:105px}
-.wiki-table .wiki-team{min-width:165px}
+/* Gols agrupados debaixo do clube, com edição direta do minuto dos gols do atleta. */
+.wiki-table .wiki-team{min-width:235px;width:235px;vertical-align:top}
+.wiki-team-name{font-weight:700;font-size:.78rem;line-height:1.35;min-height:17px;overflow-wrap:anywhere}
+.wiki-team-goals{margin-top:6px;display:flex;flex-direction:column;gap:4px}
+.wiki-team-goal{font-size:.71rem;line-height:1.35;display:flex;gap:4px;align-items:baseline;flex-wrap:wrap;color:#c9d1d9;overflow-wrap:anywhere}
+.wiki-team-goal.mine{color:var(--green)}
+.wiki-team-goal .goal-ball{flex-shrink:0}
+.wiki-team-goal .goal-author{font-weight:500}
+.wiki-team-goal.mine .goal-author{font-weight:800}
+.wiki-goal-minute-input{width:67px!important;min-width:67px!important;margin:0!important;padding:3px 5px!important;background:var(--surface2);border:1px solid var(--green);border-radius:5px;color:#fff!important;font-size:.72rem!important;text-align:center}
+.wiki-team-goal.changed{color:var(--yellow);flex-wrap:nowrap;align-items:center;white-space:nowrap}
+.wiki-team-goal.changed .goal-ball,.wiki-team-goal.changed .wiki-goal-author-input,.wiki-team-goal.changed .wiki-goal-minute-input{flex-shrink:0}
+.wiki-goal-author-input{width:118px!important;max-width:100%!important;min-width:95px!important;margin:0!important;padding:3px 5px!important;background:var(--surface2);border:1px solid rgba(227,179,65,.55);border-radius:5px;color:#e6edf3!important;font-size:.71rem!important}
+.wiki-team-goal.changed .wiki-goal-minute-input{border-color:var(--yellow)}
+.wiki-goal-added-note{font-size:.59rem;color:var(--yellow);font-weight:600}
+.wiki-own-goal-note{color:var(--green);font-size:.62rem;font-weight:700}
+.wiki-goal-hint{font-size:.65rem;color:var(--dim)}
+.wiki-team-goals:empty{display:none}
+.wiki-team-name[contenteditable="true"]:focus{outline:1px solid var(--blue);border-radius:4px;background:rgba(88,166,255,.09)}
 .wiki-table .wiki-score{min-width:70px;text-align:center;font-weight:700}
 .wiki-table .wiki-comp{min-width:170px}
 .wiki-table .wiki-num-input{width:62px!important;min-width:62px;margin:0!important;padding:6px 8px!important;text-align:center}
@@ -496,6 +524,11 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </div>
       </div>
 
+      <div class="goal-editor" id="matchGoalsEditor">
+        <div class="goal-editor-head">⚽ Autores e minutos dos gols</div>
+        <div style="font-size:.75rem;color:var(--dim);line-height:1.45;margin-bottom:10px">Preencha quem marcou e em qual minuto (ex.: 45+2). Use <b>Meu gol</b> para identificar os gols do atleta cadastrado. A quantidade de campos acompanha o placar.</div>
+        <div id="matchGoalFields"></div>
+      </div>
       <div id="matchPreview" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:.88rem;color:var(--dim);text-align:center"></div>
     </div>
 
@@ -608,7 +641,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
               <th>Placar</th>
               <th>Time 2</th>
               <th>Competição</th>
-              <th style="color:var(--green)">Gols</th>
+              <th style="color:var(--green)">Meus gols</th>
               <th style="color:var(--blue)">Assists</th>
               <th style="color:var(--green)">Titular</th>
               <th style="color:var(--purple)">Minutos</th>
@@ -621,7 +654,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
       <div style="font-size:.7rem;color:var(--dim);margin-top:8px;line-height:1.45">
-        Você pode corrigir data, times, placar e competição diretamente na tabela. Gols e assistências começam em zero; titularidade e minutos começam como titular por 90 minutos e podem ser ajustados.
+        Os autores e minutos aparecem embaixo de cada clube. Ao informar <b>Meus gols</b>, o sistema busca automaticamente o nome do atleta cadastrado e mostra um campo para digitar o minuto (ex.: 45+2). Se você acrescentar um gol ao resultado da página, atualize também o placar para manter os dados consistentes.
       </div>
     </div>
 
@@ -877,6 +910,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <script>
 let state={players:[],activePlayerIdx:null,activeSeason:null,activeView:'season'};
 let editingMatchId=null;
+let matchGoalDraft=[];
 let editingSeasonKey=null;
 let pendingConfirm=null;
 let rankComp=null;
@@ -1764,6 +1798,7 @@ function renderSubJogos(sd,matches,comps){
         <button class="btn edit-btn" style="padding:3px 8px;font-size:.72rem;border:1px solid rgba(240,136,62,.3)" onclick="editMatch('${m.id}')">✎</button>
         <button class="btn danger" style="padding:3px 8px;font-size:.72rem" onclick="deleteMatch('${m.id}')">✖</button>
       </div>
+      ${goalDetailsHtml(m,club,m.opponent||'Adversário')}
     </div>`;
   });
   return filterHtml+`
@@ -1862,10 +1897,116 @@ function fillMatchCompetitionSelect(selectedId=''){
   sel.onchange=()=>{updateMatchPreview();updateCompetitionTotalPreview();};
 }
 
+// Um registro por gol. O lado "for" corresponde ao time do jogador,
+// independentemente de a partida ter sido em casa ou fora.
+function goalSafeMinute(value){
+  const minute=String(value??'').trim().replace(/[’′']/g,'').replace(/\s+/g,'');
+  return /^\d{1,3}(?:\+\d{1,2})?$/.test(minute)?minute:'';
+}
+// Ordena gols pelo tempo da partida: 30, 45+1, 45+2, 46, 48, 49...
+// Sem minuto vai ao final. Não altera a ordem entre gols no mesmo minuto.
+function goalChronologicalSort(goals){
+  const key=g=>{
+    const m=goalSafeMinute(g.minute).match(/^(\d{1,3})(?:\+(\d{1,2}))?$/);
+    return m?[Number(m[1]),Number(m[2]||0)]:[Infinity,Infinity];
+  };
+  return [...(goals||[])].sort((a,b)=>{
+    const ka=key(a),kb=key(b);
+    return ka[0]-kb[0]||ka[1]-kb[1]||0;
+  });
+}
+function goalNormalizeEvents(events){
+  if(!Array.isArray(events))return[];
+  return events.filter(e=>e&&['for','against'].includes(e.side)).map(e=>({
+    side:e.side,player:String(e.player||'').trim().slice(0,140),minute:goalSafeMinute(e.minute),
+    ownGoal:!!e.ownGoal,isMine:!!e.isMine
+  }));
+}
+function getActivePlayerName(){return(state.players?.[state.activePlayerIdx]?.name||'').trim();}
+function renderMatchGoalEditor(){
+  const container=document.getElementById('matchGoalFields');if(!container)return;
+  const gf=Math.min(60,Math.max(0,parseInt(document.getElementById('mMatchGF').value)||0));
+  const ga=Math.min(60,Math.max(0,parseInt(document.getElementById('mMatchGA').value)||0));
+  const rows=[];
+  for(const [side,count,title] of [['for',gf,'Nosso time'],['against',ga,'Adversário']]){
+    // Preserva a ordem original do placar quando um gol é adicionado ou retirado.
+    const current=matchGoalDraft.filter(g=>g.side===side).slice(0,count);
+    while(current.length<count)current.push({side,player:'Jogador alterado',minute:'',ownGoal:false,isMine:false});
+    rows.push(...current);
+  }
+  matchGoalDraft=rows;
+  let html='';
+  for(const [side,title] of [['for','⚽ Gols do nosso time'],['against','⚽ Gols do adversário']]){
+    const items=matchGoalDraft.map((item,index)=>({...item,index})).filter(g=>g.side===side);
+    html+=`<div style="margin-bottom:12px"><div style="font-size:.76rem;color:var(--dim);font-weight:700;margin-bottom:5px">${title} (${items.length})</div>`;
+    if(!items.length)html+='<div class="goal-editor-empty">Nenhum gol neste lado.</div>';
+    items.forEach((goal,i)=>{
+      html+=`<div class="goal-editor-row">
+        <input type="text" maxlength="140" aria-label="Autor do gol ${i+1}" placeholder="Nome do jogador ${i+1}" value="${wikiEscape(goal.player)}" oninput="updateGoalDraft(${goal.index},'player',this.value)">
+        <input type="text" maxlength="6" aria-label="Minuto do gol ${i+1}" placeholder="Minuto" value="${wikiEscape(goal.minute)}" oninput="updateGoalDraft(${goal.index},'minute',this.value)">
+        ${side==='for'?`<button type="button" class="btn ${goal.isMine?'':'ghost'}" onclick="markGoalMine(${goal.index})">${goal.isMine?'✓ Meu gol':'Meu gol'}</button>`:'<span style="font-size:.7rem;color:var(--dim)"> </span>'}
+      </div>`;
+    });
+    html+='</div>';
+  }
+  container.innerHTML=html;
+}
+function updateGoalDraft(index,field,value){
+  if(!matchGoalDraft[index])return;
+  matchGoalDraft[index][field]=String(value||'').slice(0,140);
+  if(field==='player'){
+    const activeName=getActivePlayerName();
+    const wasMine=!!matchGoalDraft[index].isMine;
+    matchGoalDraft[index].isMine=!!(activeName&&wikiNormalize(value)===wikiNormalize(activeName)&&matchGoalDraft[index].side==='for');
+    const ownGoals=matchGoalDraft.filter(g=>g.side==='for'&&g.isMine).length;
+    // Se não está marcando/desmarcando um gol próprio, preserva a estatística
+    // manual pré-existente (inclusive jogos antigos sem autores preenchidos).
+    if(wasMine||matchGoalDraft[index].isMine||ownGoals>0)
+      document.getElementById('mMatchPlayerGoals').value=ownGoals;
+  }
+}
+function syncManualMatchOwnGoals(){
+  const wanted=Math.max(0,parseInt(document.getElementById('mMatchPlayerGoals')?.value)||0);
+  const name=getActivePlayerName();
+  if(!name)return;
+  const own=matchGoalDraft.filter(g=>g.side==='for'&&g.isMine);
+  if(wanted<own.length){
+    own.slice(wanted).forEach(g=>{g.isMine=false;if(wikiNormalize(g.player)===wikiNormalize(name))g.player='Jogador alterado';});
+  }else if(wanted>own.length){
+    const candidates=matchGoalDraft.filter(g=>g.side==='for'&&!g.isMine);
+    candidates.sort((a,b)=>Number(!!a.player)-Number(!!b.player));
+    candidates.slice(0,wanted-own.length).forEach(g=>{g.player=name;g.isMine=true;g.ownGoal=false;});
+  }
+  renderMatchGoalEditor();
+}
+function markGoalMine(index){
+  if(!matchGoalDraft[index]||matchGoalDraft[index].side!=='for')return;
+  const name=getActivePlayerName();
+  if(!name){toast('Cadastre o nome do seu jogador primeiro','err');return;}
+  const item=matchGoalDraft[index];item.player=name;item.isMine=true;item.ownGoal=false;
+  document.getElementById('mMatchPlayerGoals').value=matchGoalDraft.filter(g=>g.side==='for'&&g.isMine).length;
+  renderMatchGoalEditor();
+}
+function goalDetailsHtml(match,club,opponent){
+  const goals=goalChronologicalSort(goalNormalizeEvents(match.goalEvents));
+  if(!goals.length)return'';
+  const columns=[['for',club],['against',opponent]];
+  return`<div class="match-goals-panel">${columns.map(([side,team])=>{
+    const items=goals.filter(g=>g.side===side);
+    if(!items.length)return'';
+    return`<div><div class="match-goals-team">${wikiEscape(team)}</div>${items.map(g=>`<div class="match-goal-line${g.isMine?' mine':''}">⚽ ${wikiEscape(g.player||'Autor não informado')}${g.minute?` · ${wikiEscape(g.minute)}'`:''}${g.ownGoal?' (contra)':''}${g.isMine?' · Você':''}</div>`).join('')}</div>`;
+  }).join('')}</div>`;
+}
+
 function setupMatchModalListeners(){
   ['mMatchLoc','mMatchOpponent','mMatchGF','mMatchGA','mMatchMinutes'].forEach(id=>{
-    const el=document.getElementById(id);if(el){el.oninput=updateMatchPreview;el.onchange=updateMatchPreview;}
+    const el=document.getElementById(id);if(el){
+      const update=()=>{updateMatchPreview();if(id==='mMatchGF'||id==='mMatchGA')renderMatchGoalEditor();};
+      el.oninput=update;el.onchange=update;
+    }
   });
+  const goalsInput=document.getElementById('mMatchPlayerGoals');
+  if(goalsInput){goalsInput.oninput=syncManualMatchOwnGoals;goalsInput.onchange=null;}
   ['mTotalGames','mTotalStarters','mTotalGoals','mTotalAssists','mTotalMinutes','mTotalYear','mTotalGF','mTotalGA'].forEach(id=>{
     const el=document.getElementById(id);if(el){el.oninput=updateCompetitionTotalPreview;el.onchange=updateCompetitionTotalPreview;}
   });
@@ -1873,6 +2014,7 @@ function setupMatchModalListeners(){
 
 function openAddMatch(){
   editingMatchId=null;
+  matchGoalDraft=[];
   fillMatchCompetitionSelect(activeCompFilter||'');
   const mode=document.getElementById('mMatchMode');mode.disabled=false;mode.value='individual';
   document.getElementById('mMatchLoc').value='home';
@@ -1894,6 +2036,7 @@ function openAddMatch(){
   document.getElementById('mTotalGA').value='';
   setupMatchModalListeners();
   toggleMatchMode();
+  renderMatchGoalEditor();
   openModal('modalMatch');
   setTimeout(()=>{updateMatchPreview();updateCompetitionTotalPreview();},10);
 }
@@ -1903,6 +2046,7 @@ function editMatch(mid){
   const m=(season.matches||[]).find(x=>x.id===mid);
   if(!m)return;
   editingMatchId=mid;
+  matchGoalDraft=goalNormalizeEvents(m.goalEvents);
   fillMatchCompetitionSelect(m.compId);
   const total=isCompetitionTotal(m);
   const mode=document.getElementById('mMatchMode');mode.value=total?'competition_total':'individual';mode.disabled=true;
@@ -1928,6 +2072,7 @@ function editMatch(mid){
   }
   setupMatchModalListeners();
   toggleMatchMode();
+  if(!total)renderMatchGoalEditor();
   openModal('modalMatch');
   setTimeout(()=>{updateMatchPreview();updateCompetitionTotalPreview();},10);
 }
@@ -1980,8 +2125,13 @@ function saveMatch(){
   const starter=document.getElementById('mMatchStarter').checked;
   const minutes=Math.min(130,Math.max(0,parseInt(document.getElementById('mMatchMinutes').value)||0));
   if(!opponent){toast('Preencha o adversário','err');return;}
+  // Valida os minutos antes de salvar para não perder dados digitados incorretamente.
+  for(const item of matchGoalDraft){
+    if(String(item.minute||'').trim()&&!goalSafeMinute(item.minute)){toast('Minuto de gol inválido. Use 30 ou 45+2.','err');return;}
+  }
+  const goalEvents=goalNormalizeEvents(matchGoalDraft).filter(g=>g.player||g.minute);
   const existing=editingMatchId?season.matches.find(x=>x.id===editingMatchId):null;
-  const obj={...(existing||{}),id:editingMatchId||'m_'+Date.now(),entryType:'match',compId,loc,opponent,date,gf,ga,playerGoals,playerAssists,starter,minutes,year:date?date.substring(0,4):state.activeSeason};
+  const obj={...(existing||{}),id:editingMatchId||'m_'+Date.now(),entryType:'match',compId,loc,opponent,date,gf,ga,playerGoals,playerAssists,starter,minutes,goalEvents,year:date?date.substring(0,4):state.activeSeason};
   delete obj.games;delete obj.starters;delete obj.minutesTotal;
   if(editingMatchId){const idx=season.matches.findIndex(x=>x.id===editingMatchId);if(idx!==-1)season.matches[idx]=obj;editingMatchId=null;}
   else season.matches.push(obj);
@@ -2202,6 +2352,71 @@ function wikiGameAllowed(game,originalCompetition=''){
   return true;
 }
 
+// Extrai exclusivamente modelos {{goal|...}} e {{own goal|...}} dos
+// campos goals1/goals2; amarelos/vermelhos nunca entram como gols.
+function wikiParseGoalField(value,side){
+  if(!value)return[];
+  const chunks=String(value).replace(/<\s*br\s*\/?\s*>/gi,'\n').replace(/\r/g,'\n').split(/\n+/);
+  const items=[];
+  for(const chunk of chunks){
+    const re=/\{\{\s*(goal|own[ _-]?goal|owngoal)\s*\|([^{}]*)\}\}/gi;
+    const goalTemplates=[...chunk.matchAll(re)];
+    if(!goalTemplates.length)continue;
+    // O texto antes do primeiro ícone é o nome do jogador, podendo trazer cartões.
+    const before=chunk.slice(0,goalTemplates[0].index).replace(/\{\{[^{}]*\}\}/g,' ');
+    const player=wikiClean(before).replace(/\s*[,;:]\s*$/,'').slice(0,140);
+    if(!player)continue;
+    for(const tpl of goalTemplates){
+      const ownGoal=/own/i.test(tpl[1]);
+      const args=wikiSplitTopLevel(tpl[2]).map(s=>wikiClean(s));
+      const minutes=args.map(goalSafeMinute).filter(Boolean);
+      for(const minute of minutes){
+        items.push({side,player,minute,ownGoal});
+      }
+    }
+  }
+  return items;
+}
+function wikiWikitextGoals(p){
+  return [...wikiParseGoalField(p.goals1||p.homegoals||'', 'team1'),...wikiParseGoalField(p.goals2||p.awaygoals||'','team2')];
+}
+// No HTML renderizado, os marcadores de gol ficam ao lado do atleta.
+// Usa o ícone somente quando for identificável; não confunde com cartões.
+function wikiHtmlGoalField(cell,side){
+  if(!cell)return[];
+  const events=[];
+  const blocks=[...cell.querySelectorAll('li')];
+  const lines=blocks.length?blocks:[...cell.childNodes].filter(n=>n.nodeType===1&&/^(DIV|P|SPAN|SMALL|TR)$/i.test(n.nodeName));
+  const segments=lines.length?lines:[cell];
+  for(const segment of segments){
+    const imgs=[...(segment.querySelectorAll?.('img')||[])];
+    const goalIcons=imgs.filter(img=>/\bgoal\b|football\s*goal|own\s*goal|scored/i.test([img.alt,img.title,img.getAttribute('src')].join(' ')) && !/disallow|miss|save|no.?goal/i.test([img.alt,img.title].join(' ')));
+    if(!goalIcons.length)continue;
+    const raw=wikiClean(segment.textContent||'');
+    const player=wikiClean(segment.querySelector('a')?.textContent||raw.replace(/\b\d{1,3}(?:\+\d+)?['’′]?/g,'')).slice(0,140);
+    const minutes=[...raw.matchAll(/\b(\d{1,3}(?:\+\d{1,2})?)\s*['’′]/g)].map(m=>m[1]);
+    if(!player)continue;
+    minutes.slice(0,goalIcons.length).forEach(minute=>events.push({side,player,minute,ownGoal:goalIcons.some(img=>/own.?goal/i.test([img.alt,img.title].join(' ')))}));
+  }
+  return events;
+}
+function wikiHtmlGoals(event){
+  const home=event.querySelector('.fhgoal,.home-goals,[class~="homeGoals"]');
+  const away=event.querySelector('.fagoal,.away-goals,[class~="awayGoals"]');
+  return [...wikiHtmlGoalField(home,'team1'),...wikiHtmlGoalField(away,'team2')];
+}
+function wikiMappedGoals(goals,loc,gf,ga){
+  const counters={for:0,against:0};
+  return(goals||[]).map(g=>{
+    const side=(g.side==='team1')===(loc==='home')?'for':'against';
+    return{side,player:String(g.player||'').trim(),minute:goalSafeMinute(g.minute),ownGoal:!!g.ownGoal,isMine:!!g.isMine};
+  }).filter(g=>{
+    const limit=g.side==='for'?gf:ga;
+    if(counters[g.side]>=limit)return false;
+    counters[g.side]++;return !!g.player;
+  });
+}
+
 function wikiBuildGamesFromWikitext(wikitext){
   const headings=wikiHeadings(wikitext),templates=wikiExtractFootballBoxes(wikitext),games=[];
   const translate=document.getElementById('wikiTranslateComps').checked;
@@ -2213,7 +2428,7 @@ function wikiBuildGamesFromWikitext(wikitext){
     const dateInfo=wikiParseDate(p.date||'');
     const original=wikiInferCompetition(wikiHeadingStackAt(headings,template.start),p.round||p.stage||'');
     const competition=translate?wikiTranslateCompetition(original):original;
-    const game={dateDisplay:dateInfo.display,dateIso:dateInfo.iso,timestamp:dateInfo.timestamp,team1,score,team2,competition,playerGoals:0,playerAssists:0};
+    const game={dateDisplay:dateInfo.display,dateIso:dateInfo.iso,timestamp:dateInfo.timestamp,team1,score,team2,competition,playerGoals:0,playerAssists:0,goals:wikiWikitextGoals(p)};
     if(wikiGameAllowed(game,original))games.push(game);
   }
   return games;
@@ -2271,7 +2486,7 @@ function wikiBuildGamesFromHtml(html){
     const score=wikiScoreFromHtmlEvent(node);
     const original=wikiInferCompetition(stack,'');
     const competition=translate?wikiTranslateCompetition(original):original;
-    const game={dateDisplay:dateInfo.display,dateIso:dateInfo.iso,timestamp:dateInfo.timestamp,team1:teams[0],score,team2:teams[1],competition,playerGoals:0,playerAssists:0};
+    const game={dateDisplay:dateInfo.display,dateIso:dateInfo.iso,timestamp:dateInfo.timestamp,team1:teams[0],score,team2:teams[1],competition,playerGoals:0,playerAssists:0,goals:wikiHtmlGoals(node)};
     if(wikiGameAllowed(game,original))games.push(game);
   }
   return games;
@@ -2281,10 +2496,16 @@ function wikiBuildGames(wikitext,html=''){
   // O wikitext não expande subpáginas/modelos transcluídos. O HTML renderizado
   // contém essas partidas; por isso combinamos as duas leituras e removemos duplicatas.
   const candidates=[...wikiBuildGamesFromWikitext(wikitext),...wikiBuildGamesFromHtml(html)];
-  const games=[],seen=new Set();
+  const games=[],seen=new Map();
   for(const game of candidates){
     const key=wikiNormalize(`${game.dateDisplay}|${game.team1}|${game.score}|${game.team2}`);
-    if(!key||seen.has(key))continue;seen.add(key);games.push(game);
+    if(!key)continue;
+    if(seen.has(key)){
+      const existing=games[seen.get(key)];
+      if((game.goals||[]).length>(existing.goals||[]).length)existing.goals=game.goals;
+      continue;
+    }
+    seen.set(key,games.length);games.push(game);
   }
   games.sort((a,b)=>a.timestamp-b.timestamp||a.competition.localeCompare(b.competition,'pt-BR'));
   return games;
@@ -2346,6 +2567,106 @@ function wikiEscape(value=''){
   return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
 
+// Os gols importados e os adicionados ficam sob o clube de cada lado.
+// Um gol acrescentado no placar, sem marcar "Meus gols", recebe o autor
+// editável "Jogador alterado", com minuto próprio. Os registros importados
+// continuam intactos; os gols são exibidos em ordem cronológica.
+function wikiOwnTeamSide(row){
+  const main=wikiNormalize(document.getElementById('wikiMainTeam')?.value||'');
+  if(main&&wikiNormalize(row.querySelector('[data-field="team1"]')?.textContent)===main)return'team1';
+  if(main&&wikiNormalize(row.querySelector('[data-field="team2"]')?.textContent)===main)return'team2';
+  return'';
+}
+function wikiOwnGoalSourceCount(row){
+  const side=wikiOwnTeamSide(row),name=wikiNormalize(getActivePlayerName());
+  if(!side||!name)return 0;
+  const source=wikipediaImportGames[Number(row.dataset.index)]?.goals||[];
+  return source.filter(g=>g.side===side&&wikiNormalize(g.player)===name).length;
+}
+function wikiPreviewGoals(row){
+  const side=wikiOwnTeamSide(row),name=getActivePlayerName();
+  const count=Math.min(60,Math.max(0,parseInt(row.querySelector('[data-field="goals"]')?.value)||0));
+  const base=(wikipediaImportGames[Number(row.dataset.index)]?.goals||[]).map(g=>({...g}));
+  let marked=0;
+  for(const goal of base){
+    if(side&&goal.side===side&&name&&wikiNormalize(goal.player)===wikiNormalize(name)&&marked<count){goal.isMine=true;marked++;}
+  }
+  const extra=Math.max(0,count-marked);
+  if(!Array.isArray(row._ownGoalMinutes))row._ownGoalMinutes=[];
+  for(let index=0;index<extra&&side;index++){
+    base.push({side,player:name,minute:row._ownGoalMinutes[index]||'',ownGoal:false,isMine:true,manual:true,manualKind:'mine',manualIndex:index});
+  }
+  const score=String(row.querySelector('[data-field="score"]')?.textContent||'').trim().replace(/[—-]/g,'–').replace(/\s+/g,'');
+  const match=score.match(/^(\d+)–(\d+)$/);
+  if(match){
+    if(!row._alteredGoals)row._alteredGoals={team1:[],team2:[]};
+    for(const [team,expected] of [['team1',+match[1]],['team2',+match[2]]]){
+      const present=base.filter(g=>g.side===team).length;
+      const missing=Math.max(0,Math.min(60,expected)-present);
+      const drafts=row._alteredGoals[team]||(row._alteredGoals[team]=[]);
+      for(let index=0;index<missing;index++){
+        const draft=drafts[index]||{};
+        base.push({side:team,player:String(draft.player||'').trim()||'Jogador alterado',minute:draft.minute||'',ownGoal:false,isMine:false,manual:true,manualKind:'altered',manualIndex:index});
+      }
+    }
+  }
+  return goalChronologicalSort(base);
+}
+function wikiRenderTeamGoals(row){
+  const goals=wikiPreviewGoals(row);
+  for(const side of ['team1','team2']){
+    const target=row.querySelector(`[data-goal-side="${side}"]`);
+    if(!target)continue;
+    target.innerHTML=goals.filter(g=>g.side===side).map(g=>{
+      if(g.manualKind==='mine'){
+        return`<div class="wiki-team-goal mine" data-minute="${wikiEscape(g.minute)}"><span class="goal-ball">⚽</span><span class="goal-author">${wikiEscape(g.player||'Seu jogador')}</span><input class="wiki-goal-minute-input" type="text" maxlength="6" inputmode="text" aria-label="Minuto do seu gol ${g.manualIndex+1}" placeholder="Minuto" value="${wikiEscape(g.minute)}" oninput="wikiUpdateOwnGoalMinute(this.closest('tr'),${g.manualIndex},this.value)" onchange="wikiSortVisibleGoals(this.closest('tr'),'${side}')"><span class="wiki-own-goal-note">(você)</span></div>`;
+      }
+      if(g.manualKind==='altered'){
+        return`<div class="wiki-team-goal changed" data-minute="${wikiEscape(g.minute)}"><span class="goal-ball">⚽</span><input class="wiki-goal-author-input" type="text" maxlength="140" aria-label="Autor alterado do gol ${g.manualIndex+1} do ${side==='team1'?'time 1':'time 2'}" placeholder="Jogador alterado" value="${wikiEscape(g.player)}" oninput="wikiUpdateAlteredGoal(this.closest('tr'),'${side}',${g.manualIndex},'player',this.value)"><input class="wiki-goal-minute-input" type="text" maxlength="6" inputmode="text" aria-label="Minuto do gol alterado ${g.manualIndex+1} do ${side==='team1'?'time 1':'time 2'}" placeholder="Minuto" value="${wikiEscape(g.minute)}" oninput="wikiUpdateAlteredGoal(this.closest('tr'),'${side}',${g.manualIndex},'minute',this.value)" onblur="wikiSortVisibleGoals(this.closest('tr'),'${side}')"></div>`;
+      }
+      return`<div class="wiki-team-goal${g.isMine?' mine':''}" data-minute="${wikiEscape(g.minute)}"><span class="goal-ball">⚽</span><span class="goal-author">${wikiEscape(g.player||'Autor não informado')}</span>${g.minute?`<span>${wikiEscape(g.minute)}'</span>`:''}${g.ownGoal?'<span>(contra)</span>':''}${g.isMine?'<span class="wiki-own-goal-note">(você)</span>':''}</div>`;
+    }).join('');
+  }
+}
+// Reordena os mesmos elementos (sem reconstruir os inputs), conservando
+// minutos e autores digitados mesmo durante a navegação pelo teclado.
+function wikiSortVisibleGoals(row,side){
+  const panel=row?.querySelector(`[data-goal-side="${side}"]`);
+  if(!panel)return;
+  const nodes=[...panel.children];
+  const mins=nodes.map(node=>node.querySelector('.wiki-goal-minute-input')?.value||node.dataset.minute||'');
+  const sorted=goalChronologicalSort(nodes.map((node,i)=>({node,minute:mins[i]})));
+  for(const goal of sorted)panel.appendChild(goal.node);
+}
+function wikiChangeOwnGoalCount(row){
+  row._playerGoalsEdited=true;
+  wikiRenderTeamGoals(row);
+  refreshWikipediaRow(row);
+}
+function wikiChangeScore(row){
+  row._scoreEdited=true;
+  wikiRenderTeamGoals(row);
+  refreshWikipediaRow(row);
+}
+function wikiChangeTeams(row){
+  wikiRenderTeamGoals(row);
+  refreshWikipediaRow(row);
+}
+function wikiUpdateOwnGoalMinute(row,index,value){
+  if(!Array.isArray(row._ownGoalMinutes))row._ownGoalMinutes=[];
+  row._ownGoalMinutes[index]=String(value||'').slice(0,6);
+  row._playerGoalsEdited=true;
+  refreshWikipediaRow(row);
+}
+function wikiUpdateAlteredGoal(row,side,index,field,value){
+  if(!['team1','team2'].includes(side)||!['player','minute'].includes(field))return;
+  if(!row._alteredGoals)row._alteredGoals={team1:[],team2:[]};
+  const drafts=row._alteredGoals[side]||(row._alteredGoals[side]=[]);
+  if(!drafts[index])drafts[index]={player:'Jogador alterado',minute:''};
+  drafts[index][field]=String(value||'').slice(0,field==='player'?140:6);
+  row._manualGoalsEdited=true;
+  refreshWikipediaRow(row);
+}
 function renderWikipediaPreview(){
   const body=document.getElementById('wikiImportBody');body.innerHTML='';
   wikipediaImportGames.forEach((g,index)=>{
@@ -2353,17 +2674,18 @@ function renderWikipediaPreview(){
     tr.innerHTML=`
       <td><input class="wiki-check" type="checkbox" checked onchange="refreshWikipediaRow(this.closest('tr'))"></td>
       <td class="wiki-date" contenteditable="true" data-field="date" oninput="refreshWikipediaRow(this.closest('tr'))">${wikiEscape(g.dateDisplay)}</td>
-      <td class="wiki-team" contenteditable="true" data-field="team1" oninput="refreshWikipediaRow(this.closest('tr'))">${wikiEscape(g.team1)}</td>
-      <td class="wiki-score" contenteditable="true" data-field="score" oninput="refreshWikipediaRow(this.closest('tr'))">${wikiEscape(g.score)}</td>
-      <td class="wiki-team" contenteditable="true" data-field="team2" oninput="refreshWikipediaRow(this.closest('tr'))">${wikiEscape(g.team2)}</td>
+      <td class="wiki-team"><div class="wiki-team-name" contenteditable="true" data-field="team1" oninput="wikiChangeTeams(this.closest('tr'))">${wikiEscape(g.team1)}</div><div class="wiki-team-goals" data-goal-side="team1"></div></td>
+      <td class="wiki-score" contenteditable="true" data-field="score" oninput="wikiChangeScore(this.closest('tr'))">${wikiEscape(g.score)}</td>
+      <td class="wiki-team"><div class="wiki-team-name" contenteditable="true" data-field="team2" oninput="wikiChangeTeams(this.closest('tr'))">${wikiEscape(g.team2)}</div><div class="wiki-team-goals" data-goal-side="team2"></div></td>
       <td class="wiki-comp" contenteditable="true" data-field="competition" oninput="refreshWikipediaRow(this.closest('tr'))">${wikiEscape(g.competition)}</td>
-      <td><input class="wiki-num-input" data-field="goals" type="number" min="0" step="1" value="${g.playerGoals||0}"></td>
+      <td><input class="wiki-num-input" data-field="goals" type="number" min="0" step="1" value="${g.playerGoals||0}" aria-label="Meus gols" oninput="wikiChangeOwnGoalCount(this.closest('tr'))"></td>
       <td><input class="wiki-num-input" data-field="assists" type="number" min="0" step="1" value="${g.playerAssists||0}"></td>
       <td style="text-align:center"><input class="wiki-starter-check" data-field="starter" type="checkbox" ${g.starter===false?'':'checked'} onchange="refreshWikipediaRow(this.closest('tr'))"></td>
       <td><input class="wiki-num-input" data-field="minutes" type="number" min="0" max="130" step="1" value="${g.minutes===undefined?90:g.minutes}" oninput="refreshWikipediaRow(this.closest('tr'))"></td>
       <td><span class="wiki-row-status"></span></td>
       <td><button class="btn danger" style="padding:3px 7px;font-size:.68rem" onclick="removeWikipediaRow(this.closest('tr'))">✕</button></td>`;
     body.appendChild(tr);
+    wikiRenderTeamGoals(tr);
   });
   refreshWikipediaPreviewMapping();
 }
@@ -2387,7 +2709,11 @@ function wikiReadPreviewRow(row){
     playerGoals:Math.max(0,parseInt(read('goals')?.value)||0),
     playerAssists:Math.max(0,parseInt(read('assists')?.value)||0),
     starter:read('starter')?.checked===true,
-    minutes:Math.min(130,Math.max(0,parseInt(read('minutes')?.value)||0))
+    minutes:Math.min(130,Math.max(0,parseInt(read('minutes')?.value)||0)),
+    goals:wikiPreviewGoals(row),
+    scoreEdited:!!row._scoreEdited,
+    manualGoalsEdited:!!row._manualGoalsEdited,
+    playerGoalsEdited:!!row._playerGoalsEdited
   };
 }
 
@@ -2404,14 +2730,37 @@ function wikiMapPreviewGame(data){
   else if(t2===mainKey){loc='away';opponent=data.team1;gf=+scoreMatch[2];ga=+scoreMatch[1];}
   else return{valid:false,reason:'Time não encontrado',kind:'err'};
   if(!opponent)return{valid:false,reason:'Sem adversário',kind:'err'};
-  const mapped={valid:true,date,loc,opponent,gf,ga,competition:data.competition,playerGoals:data.playerGoals,playerAssists:data.playerAssists,starter:data.starter,minutes:data.minutes};
-  if(wikiMatchAlreadyExists(mapped))return{...mapped,valid:false,duplicate:true,reason:'Já cadastrado',kind:'warn'};
+  if(data.playerGoals>gf)return{valid:false,reason:'Meus gols excedem placar',kind:'err'};
+  if(data.goals.some(g=>g.manual&&g.minute&&!goalSafeMinute(g.minute)))
+    return{valid:false,reason:'Minuto inválido (ex.: 45+2)',kind:'err'};
+  const ownSide=loc==='home'?'team1':'team2';
+  if(data.playerGoals>0&&data.goals.filter(g=>g.side===ownSide).length>gf)
+    return{valid:false,reason:'Ajuste o placar para caber meu gol',kind:'err'};
+  const goalEvents=wikiMappedGoals(data.goals,loc,gf,ga);
+  const mapped={valid:true,date,loc,opponent,gf,ga,competition:data.competition,playerGoals:data.playerGoals,playerAssists:data.playerAssists,starter:data.starter,minutes:data.minutes,goalEvents};
+  const existing=wikiMatchAlreadyExists(mapped)||wikiMatchAlreadyExists(mapped,true);
+  if(existing){
+    // Uma partida na mesma data/adversário/competição pode ter o placar
+    // ajustado para incluir o jogador. Nesse caso atualize-a, não duplique.
+    const revisedScore=Number(existing.gf)!==gf||Number(existing.ga)!==ga;
+    const prior=goalNormalizeEvents(existing.goalEvents),incoming=goalNormalizeEvents(goalEvents);
+    const fillMissing=incoming.length&&!prior.length;
+    const statChange=Number(existing.playerGoals||0)!==data.playerGoals;
+    const normalizeForCompare=items=>JSON.stringify(goalChronologicalSort(items).map(g=>[g.side,g.player,g.minute,g.isMine,g.ownGoal]));
+    const detailChange=normalizeForCompare(prior)!==normalizeForCompare(incoming);
+    // Nunca substitui partidas já personalizadas simplesmente por reabrir a Wikipédia.
+    // Para atualizar resultados e autores existentes, é necessária edição nesta prévia.
+    const userEdited=!!(data.scoreEdited||data.manualGoalsEdited||data.playerGoalsEdited);
+    if(fillMissing||(userEdited&&(revisedScore||statChange||detailChange)))
+      return{...mapped,updateExistingId:existing.id,updateGoalsAndScore:true,reason:revisedScore?'Atualizar placar e autores':statChange?'Atualizar meus gols':'Atualizar autores',kind:'ok'};
+    return{...mapped,valid:false,duplicate:true,reason:'Já cadastrado',kind:'warn'};
+  }
   return{...mapped,reason:loc==='home'?'Casa':'Fora',kind:'ok'};
 }
 
-function wikiMatchAlreadyExists(mapped){
+function wikiMatchAlreadyExists(mapped,ignoreScore=false){
   const season=state.players[state.activePlayerIdx].seasons[state.activeSeason];
-  return(season.matches||[]).some(m=>m.date===mapped.date&&m.loc===mapped.loc&&wikiNormalize(m.opponent)===wikiNormalize(mapped.opponent)&&Number(m.gf)===Number(mapped.gf)&&Number(m.ga)===Number(mapped.ga)&&wikiNormalize(getCompName(season,m.compId))===wikiNormalize(mapped.competition));
+  return(season.matches||[]).find(m=>!isCompetitionTotal(m)&&m.date===mapped.date&&m.loc===mapped.loc&&wikiNormalize(m.opponent)===wikiNormalize(mapped.opponent)&&((ignoreScore&&Number(m.gf)<=99&&Number(m.ga)<=99)||(Number(m.gf)===Number(mapped.gf)&&Number(m.ga)===Number(mapped.ga)))&&wikiNormalize(getCompName(season,m.compId))===wikiNormalize(mapped.competition));
 }
 
 function refreshWikipediaRow(row){
@@ -2424,7 +2773,10 @@ function refreshWikipediaRow(row){
 }
 
 function refreshWikipediaPreviewMapping(){
-  document.querySelectorAll('#wikiImportBody tr').forEach(refreshWikipediaRow);refreshWikipediaCount();
+  document.querySelectorAll('#wikiImportBody tr').forEach(row=>{
+    wikiRenderTeamGoals(row);refreshWikipediaRow(row);
+  });
+  refreshWikipediaCount();
 }
 
 function refreshWikipediaCount(){
@@ -2447,21 +2799,35 @@ function importWikipediaMatches(){
   if(!ready.length){wikiStatus(duplicates?'Todos os jogos marcados já estão cadastrados.':'Nenhum jogo válido está pronto para importar.','error');return;}
   const compCache=new Map();
   season.comps.forEach(c=>compCache.set(wikiNormalize(c.name),c));
-  const stamp=Date.now();let blockedByTotal=0,imported=0,repaired=0;
+  const stamp=Date.now();let blockedByTotal=0,imported=0,repaired=0,detailsUpdated=0;
   ready.forEach((m,index)=>{
     const compKey=wikiNormalize(m.competition);let comp=compCache.get(compKey);
     if(!comp){comp={id:`comp_${stamp}_${index}_${Math.random().toString(36).slice(2,6)}`,name:m.competition};season.comps.push(comp);compCache.set(compKey,comp);}
     if(season.matches.some(x=>x.compId===comp.id&&isCompetitionTotal(x))){blockedByTotal++;return;}
+    if(m.updateExistingId){
+      const existing=season.matches.find(x=>x.id===m.updateExistingId);
+      if(existing){
+        if(m.updateGoalsAndScore){
+          existing.goalEvents=m.goalEvents;
+          existing.playerGoals=m.playerGoals;
+          existing.gf=m.gf;existing.ga=m.ga;
+        }else if(!goalNormalizeEvents(existing.goalEvents).length)existing.goalEvents=m.goalEvents;
+        detailsUpdated++;
+      }
+      return;
+    }
     // Corrige importações antigas da Wikipédia com "2018–09" em vez do placar.
     // Preserva gols, assistências, minutos e titularidade editados pelo usuário.
     const oldBroken=season.matches.find(x=>x.source==='wikipedia'&&x.compId===comp.id&&x.date===m.date&&x.loc===m.loc&&wikiNormalize(x.opponent)===wikiNormalize(m.opponent)&&(Number(x.gf)>99||Number(x.ga)>99));
-    if(oldBroken){oldBroken.gf=m.gf;oldBroken.ga=m.ga;oldBroken.sourcePage=wikipediaImportPage;repaired++;return;}
-    season.matches.push({id:`m_${stamp}_${index}_${Math.random().toString(36).slice(2,7)}`,entryType:'match',compId:comp.id,loc:m.loc,opponent:m.opponent,date:m.date,gf:m.gf,ga:m.ga,playerGoals:m.playerGoals,playerAssists:m.playerAssists,starter:m.starter,minutes:m.minutes,year:m.date.substring(0,4),source:'wikipedia',sourcePage:wikipediaImportPage});
+    if(oldBroken){oldBroken.gf=m.gf;oldBroken.ga=m.ga;oldBroken.sourcePage=wikipediaImportPage;
+      if(!goalNormalizeEvents(oldBroken.goalEvents).length)oldBroken.goalEvents=m.goalEvents;
+      repaired++;return;}
+    season.matches.push({id:`m_${stamp}_${index}_${Math.random().toString(36).slice(2,7)}`,entryType:'match',compId:comp.id,loc:m.loc,opponent:m.opponent,date:m.date,gf:m.gf,ga:m.ga,playerGoals:m.playerGoals,playerAssists:m.playerAssists,starter:m.starter,minutes:m.minutes,goalEvents:m.goalEvents,year:m.date.substring(0,4),source:'wikipedia',sourcePage:wikipediaImportPage});
     imported++;
   });
-  if(!imported&&!repaired){wikiStatus(blockedByTotal?'As competições selecionadas já estão totalizadas. Exclua a totalização antes de importar jogos individuais.':'Nenhum jogo foi importado.','error');return;}
+  if(!imported&&!repaired&&!detailsUpdated){wikiStatus(blockedByTotal?'As competições selecionadas já estão totalizadas. Exclua a totalização antes de importar jogos individuais.':'Nenhum jogo foi importado.','error');return;}
   save();closeModal('modalWikiImport');seasonSubView='jogos';activeCompFilter=null;renderSeasonContent();
-  const notes=[];if(repaired)notes.push(`${repaired} placar(es) antigo(s) corrigido(s)`);if(duplicates)notes.push(`${duplicates} duplicado(s) ignorado(s)`);if(invalid)notes.push(`${invalid} linha(s) inválida(s)`);if(blockedByTotal)notes.push(`${blockedByTotal} ignorado(s) porque a competição está totalizada`);
+  const notes=[];if(detailsUpdated)notes.push(`${detailsUpdated} jogo(s) já existente(s) com autores atualizados`);if(repaired)notes.push(`${repaired} placar(es) antigo(s) corrigido(s)`);if(duplicates)notes.push(`${duplicates} duplicado(s) ignorado(s)`);if(invalid)notes.push(`${invalid} linha(s) inválida(s)`);if(blockedByTotal)notes.push(`${blockedByTotal} ignorado(s) porque a competição está totalizada`);
   toast(`${imported} jogo(s) importado(s)!${notes.length?' '+notes.join(' · '):''}`);
 }
 
