@@ -2536,7 +2536,13 @@ function wikiBuildGamesFromSeasonTables(wikitext,pageTitle=''){
   for(const table of wikiSeasonTableRows(wikitext)){
     const chunks=table.text.split(/^\|-[^\r\n]*(?:\r?\n|$)/gm);
     const header=chunks.filter((part,index)=>index===0||/^\s*!/.test(part)).join('\n');
-    const hasNumber=/\{\{\s*Abbr\s*\|\s*(?:MD|Leg|Match)\b|^!\s*(?:[^\n]*?\|\s*)?(?:MD|Leg|Match)\b/im.test(header);
+    // O índice/rodada, quando existe, está na PRIMEIRA célula do cabeçalho.
+    // Não procurar "Match" em todo o cabeçalho: {{Abbr|Att.|Match attendance}}
+    // nas tabelas DFB-Pokal e DFL-Supercup era confundido com uma coluna
+    // numérica extra, deslocando data, placar e autores e excluindo os jogos.
+    const firstHeaderCell=header.match(/^!\s*[^\r\n]*/m)?.[0]||'';
+    const hasNumber=/\{\{\s*Abbr\s*\|\s*(?:MD|Leg|Match)\b/i.test(firstHeaderCell)
+      ||/(?:^!\s*|\|\s*)(?:MD|Leg|Match)\s*(?:<br\b|$|\b)/i.test(firstHeaderCell);
     const hasAggregate=/\{\{\s*Abbr\s*\|\s*Agg\b|Agg\.\s*score/i.test(header);
     const dateAt=hasNumber?1:0;
     const scoreAt=dateAt+3;
@@ -2694,7 +2700,10 @@ async function loadWikipediaMatches(){
     populateWikipediaMainTeam();renderWikipediaPreview();
     document.getElementById('wikiMapping').classList.add('visible');
     document.getElementById('wikiImportBtn').style.display='inline-block';
-    wikiStatus(`${wikipediaImportGames.length} jogo(s) encontrado(s). Confira a tabela antes de importar.`,'success');
+    const byCompetition=new Map();
+    wikipediaImportGames.forEach(g=>byCompetition.set(g.competition,(byCompetition.get(g.competition)||0)+1));
+    const breakdown=[...byCompetition].map(([name,count])=>`${name}: ${count}`).join(' · ');
+    wikiStatus(`${wikipediaImportGames.length} jogo(s) encontrado(s). ${breakdown}. Confira a tabela antes de importar.`,'success');
   }catch(error){console.error(error);wikiStatus(error.message||'Não foi possível processar a página.','error');}
   finally{btn.disabled=false;}
 }
